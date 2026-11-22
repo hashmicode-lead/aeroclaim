@@ -254,6 +254,16 @@ body {
   animation: rise 420ms var(--ease-out-quint) both;
 }
 
+/* Modal sheet: materializes from 96% with the scrim; exits the way it came. */
+@keyframes scrim-in { from { opacity: 0; } }
+@keyframes scrim-out { to { opacity: 0; } }
+@keyframes sheet-in { from { opacity: 0; transform: translateY(16px) scale(0.96); } }
+@keyframes sheet-out { to { opacity: 0; transform: translateY(16px) scale(0.96); } }
+.scrim { animation: scrim-in 240ms ease-out both; }
+.scrim-out { animation: scrim-out 180ms ease-in both; }
+.sheet { animation: sheet-in 360ms var(--ease-out-quint) both; }
+.sheet-out { animation: sheet-out 180ms ease-in both; }
+
 /* Scroll-edge fade instead of a hard divider under floating chrome */
 .edge-fade::after {
   content: "";

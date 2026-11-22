@@ -1,6 +1,8 @@
 "use client";
 
-import { Download, Search, Upload } from "lucide-react";
+import { Download, FileSpreadsheet, Search, Upload, Users } from "lucide-react";
+import { EmptyHome } from "@/components/EmptyHome";
+import { useSession } from "@/components/session";
 import { useMemo, useState } from "react";
 import { corporate, inr } from "@/lib/demo";
 
@@ -14,6 +16,7 @@ const STATUS_TONE: Record<string, string> = {
 };
 
 export default function CorporatePage() {
+  const session = useSession();
   const [q, setQ] = useState("");
   const [toast, setToast] = useState("");
   const rows = useMemo(
@@ -25,6 +28,20 @@ export default function CorporatePage() {
     setToast(m);
     setTimeout(() => setToast(""), 2200);
   };
+
+  if (session?.isNew)
+    return (
+      <EmptyHome
+        greeting={session.org || "Your company"}
+        title="Set up your PNR audit"
+        sub="Upload your travel desk's bookings and we'll find delayed, cancelled and unrefunded tickets."
+        actions={[
+          { href: "#", label: "Upload bookings (CSV or Excel)", desc: "PNR, employee, flight and fare columns. We match the rest.", Icon: FileSpreadsheet, primary: true },
+          { href: "#", label: "Invite your team", desc: "Add finance and travel-desk colleagues.", Icon: Users },
+        ]}
+        checklist={["Create your business account", "Upload your first bookings file", "Invite a colleague", "Choose a plan (₹4,999/mo)"]}
+      />
+    );
 
   return (
     <div className="reveal mx-auto max-w-5xl px-4 py-10">

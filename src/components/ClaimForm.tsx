@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, FileText, UploadCloud, X } from "lucide-react";
 import { useState } from "react";
 import { AIRLINES, AIRPORTS } from "@/lib/airports";
+import { DateTimeField } from "./DateTimeField";
 import { DOC_KIND_LABELS, type DisruptionType, type DocKind } from "@/lib/types";
 
 type Values = Record<string, string>;
@@ -370,20 +371,20 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
           </div>
           <div>
             <label htmlFor="scheduledDeparture" className="label">Scheduled departure</label>
-            <input type="datetime-local" className="field" {...bind("scheduledDeparture")} />
+            <DateTimeField id="scheduledDeparture" withTime value={v.scheduledDeparture ?? ""} onChange={set("scheduledDeparture")} invalid={!!errors.scheduledDeparture} placeholder="Select date and time" />
             <p className="hint">Local time at origin</p>
             {err("scheduledDeparture")}
           </div>
           <div>
             <label htmlFor="scheduledArrival" className="label">Scheduled arrival</label>
-            <input type="datetime-local" className="field" {...bind("scheduledArrival")} />
+            <DateTimeField id="scheduledArrival" withTime value={v.scheduledArrival ?? ""} onChange={set("scheduledArrival")} invalid={!!errors.scheduledArrival} placeholder="Select date and time" />
             <p className="hint">Local time at destination. Used to work out block time.</p>
             {err("scheduledArrival")}
           </div>
           {type === "delay" && (
             <div>
               <label htmlFor="actualDeparture" className="label">Actual departure</label>
-              <input type="datetime-local" className="field" {...bind("actualDeparture")} />
+              <DateTimeField id="actualDeparture" withTime value={v.actualDeparture ?? ""} onChange={set("actualDeparture")} invalid={!!errors.actualDeparture} placeholder="Select date and time" />
               {err("actualDeparture")}
             </div>
           )}
@@ -417,7 +418,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
                 {v.alternateOffered === "true" && (
                   <div>
                     <label htmlFor="alternateDeparture" className="label">Alternate flight departure</label>
-                    <input type="datetime-local" className="field" {...bind("alternateDeparture")} />
+                    <DateTimeField id="alternateDeparture" withTime value={v.alternateDeparture ?? ""} onChange={set("alternateDeparture")} invalid={!!errors.alternateDeparture} placeholder="Select date and time" />
                   </div>
                 )}
               </>
@@ -443,7 +444,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
                 {v.baggageIssue !== "lost" && (
                   <div>
                     <label htmlFor="baggageReceivedOn" className="label">Date you received the bag</label>
-                    <input type="date" className="field" {...bind("baggageReceivedOn")} />
+                    <DateTimeField id="baggageReceivedOn" value={v.baggageReceivedOn ?? ""} onChange={set("baggageReceivedOn")} invalid={!!errors.baggageReceivedOn} />
                     <p className="hint">Leave empty if it has not arrived yet.</p>
                   </div>
                 )}
@@ -465,7 +466,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
               <>
                 <div>
                   <label htmlFor="refundRequestedOn" className="label">Date you cancelled / requested refund</label>
-                  <input type="date" className="field" {...bind("refundRequestedOn")} />
+                  <DateTimeField id="refundRequestedOn" value={v.refundRequestedOn ?? ""} onChange={set("refundRequestedOn")} invalid={!!errors.refundRequestedOn} />
                   {type === "cancellation" && <p className="hint">Leave empty if you took the alternate flight.</p>}
                 </div>
                 {v.refundRequestedOn && (
@@ -500,7 +501,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
           </div>
           <div>
             <label htmlFor="bookingDate" className="label">Booking date</label>
-            <input type="date" className="field" {...bind("bookingDate")} />
+            <DateTimeField id="bookingDate" value={v.bookingDate ?? ""} onChange={set("bookingDate")} invalid={!!errors.bookingDate} />
           </div>
           <div>
             <label htmlFor="bookingChannel" className="label">Booked through</label>

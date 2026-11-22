@@ -4,12 +4,14 @@ import { Plane } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
+import { PricingModal } from "./PricingModal";
 import { ROLE_HOME, ROLE_LABEL, setRole, signOut, useSession, type Role } from "./session";
 
 const LINKS: Record<Role, { href: string; label: string }[]> = {
   flyer: [
     { href: "/dashboard", label: "My claims" },
     { href: "/claims/new", label: "New claim" },
+    { href: "/cards", label: "Card cover" },
   ],
   corporate: [{ href: "/corporate", label: "PNR audit" }],
   advocate: [{ href: "/advocate", label: "Leads" }],
@@ -36,6 +38,7 @@ export function NavBar() {
   const session = useSession();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [pricing, setPricing] = useState(false);
   const menu = useRef<HTMLDivElement>(null);
   const role: Role = session?.role ?? "flyer";
 
@@ -52,6 +55,7 @@ export function NavBar() {
   }, [open]);
 
   return (
+    <>
     <header className="no-print chrome edge-fade sticky top-0 z-40">
       <div className="mx-auto flex h-12 max-w-5xl items-center gap-4 px-4">
         <Link href="/" className="flex items-center gap-1.5 text-[15px] font-semibold tracking-[-0.02em]">
@@ -130,12 +134,15 @@ export function NavBar() {
             </div>
           ) : (
             <>
+              <button onClick={() => setPricing(true)} className="hidden rounded-full px-3 py-1.5 text-[13px] text-ink/70 hover:text-ink sm:inline">Pricing</button>
               <Link href="/login" className="rounded-full px-3 py-1.5 text-[13px] text-ink/70 hover:text-ink">Sign in</Link>
-              <Link href="/demo" className="btn-primary px-3.5! py-1! text-[13px]!">Live demo</Link>
+              <Link href="/signup" className="btn-primary px-3.5! py-1! text-[13px]!">Sign up</Link>
             </>
           )}
         </div>
       </div>
     </header>
+    <PricingModal open={pricing} onClose={() => setPricing(false)} onChoose={() => router.push("/signup")} />
+    </>
   );
 }

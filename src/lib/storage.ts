@@ -9,7 +9,8 @@ import { get, put } from "@vercel/blob";
  * - Local disk under ./data/uploads otherwise (development).
  * Stored keys are prefixed `blob:` or `file:` so both can coexist.
  */
-export const DATA_DIR = process.env.AEROCLAIM_DATA_DIR ?? path.join(process.cwd(), "data");
+// On Vercel the project folder is read-only; /tmp is writable but wiped between cold starts.
+export const DATA_DIR = process.env.AEROCLAIM_DATA_DIR ?? (process.env.VERCEL ? "/tmp/aeroclaim" : path.join(process.cwd(), "data"));
 const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
 export const BLOB_PREFIX = "uploads/";
 export const MAX_FILE_BYTES = 10 * 1024 * 1024;

@@ -1,6 +1,8 @@
 "use client";
 
-import { CalendarDays, Lock, MapPin, ShieldCheck, Unlock } from "lucide-react";
+import { BadgeCheck, CalendarDays, Clock, Lock, MapPin, ShieldCheck, Unlock } from "lucide-react";
+import { EmptyHome } from "@/components/EmptyHome";
+import { useSession } from "@/components/session";
 import Link from "next/link";
 import { useState } from "react";
 import { inr, leads } from "@/lib/demo";
@@ -12,8 +14,23 @@ const SLOTS = [
 ];
 
 export default function AdvocatePortal() {
+  const session = useSession();
   const [unlocked, setUnlocked] = useState<Record<string, boolean>>({ "L-2291": true });
   const spent = leads.filter((l) => unlocked[l.id]).reduce((s, l) => s + l.fee, 0);
+
+  if (session?.isNew)
+    return (
+      <EmptyHome
+        greeting="Consumer Advocate Portal"
+        title="Verification in progress"
+        sub="We're confirming your enrolment with the Bar Council. Leads appear here once you're verified, usually within one working day."
+        actions={[
+          { href: "#", label: "Complete your profile", desc: "Practice areas, city and consultation fee.", Icon: BadgeCheck, primary: true },
+          { href: "#", label: "Set your availability", desc: "Slots travellers can book for video consults.", Icon: Clock },
+        ]}
+        checklist={["Create your advocate account", "Bar Council verification", "Complete your profile", "Unlock your first lead"]}
+      />
+    );
 
   return (
     <div className="reveal mx-auto max-w-5xl px-4 py-10">

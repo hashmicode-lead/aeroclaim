@@ -155,7 +155,7 @@ Vercel functions have a read-only filesystem, so production uses Turso for the d
 3. **Storage → Turso** (Marketplace): create and connect a database. This sets `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`. Tables are created on the first request.
 4. **Redeploy** so the build picks up the variables.
 
-If `TURSO_DATABASE_URL` is missing on Vercel, the app fails loudly instead of quietly writing to a disk that disappears. See `.env.example`.
+It also deploys with no storage connected at all: claims and uploads then go to `/tmp`, which Vercel clears between cold starts. That's fine for a demo. Connect Turso and Blob for anything real. See `.env.example`.
 
 ## Project layout
 

@@ -8,6 +8,9 @@ export interface DemoSession {
   name: string;
   email: string;
   role: Role;
+  /** True for accounts created in this browser via sign-up: they start with no claim history. */
+  isNew?: boolean;
+  org?: string;
 }
 
 const KEY = "aeroclaim.session";

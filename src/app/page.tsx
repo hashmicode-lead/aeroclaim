@@ -1,48 +1,100 @@
+import { ArrowRight, Briefcase, CreditCard, Plane, Scale } from "lucide-react";
 import Link from "next/link";
+import { AdPopup } from "@/components/AdPopup";
+import { InsuranceAd } from "@/components/InsuranceAd";
 
 const TRACKS = [
-  { t: "Delays & cancellations", stat: "₹10,000", sub: "max cancellation compensation", d: "Compensation slabs based on block time, notice window and the alternate flight offered, plus meals, hotel and refund rights." },
+  { t: "Delays & cancellations", stat: "₹10,000", sub: "max cancellation compensation", d: "Compensation slabs by block time and notice window, plus meals, hotel and refund rights." },
   { t: "Denied boarding", stat: "400%", sub: "of basic fare + fuel, up to ₹20,000", d: "Depends on how late your alternate flight left." },
   { t: "Baggage", stat: "1,519 SDR", sub: "Montreal Convention liability", d: "We track the 7-day damage and 21-day delay notice deadlines for you." },
   { t: "Stuck refunds", stat: "7 days", sub: "airline deadline for card refunds", d: "30 working days through agents. We flag a card chargeback when the airline misses it." },
 ];
 
+const AUDIENCES = [
+  { Icon: Plane, t: "Travellers", d: "Claim compensation, refunds and baggage payouts for your own flights. Free to start.", cta: "Sign up free" },
+  { Icon: Briefcase, t: "Businesses", d: "Audit every employee booking and recover unused and delayed travel spend.", cta: "Start a trial" },
+  { Icon: Scale, t: "Advocates", d: "Receive evidence-checked consumer cases above ₹50,000 and consult by video.", cta: "Join as advocate" },
+];
+
 const STEPS = [
-  { t: "Upload", d: "E-ticket, boarding pass, PIR, the airline's SMS. We read out the PNR, flight and route." },
-  { t: "Verify", d: "Rules are checked and airport weather is pulled, so a 'bad weather' excuse can be tested." },
-  { t: "Act", d: "A ready-to-send claim letter, a timeline of events, and every legal deadline added to your calendar." },
+  { t: "Create your account", d: "Sign up with Google or email. It takes under a minute." },
+  { t: "Add your flight", d: "Upload the ticket and the airline's SMS. We read the details for you." },
+  { t: "Get your claim pack", d: "See what you're owed, why, and the deadlines, with letters ready to send." },
 ];
 
 export default function Home() {
   return (
     <div className="mx-auto max-w-5xl px-4">
-      <section className="reveal pt-20 pb-16 text-center sm:pt-28 sm:pb-24">
+      <section className="reveal pt-20 pb-16 text-center sm:pt-28 sm:pb-20">
         <p className="headline text-accent">Flight claims for India</p>
         <h1 className="display mx-auto mt-3 max-w-3xl text-balance">Your flight went wrong. Get back what you&apos;re owed.</h1>
         <p className="title-2 mx-auto mt-5 max-w-2xl font-normal! text-balance text-muted">
-          We check what happened against DGCA rules, the Montreal Convention and real airport weather, then give you the claim letter and deadlines.
+          AeroClaim checks your flight against DGCA rules, the Montreal Convention and real airport weather, then prepares every claim for you.
         </p>
         <div className="mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-          <Link href="/demo" className="btn-primary px-6! py-3! text-[17px]!">Run the ₹1,82,400 live demo</Link>
-          <Link href="/claims/new" className="text-[17px] text-accent hover:underline">
-            Check my own claim <span aria-hidden>›</span>
+          <Link href="/signup" className="btn-primary px-6! py-3! text-[17px]!">Create free account</Link>
+          <Link href="/login" className="text-[17px] text-accent hover:underline">
+            Log in <span aria-hidden>›</span>
           </Link>
         </div>
+        <p className="footnote mt-4 text-muted">No card required. You pay only if you recover.</p>
       </section>
 
-      <section aria-label="What we cover" className="grid gap-3 sm:grid-cols-2">
-        {TRACKS.map((x) => (
-          <div key={x.t} className="card p-7">
-            <div className="headline">{x.t}</div>
-            <div className="title-1 mt-4 text-accent">{x.stat}</div>
-            <div className="footnote text-muted">{x.sub}</div>
-            <p className="footnote mt-4 text-ink/80">{x.d}</p>
-          </div>
+      <section aria-label="Who it's for" className="grid gap-3 sm:grid-cols-3">
+        {AUDIENCES.map((a) => (
+          <Link key={a.t} href="/signup" className="pressable card group flex flex-col p-6 hover:bg-surface-2">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-accent-soft text-accent"><a.Icon size={20} aria-hidden /></span>
+            <span className="headline mt-4">{a.t}</span>
+            <span className="footnote mt-1 flex-1 text-muted">{a.d}</span>
+            <span className="footnote mt-4 inline-flex items-center gap-1 font-medium text-accent">{a.cta} <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" aria-hidden /></span>
+          </Link>
         ))}
       </section>
 
+      <section className="card mt-16 grid items-center gap-8 overflow-hidden p-7 sm:p-10 md:grid-cols-[1fr_auto]">
+        <div>
+          <p className="eyebrow">Card cover</p>
+          <h2 className="title-1 mt-2">Paid with Visa or Mastercard? Your card may pay too.</h2>
+          <p className="mt-3 max-w-lg text-muted">
+            Premium cards include trip-delay and baggage insurance when the ticket was bought on the card. We check whether your booking qualifies and file the card claim alongside the airline claim.
+          </p>
+          <Link href="/cards" className="btn-primary mt-6"><CreditCard size={16} aria-hidden /> Check my card</Link>
+        </div>
+        <div className="relative mx-auto h-44 w-72" aria-hidden>
+          <div className="absolute top-6 left-8 h-40 w-64 rotate-6 rounded-2xl bg-gradient-to-br from-[#2b2b2e] to-[#0b0b0c] shadow-[var(--shadow-raised)]">
+            <div className="absolute right-4 bottom-4 flex">
+              <span className="size-7 rounded-full bg-[#eb001b]" />
+              <span className="-ml-3 size-7 rounded-full bg-[#f79e1b] mix-blend-screen" />
+            </div>
+          </div>
+          <div className="absolute top-0 left-0 h-40 w-64 -rotate-3 rounded-2xl bg-gradient-to-br from-[#1a3a8f] to-[#0b1f5c] p-4 shadow-[var(--shadow-raised)]">
+            <div className="h-6 w-9 rounded-md bg-gradient-to-br from-[#f5d98b] to-[#c9a44c]" />
+            <div className="caption mt-8 font-mono tracking-[0.2em] text-white/80">•••• 4821</div>
+            <div className="absolute right-4 bottom-3 text-lg font-bold italic text-white">VISA</div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-label="What we cover" className="mt-16">
+        <h2 className="title-1 text-center">Everything the airline owes you</h2>
+        <div className="mt-8 grid gap-3 sm:grid-cols-2">
+          {TRACKS.map((x) => (
+            <div key={x.t} className="card p-7">
+              <div className="headline">{x.t}</div>
+              <div className="title-1 mt-4 text-accent">{x.stat}</div>
+              <div className="footnote text-muted">{x.sub}</div>
+              <p className="footnote mt-4 text-ink/80">{x.d}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="mt-6">
+        <InsuranceAd variant="banner" index={0} />
+      </div>
+
       <section className="mt-20">
-        <h2 className="title-1 text-center">Three steps, about two minutes.</h2>
+        <h2 className="title-1 text-center">Three steps to your claim</h2>
         <ol className="mt-10 grid gap-8 sm:grid-cols-3">
           {STEPS.map((s, i) => (
             <li key={s.t} className="text-center">
@@ -52,22 +104,12 @@ export default function Home() {
             </li>
           ))}
         </ol>
+        <div className="mt-10 text-center">
+          <Link href="/signup" className="btn-primary px-6! py-3! text-[17px]!">Create free account</Link>
+        </div>
       </section>
 
-      <section className="card mt-20 flex flex-col gap-4 p-7 sm:flex-row sm:items-center">
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-warn-soft text-warn" aria-hidden>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01" />
-          </svg>
-        </div>
-        <div className="flex-1">
-          <div className="headline">Still at the baggage belt?</div>
-          <p className="footnote mt-0.5 text-muted">
-            Don&apos;t leave arrivals without a printed Property Irregularity Report (PIR) and a photo of your bag tag. If you&apos;ve already left, start a claim now and we&apos;ll draft the written notice for you to send today.
-          </p>
-        </div>
-        <Link href="/claims/new" className="btn-ghost">Start now</Link>
-      </section>
+      <AdPopup />
     </div>
   );
 }

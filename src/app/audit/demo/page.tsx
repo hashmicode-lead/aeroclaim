@@ -2,6 +2,7 @@ import { ArrowRight, BadgeCheck, CloudSun, CreditCard, Link2, Luggage, Plane } f
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Countdown } from "@/components/client";
+import { InsuranceAd } from "@/components/InsuranceAd";
 import { Section } from "@/components/ui";
 import { demoBreakdown, demoClaim as c, demoDeadlines, demoTotal, demoWeather as w, inr } from "@/lib/demo";
 import { formatDate } from "@/lib/time";
@@ -173,6 +174,10 @@ export default function AuditPage() {
             </div>
           </div>
         </Section>
+        <section>
+          <h2 className="title-2 mb-2 px-1">Cover your next trip</h2>
+          <InsuranceAd variant="banner" index={1} />
+        </section>
       </div>
     </div>
   );

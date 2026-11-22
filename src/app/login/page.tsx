@@ -1,10 +1,10 @@
 "use client";
 
-import { Plane } from "lucide-react";
+import { Briefcase, Plane, Scale, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { signIn } from "@/components/session";
+import { ROLE_HOME, signIn, type Role } from "@/components/session";
 
 function GoogleMark() {
   return (
@@ -17,95 +17,140 @@ function GoogleMark() {
   );
 }
 
+function MicrosoftMark() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 23 23" aria-hidden>
+      <path fill="#f35325" d="M1 1h10v10H1z" /><path fill="#81bc06" d="M12 1h10v10H12z" /><path fill="#05a6f0" d="M1 12h10v10H1z" /><path fill="#ffba08" d="M12 12h10v10H12z" />
+    </svg>
+  );
+}
+
+const TABS: { id: Role; label: string; Icon: typeof Plane; title: string; sub: string }[] = [
+  { id: "flyer", label: "Individual", Icon: Plane, title: "Welcome back", sub: "Track your claims, deadlines and payouts." },
+  { id: "corporate", label: "Business", Icon: Briefcase, title: "Business sign in", sub: "For travel desks and finance teams." },
+  { id: "advocate", label: "Advocate", Icon: Scale, title: "Advocate portal", sub: "For advocates enrolled with a State Bar Council." },
+];
+
 export default function LoginPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [username, setUsername] = useState("");
+  const [role, setRole] = useState<Role>("flyer");
+  const [id, setId] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [busy, setBusy] = useState<"google" | "form" | null>(null);
+  const [extra, setExtra] = useState("");
+  const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const tab = TABS.find((t) => t.id === role)!;
 
-  function finish(n: string, email: string) {
-    signIn({ name: n, email, role: "flyer" });
-    router.push("/dashboard");
+  function finish(name: string, email: string, org?: string) {
+    signIn({ name, email, role, isNew: false, org });
+    router.push(ROLE_HOME[role]);
+  }
+
+  function sso(provider: string) {
+    setBusy(provider);
+    const people: Record<Role, [string, string, string?]> = {
+      flyer: ["Ananya Sharma", "ananya.sharma@gmail.com"],
+      corporate: ["Rohan Mehta", "rohan.mehta@northwind.in", "Northwind Analytics Pvt Ltd"],
+      advocate: ["Adv. Rahul Khanna", "rahul.khanna@lawchambers.in"],
+    };
+    setTimeout(() => finish(...people[role]), 700);
+  }
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!id.trim() || password.length < 4) return setError("Enter your email and password.");
+    if (role === "corporate" && !/@/.test(id)) return setError("Use your work email address.");
+    if (role === "advocate" && !/^[A-Z]{1,3}\/\d{1,5}\/\d{4}$/i.test(extra.trim())) return setError("Enter your enrolment number, e.g. D/1842/2014.");
+    setError("");
+    setBusy("form");
+    const name = id.split("@")[0].replace(/[._]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    setTimeout(() => finish(role === "advocate" ? `Adv. ${name}` : name, id.includes("@") ? id : `${id}@aeroclaim.demo`, role === "corporate" ? (extra.trim() || "Your company") : undefined), 500);
   }
 
   return (
     <div className="flex min-h-[calc(100vh-3rem)] items-center justify-center px-4 py-12">
-      <div className="reveal w-full max-w-sm">
-        <div className="text-center">
-          <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-accent text-white shadow-[var(--shadow-card)]">
-            <Plane size={24} strokeWidth={2.25} aria-hidden />
-          </div>
-          <h1 className="title-1 mt-5">{mode === "signin" ? "Sign in to AeroClaim" : "Create your account"}</h1>
-          <p className="footnote mt-1.5 text-muted">Track claims, deadlines and payouts in one place.</p>
+      <div className="w-full max-w-md">
+        <div className="segmented mx-auto flex! w-full" role="tablist" aria-label="Account type">
+          {TABS.map((t) => (
+            <label key={t.id} data-on={role === t.id} className="flex-1 inline-flex items-center justify-center gap-1.5">
+              <input type="radio" name="acct" className="sr-only" checked={role === t.id} onChange={() => { setRole(t.id); setError(""); setExtra(""); }} />
+              <t.Icon size={14} aria-hidden /> {t.label}
+            </label>
+          ))}
         </div>
 
-        <div className="card mt-8 p-6">
-          <button
-            type="button"
-            className="btn w-full border border-line bg-surface py-2.5! text-ink hover:bg-surface-2"
-            disabled={busy !== null}
-            onClick={() => {
-              setBusy("google");
-              setTimeout(() => finish("Ananya Sharma", "ananya.sharma@gmail.com"), 700);
-            }}
-          >
-            <GoogleMark />
-            {busy === "google" ? "Connecting to Google…" : "Continue with Google"}
-          </button>
-
-          <div className="my-5 flex items-center gap-3">
-            <div className="h-px flex-1 bg-line" />
-            <span className="caption text-muted">or</span>
-            <div className="h-px flex-1 bg-line" />
+        <div key={role} className="reveal">
+          <div className="mt-8 text-center">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-accent text-white shadow-[var(--shadow-card)]">
+              <tab.Icon size={24} strokeWidth={2.1} aria-hidden />
+            </div>
+            <h1 className="title-1 mt-5">{tab.title}</h1>
+            <p className="footnote mt-1.5 text-muted">{tab.sub}</p>
           </div>
 
-          <form
-            className="space-y-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!username.trim() || password.length < 4) {
-                setError("Enter a username and a password of at least 4 characters.");
-                return;
-              }
-              setError("");
-              setBusy("form");
-              const display = mode === "signup" && name.trim() ? name.trim() : username.trim().replace(/[._]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-              setTimeout(() => finish(display, username.includes("@") ? username : `${username.trim()}@aeroclaim.demo`), 500);
-            }}
-          >
-            {mode === "signup" && (
-              <div>
-                <label htmlFor="name" className="label">Full name</label>
-                <input id="name" className="field" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ananya Sharma" />
-              </div>
+          <div className="card mt-8 p-6">
+            {role !== "advocate" && (
+              <>
+                <div className="space-y-2">
+                  <button type="button" className="btn w-full border border-line bg-surface py-2.5! text-ink hover:bg-surface-2" disabled={busy !== null} onClick={() => sso("google")}>
+                    <GoogleMark /> {busy === "google" ? "Connecting…" : role === "corporate" ? "Continue with Google Workspace" : "Continue with Google"}
+                  </button>
+                  {role === "corporate" && (
+                    <button type="button" className="btn w-full border border-line bg-surface py-2.5! text-ink hover:bg-surface-2" disabled={busy !== null} onClick={() => sso("microsoft")}>
+                      <MicrosoftMark /> {busy === "microsoft" ? "Connecting…" : "Continue with Microsoft"}
+                    </button>
+                  )}
+                </div>
+                <div className="my-5 flex items-center gap-3">
+                  <div className="h-px flex-1 bg-line" />
+                  <span className="caption text-muted">or</span>
+                  <div className="h-px flex-1 bg-line" />
+                </div>
+              </>
             )}
-            <div>
-              <label htmlFor="username" className="label">Username or email</label>
-              <input id="username" className="field" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="ananya" />
-            </div>
-            <div>
-              <label htmlFor="password" className="label">Password</label>
-              <input id="password" type="password" className="field" autoComplete={mode === "signin" ? "current-password" : "new-password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
-            </div>
-            {error && <p className="footnote text-bad">{error}</p>}
-            <button type="submit" className="btn-primary w-full py-2.5!" disabled={busy !== null}>
-              {busy === "form" ? "Signing in…" : mode === "signin" ? "Sign in" : "Create account"}
-            </button>
-          </form>
-        </div>
 
-        <p className="footnote mt-6 text-center text-muted">
-          {mode === "signin" ? "New to AeroClaim? " : "Already have an account? "}
-          <button className="text-accent hover:underline" onClick={() => { setMode(mode === "signin" ? "signup" : "signin"); setError(""); }}>
-            {mode === "signin" ? "Create an account" : "Sign in"}
-          </button>
-        </p>
-        <p className="caption mt-3 text-center text-muted">
-          Demo build: any username and password will work. <Link href="/demo" className="text-accent hover:underline">Skip to the live demo</Link>
-        </p>
+            <form className="space-y-3" onSubmit={submit} noValidate>
+              {role === "advocate" && (
+                <div>
+                  <label htmlFor="extra" className="label">Bar Council enrolment number</label>
+                  <input id="extra" className="field uppercase" value={extra} onChange={(e) => setExtra(e.target.value)} placeholder="D/1842/2014" />
+                </div>
+              )}
+              <div>
+                <label htmlFor="id" className="label">{role === "corporate" ? "Work email" : role === "advocate" ? "Email" : "Email or username"}</label>
+                <input id="id" className="field" autoComplete="username" value={id} onChange={(e) => setId(e.target.value)} placeholder={role === "corporate" ? "you@company.com" : "ananya@example.com"} />
+              </div>
+              <div>
+                <div className="flex items-baseline justify-between">
+                  <label htmlFor="password" className="label">Password</label>
+                  <button type="button" className="caption text-accent hover:underline">Forgot?</button>
+                </div>
+                <input id="password" type="password" className="field" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+              </div>
+              {role === "corporate" && (
+                <div>
+                  <label htmlFor="extra" className="label">Company <span className="font-normal text-muted">(optional)</span></label>
+                  <input id="extra" className="field" value={extra} onChange={(e) => setExtra(e.target.value)} placeholder="Northwind Analytics Pvt Ltd" />
+                </div>
+              )}
+              {error && <p className="footnote text-bad" role="alert">{error}</p>}
+              <button type="submit" className="btn-primary w-full py-2.5!" disabled={busy !== null}>
+                {busy === "form" ? "Signing in…" : "Sign in"}
+              </button>
+            </form>
+
+            {role === "advocate" && (
+              <p className="caption mt-4 flex items-start gap-1.5 text-muted">
+                <ShieldCheck size={14} className="mt-px shrink-0 text-ok" aria-hidden /> We verify every enrolment with the issuing Bar Council before leads are shown.
+              </p>
+            )}
+          </div>
+
+          <p className="footnote mt-6 text-center text-muted">
+            New to AeroClaim? <Link href="/signup" className="text-accent hover:underline">Create an account</Link>
+          </p>
+          <p className="caption mt-2 text-center text-muted">Demo build: any email and password will work.</p>
+        </div>
       </div>
     </div>
   );

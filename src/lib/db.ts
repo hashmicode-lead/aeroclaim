@@ -38,7 +38,7 @@ async function db(): Promise<Client> {
   if (!g.__aeroclaimDb) {
     let url = process.env.TURSO_DATABASE_URL;
     if (!url) {
-      if (process.env.VERCEL) throw new Error("TURSO_DATABASE_URL is not set. Connect a Turso database to this Vercel project.");
+      if (process.env.VERCEL) console.warn("TURSO_DATABASE_URL is not set: using a temporary database in /tmp. Claims will not persist between deployments.");
       mkdirSync(DATA_DIR, { recursive: true });
       url = "file:" + path.join(DATA_DIR, "aeroclaim.db").replace(/\\/g, "/");
     }
