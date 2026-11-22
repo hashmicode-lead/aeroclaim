@@ -1,64 +1,88 @@
 import "server-only";
 import { mkdirSync } from "node:fs";
-import { writeFile, readFile } from "node:fs/promises";
 import path from "node:path";
-import { DatabaseSync } from "node:sqlite";
+import { createClient, type Client, type InStatement } from "@libsql/client";
+import { DATA_DIR, loadFile } from "./storage";
 import type { Assessment, ClaimInput, ClaimRecord, DocKind, StoredDocument, WeatherReport } from "./types";
 
-const DATA_DIR = process.env.AEROCLAIM_DATA_DIR ?? path.join(process.cwd(), "data");
-const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
+/**
+ * Database: libSQL / Turso.
+ * - Production (Vercel): TURSO_DATABASE_URL + TURSO_AUTH_TOKEN (set by the Turso integration).
+ * - Development: a local SQLite file at ./data/aeroclaim.db.
+ */
+const g = globalThis as unknown as { __aeroclaimDb?: { client: Client; ready: Promise<unknown> } };
 
-const g = globalThis as unknown as { __aeroclaimDb?: DatabaseSync };
+const SCHEMA = `
+  CREATE TABLE IF NOT EXISTS claims (
+    id TEXT PRIMARY KEY,
+    created_at TEXT NOT NULL,
+    input TEXT NOT NULL,
+    assessment TEXT NOT NULL,
+    weather TEXT
+  );
+  CREATE TABLE IF NOT EXISTS documents (
+    id TEXT PRIMARY KEY,
+    claim_id TEXT NOT NULL REFERENCES claims(id) ON DELETE CASCADE,
+    filename TEXT NOT NULL,
+    mime TEXT NOT NULL,
+    size INTEGER NOT NULL,
+    kind TEXT NOT NULL,
+    stored_name TEXT NOT NULL,
+    extracted TEXT,
+    created_at TEXT NOT NULL
+  );
+  CREATE INDEX IF NOT EXISTS documents_claim ON documents(claim_id);
+`;
 
-function db(): DatabaseSync {
-  if (g.__aeroclaimDb) return g.__aeroclaimDb;
-  mkdirSync(UPLOAD_DIR, { recursive: true });
-  const conn = new DatabaseSync(path.join(DATA_DIR, "aeroclaim.db"));
-  conn.exec(`
-    PRAGMA journal_mode = WAL;
-    CREATE TABLE IF NOT EXISTS claims (
-      id TEXT PRIMARY KEY,
-      created_at TEXT NOT NULL,
-      input TEXT NOT NULL,
-      assessment TEXT NOT NULL,
-      weather TEXT
-    );
-    CREATE TABLE IF NOT EXISTS documents (
-      id TEXT PRIMARY KEY,
-      claim_id TEXT NOT NULL REFERENCES claims(id) ON DELETE CASCADE,
-      filename TEXT NOT NULL,
-      mime TEXT NOT NULL,
-      size INTEGER NOT NULL,
-      kind TEXT NOT NULL,
-      stored_name TEXT NOT NULL,
-      extracted TEXT,
-      created_at TEXT NOT NULL
-    );
-    CREATE INDEX IF NOT EXISTS documents_claim ON documents(claim_id);
-  `);
-  g.__aeroclaimDb = conn;
-  return conn;
+async function db(): Promise<Client> {
+  if (!g.__aeroclaimDb) {
+    let url = process.env.TURSO_DATABASE_URL;
+    if (!url) {
+      if (process.env.VERCEL) throw new Error("TURSO_DATABASE_URL is not set. Connect a Turso database to this Vercel project.");
+      mkdirSync(DATA_DIR, { recursive: true });
+      url = "file:" + path.join(DATA_DIR, "aeroclaim.db").replace(/\\/g, "/");
+    }
+    const client = createClient({ url, authToken: process.env.TURSO_AUTH_TOKEN });
+    g.__aeroclaimDb = { client, ready: client.executeMultiple(SCHEMA) };
+  }
+  try {
+    await g.__aeroclaimDb.ready;
+  } catch (e) {
+    g.__aeroclaimDb = undefined; // retry schema setup on the next request
+    throw e;
+  }
+  return g.__aeroclaimDb.client;
 }
 
-type DocRow = { id: string; claim_id: string; filename: string; mime: string; size: number; kind: string; stored_name: string; extracted: string | null; created_at: string };
-type ClaimRow = { id: string; created_at: string; input: string; assessment: string; weather: string | null };
+type Row = Record<string, unknown>;
 
-const toDoc = (r: DocRow): StoredDocument => ({
-  id: r.id,
-  claimId: r.claim_id,
-  filename: r.filename,
-  mime: r.mime,
-  size: r.size,
-  kind: r.kind as DocKind,
-  extracted: r.extracted ?? undefined,
-  createdAt: r.created_at,
+const toDoc = (r: Row): StoredDocument => ({
+  id: String(r.id),
+  claimId: String(r.claim_id),
+  filename: String(r.filename),
+  mime: String(r.mime),
+  size: Number(r.size),
+  kind: String(r.kind) as DocKind,
+  extracted: r.extracted ? String(r.extracted) : undefined,
+  createdAt: String(r.created_at),
+});
+
+const toClaim = (row: Row, documents: StoredDocument[]): ClaimRecord => ({
+  id: String(row.id),
+  createdAt: String(row.created_at),
+  input: JSON.parse(String(row.input)),
+  assessment: JSON.parse(String(row.assessment)),
+  weather: row.weather ? JSON.parse(String(row.weather)) : null,
+  documents,
 });
 
 export interface NewDocument {
+  id: string;
   filename: string;
   mime: string;
+  size: number;
   kind: DocKind;
-  bytes: Uint8Array;
+  storedKey: string;
   extracted?: string;
 }
 
@@ -70,73 +94,49 @@ export async function createClaim(args: {
 }): Promise<string> {
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
-  const conn = db();
-  const stored: { doc: NewDocument; id: string; storedName: string }[] = [];
-  for (const doc of args.documents) {
-    const docId = crypto.randomUUID();
-    const ext = path.extname(doc.filename).replace(/[^.\w]/g, "").slice(0, 10);
-    const storedName = `${docId}${ext}`;
-    await writeFile(path.join(UPLOAD_DIR, storedName), doc.bytes);
-    stored.push({ doc, id: docId, storedName });
-  }
-  conn.exec("BEGIN");
-  try {
-    conn.prepare("INSERT INTO claims (id, created_at, input, assessment, weather) VALUES (?, ?, ?, ?, ?)").run(
-      id,
-      now,
-      JSON.stringify(args.input),
-      JSON.stringify(args.assessment),
-      args.weather ? JSON.stringify(args.weather) : null,
-    );
-    const ins = conn.prepare(
-      "INSERT INTO documents (id, claim_id, filename, mime, size, kind, stored_name, extracted, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    );
-    for (const s of stored) {
-      ins.run(s.id, id, s.doc.filename, s.doc.mime, s.doc.bytes.byteLength, s.doc.kind, s.storedName, s.doc.extracted ?? null, now);
-    }
-    conn.exec("COMMIT");
-  } catch (e) {
-    conn.exec("ROLLBACK");
-    throw e;
-  }
+  const stmts: InStatement[] = [
+    {
+      sql: "INSERT INTO claims (id, created_at, input, assessment, weather) VALUES (?, ?, ?, ?, ?)",
+      args: [id, now, JSON.stringify(args.input), JSON.stringify(args.assessment), args.weather ? JSON.stringify(args.weather) : null],
+    },
+    ...args.documents.map((d) => ({
+      sql: "INSERT INTO documents (id, claim_id, filename, mime, size, kind, stored_name, extracted, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      args: [d.id, id, d.filename, d.mime, d.size, d.kind, d.storedKey, d.extracted ?? null, now],
+    })),
+  ];
+  await (await db()).batch(stmts, "write");
   return id;
 }
 
-export function getClaim(id: string): ClaimRecord | null {
-  const conn = db();
-  const row = conn.prepare("SELECT * FROM claims WHERE id = ?").get(id) as ClaimRow | undefined;
+export async function getClaim(id: string): Promise<ClaimRecord | null> {
+  const c = await db();
+  const [claims, docs] = await c.batch(
+    [
+      { sql: "SELECT * FROM claims WHERE id = ?", args: [id] },
+      { sql: "SELECT * FROM documents WHERE claim_id = ? ORDER BY created_at", args: [id] },
+    ],
+    "read",
+  );
+  const row = claims.rows[0];
+  return row ? toClaim(row, docs.rows.map(toDoc)) : null;
+}
+
+export async function listClaims(): Promise<ClaimRecord[]> {
+  const res = await (await db()).execute("SELECT id, created_at, input, assessment, NULL AS weather FROM claims ORDER BY created_at DESC LIMIT 200");
+  return res.rows.map((r) => toClaim(r, []));
+}
+
+export async function updateAssessment(id: string, assessment: Assessment, weather: WeatherReport | null) {
+  await (await db()).execute({
+    sql: "UPDATE claims SET assessment = ?, weather = ? WHERE id = ?",
+    args: [JSON.stringify(assessment), weather ? JSON.stringify(weather) : null, id],
+  });
+}
+
+export async function readDocument(id: string): Promise<{ doc: StoredDocument; body: Uint8Array | ReadableStream<Uint8Array> } | null> {
+  const res = await (await db()).execute({ sql: "SELECT * FROM documents WHERE id = ?", args: [id] });
+  const row = res.rows[0];
   if (!row) return null;
-  const docs = conn.prepare("SELECT * FROM documents WHERE claim_id = ? ORDER BY created_at").all(id) as DocRow[];
-  return {
-    id: row.id,
-    createdAt: row.created_at,
-    input: JSON.parse(row.input),
-    assessment: JSON.parse(row.assessment),
-    weather: row.weather ? JSON.parse(row.weather) : null,
-    documents: docs.map(toDoc),
-  };
-}
-
-export function listClaims(): ClaimRecord[] {
-  const conn = db();
-  const rows = conn.prepare("SELECT * FROM claims ORDER BY created_at DESC LIMIT 200").all() as ClaimRow[];
-  return rows.map((row) => ({
-    id: row.id,
-    createdAt: row.created_at,
-    input: JSON.parse(row.input),
-    assessment: JSON.parse(row.assessment),
-    weather: row.weather ? JSON.parse(row.weather) : null,
-    documents: [],
-  }));
-}
-
-export function updateAssessment(id: string, assessment: Assessment, weather: WeatherReport | null) {
-  db().prepare("UPDATE claims SET assessment = ?, weather = ? WHERE id = ?").run(JSON.stringify(assessment), weather ? JSON.stringify(weather) : null, id);
-}
-
-export async function readDocument(id: string): Promise<{ doc: StoredDocument; bytes: Buffer } | null> {
-  const row = db().prepare("SELECT * FROM documents WHERE id = ?").get(id) as DocRow | undefined;
-  if (!row) return null;
-  const bytes = await readFile(path.join(UPLOAD_DIR, path.basename(row.stored_name)));
-  return { doc: toDoc(row), bytes };
+  const body = await loadFile(String(row.stored_name));
+  return body ? { doc: toDoc(row), body } : null;
 }

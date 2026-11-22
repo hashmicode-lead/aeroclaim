@@ -10,7 +10,7 @@ import { formatDate, todayIST } from "@/lib/time";
 async function Packet({ params }: { params: Promise<{ id: string }> }) {
   await connection();
   const { id } = await params;
-  const claim = getClaim(id);
+  const claim = await getClaim(id);
   if (!claim) notFound();
   const today = todayIST();
   const p = buildPacket(claim, today);

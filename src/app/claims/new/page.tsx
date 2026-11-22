@@ -11,7 +11,7 @@ export default function NewClaimPage() {
         Tell us what happened. We check it against DGCA rules, the Montreal Convention and recorded airport weather, then build your claim letter and deadline calendar.
       </p>
       <div className="mt-8">
-        <ClaimForm />
+        <ClaimForm directUpload={Boolean(process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID)} />
       </div>
     </div>
   );

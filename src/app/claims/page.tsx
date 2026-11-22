@@ -12,7 +12,7 @@ const TYPE = { delay: "Delay", cancellation: "Cancellation", denied_boarding: "D
 
 async function ClaimList() {
   await connection();
-  const claims = listClaims();
+  const claims = await listClaims();
   const today = todayIST();
   if (!claims.length)
     return (

@@ -1,11 +1,13 @@
 "use client";
 
+import { upload } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AIRLINES, AIRPORTS } from "@/lib/airports";
 import { DOC_KIND_LABELS, type DisruptionType, type DocKind } from "@/lib/types";
 
 type Values = Record<string, string>;
+type Upload = { key: string; file: File; kind: DocKind | "auto"; status: "local" | "uploading" | "done" | "error"; pathname?: string };
 type ParseResponse = {
   fields: Record<string, string | number | boolean>;
   results: { filename: string; kind: DocKind; source: string; found: string[]; missing: string[] }[];
@@ -69,10 +71,10 @@ function YesNo({ name, value, onChange, label }: { name: string; value: string; 
   );
 }
 
-export function ClaimForm() {
+export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) {
   const router = useRouter();
   const [v, setV] = useState<Values>({ airlineReason: "unknown", bookingChannel: "airline", paymentMethod: "credit_card" });
-  const [files, setFiles] = useState<{ file: File; kind: DocKind | "auto" }[]>([]);
+  const [files, setFiles] = useState<Upload[]>([]);
   const [paste, setPaste] = useState("");
   const [parsing, setParsing] = useState(false);
   const [parsed, setParsed] = useState<ParseResponse | null>(null);
@@ -84,11 +86,38 @@ export function ClaimForm() {
   const err = (k: string) => (errors[k] ? <p className="mt-1 text-xs text-bad">{errors[k]}</p> : null);
   const type = v.disruptionType as DisruptionType | undefined;
 
+  const uploading = files.some((f) => f.status === "uploading");
+
+  /** Attach files to a request: direct-to-Blob references in production, inline multipart locally. */
+  function appendFiles(fd: FormData, withKinds: boolean) {
+    const refs: { pathname: string; filename: string; mime: string; kind: string }[] = [];
+    for (const f of files) {
+      if (f.status === "done" && f.pathname) refs.push({ pathname: f.pathname, filename: f.file.name, mime: f.file.type, kind: f.kind });
+      else if (f.status === "local") {
+        fd.append("files", f.file);
+        if (withKinds) fd.append("kinds", f.kind);
+      }
+    }
+    fd.set("blobs", JSON.stringify(refs));
+  }
+
+  function addFiles(list: File[]) {
+    const added: Upload[] = list.map((file) => ({ key: crypto.randomUUID(), file, kind: "auto", status: directUpload ? "uploading" : "local" }));
+    setFiles((fs) => [...fs, ...added].slice(0, 12));
+    if (!directUpload) return;
+    for (const u of added) {
+      const safe = u.file.name.replace(/[^\w.-]+/g, "_").slice(-80);
+      upload(`uploads/${safe}`, u.file, { access: "private", handleUploadUrl: "/api/uploads", contentType: u.file.type || undefined })
+        .then((res) => setFiles((fs) => fs.map((x) => (x.key === u.key ? { ...x, status: "done", pathname: res.pathname } : x))))
+        .catch(() => setFiles((fs) => fs.map((x) => (x.key === u.key ? { ...x, status: "error" } : x))));
+    }
+  }
+
   async function autofill() {
     setParsing(true);
     const fd = new FormData();
     fd.set("text", paste);
-    files.forEach((f) => fd.append("files", f.file));
+    appendFiles(fd, false);
     try {
       const res = await fetch("/api/parse", { method: "POST", body: fd });
       const data = (await res.json()) as ParseResponse;
@@ -110,10 +139,7 @@ export function ClaimForm() {
     setErrors({});
     const fd = new FormData();
     fd.set("data", JSON.stringify(v));
-    files.forEach((f) => {
-      fd.append("files", f.file);
-      fd.append("kinds", f.kind);
-    });
+    appendFiles(fd, true);
     const res = await fetch("/api/claims", { method: "POST", body: fd });
     const data = await res.json();
     if (!res.ok) {
@@ -143,8 +169,7 @@ export function ClaimForm() {
               accept=".pdf,.png,.jpg,.jpeg,.webp,.heic,.txt"
               className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-surface-2 file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink hover:file:bg-line"
               onChange={(e) => {
-                const list = Array.from(e.target.files ?? []);
-                setFiles((fs) => [...fs, ...list.map((file) => ({ file, kind: "auto" as const }))].slice(0, 12));
+                addFiles(Array.from(e.target.files ?? []));
                 e.target.value = "";
               }}
             />
@@ -158,8 +183,10 @@ export function ClaimForm() {
         {files.length > 0 && (
           <ul className="mt-4 divide-y divide-line rounded-lg border border-line">
             {files.map((f, idx) => (
-              <li key={idx} className="flex flex-wrap items-center gap-3 px-3 py-2 text-sm">
+              <li key={f.key} className="flex flex-wrap items-center gap-3 px-3 py-2 text-sm">
                 <span className="min-w-0 flex-1 truncate">{f.file.name}</span>
+                {f.status === "uploading" && <span className="text-xs text-muted">Uploading…</span>}
+                {f.status === "error" && <span className="text-xs text-bad">Upload failed</span>}
                 <select
                   aria-label={`Document type for ${f.file.name}`}
                   className="field w-auto! py-1! text-xs"
@@ -177,7 +204,7 @@ export function ClaimForm() {
           </ul>
         )}
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button type="button" className="btn-ghost" disabled={parsing || (!paste.trim() && !files.length)} onClick={autofill}>
+          <button type="button" className="btn-ghost" disabled={parsing || uploading || (!paste.trim() && !files.length)} onClick={autofill}>
             {parsing ? "Reading…" : "Extract details"}
           </button>
           {parsed && (
@@ -424,8 +451,8 @@ export function ClaimForm() {
       {(errors.form || errors.files) && <p className="text-sm text-bad">{errors.form ?? errors.files}</p>}
       {Object.keys(errors).length > 0 && !errors.form && !errors.files && <p className="text-sm text-bad">Please fix the highlighted fields.</p>}
       <div className="flex justify-end">
-        <button type="submit" className="btn-primary px-6! py-2.5!" disabled={submitting}>
-          {submitting ? "Assessing your claim…" : "Assess my claim"}
+        <button type="submit" className="btn-primary px-6! py-2.5!" disabled={submitting || uploading}>
+          {uploading ? "Waiting for uploads…" : submitting ? "Assessing your claim…" : "Assess my claim"}
         </button>
       </div>
     </form>

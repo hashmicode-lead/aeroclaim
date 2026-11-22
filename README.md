@@ -16,7 +16,7 @@ Rule packs implement `RulePack` (`src/lib/rules/pack.ts`). Register a new jurisd
 
 ## Run locally
 
-Requires Node 22.5+ (uses the built-in `node:sqlite`).
+Requires Node 20.9+.
 
 ```bash
 npm install
@@ -25,7 +25,18 @@ npm test           # rule engine, parser, weather, time tests
 npm run build
 ```
 
-Data (SQLite DB and uploads) lives in `./data/`, which is gitignored. Override it with `AEROCLAIM_DATA_DIR`.
+With no env vars set, data (SQLite file and uploads) lives in `./data/`, which is gitignored.
+
+## Deploy to Vercel
+
+Storage is environment-driven: **Turso** (libSQL) for the database and **Vercel Blob (private)** for evidence files. The browser uploads files directly to Blob, which avoids Vercel's 4.5 MB function body limit.
+
+1. On vercel.com, **Add New → Project** and import this GitHub repo. The defaults are fine.
+2. In the project, open **Storage**. Create a **Blob** store with access set to **Private** and connect it. This sets `BLOB_READ_WRITE_TOKEN`.
+3. Still under **Storage** (or the Marketplace), add **Turso** and connect a database. This sets `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`. Tables are created automatically on first request.
+4. **Redeploy** so the build picks up the new variables.
+
+See `.env.example`. Without `TURSO_DATABASE_URL`, a Vercel deployment fails with a clear error rather than silently losing data.
 
 ## Not yet built (Sprint 2–3)
 

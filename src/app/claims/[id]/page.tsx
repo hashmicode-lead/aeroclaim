@@ -20,7 +20,7 @@ const SEV: Record<WeatherSeverity, string> = { none: "bg-ok-soft text-ok", moder
 async function ClaimReport({ params }: { params: Promise<{ id: string }> }) {
   await connection();
   const { id } = await params;
-  const claim = getClaim(id);
+  const claim = await getClaim(id);
   if (!claim) notFound();
   const { input: i, assessment: a, weather } = claim;
   const o = getAirport(i.origin);
