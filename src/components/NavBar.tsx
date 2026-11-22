@@ -59,7 +59,7 @@ export function NavBar() {
     <header className="no-print chrome edge-fade sticky top-0 z-40">
       <div className="mx-auto flex h-12 max-w-5xl items-center gap-4 px-4">
         <Link href="/" aria-label="AeroClaim home" className="flex items-center">
-          <Logo size={22} />
+          <Logo size={26} />
         </Link>
 
         {session && (

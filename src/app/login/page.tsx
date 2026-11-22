@@ -82,7 +82,7 @@ export default function LoginPage() {
 
         <div key={role} className="reveal">
           <div className="mt-8 text-center">
-            <LogoMark size={56} className="mx-auto drop-shadow-[0_6px_14px_rgba(0,88,184,0.25)]" />
+            <LogoMark size={56} className="mx-auto drop-shadow-[0_8px_18px_rgba(0,0,0,0.12)]" />
             <h1 className="title-1 mt-5">{tab.title}</h1>
             <p className="footnote mt-1.5 text-muted">{tab.sub}</p>
           </div>

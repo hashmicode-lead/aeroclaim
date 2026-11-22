@@ -1,38 +1,49 @@
 import { useId } from "react";
 
 /**
- * AeroClaim mark: a boarding pass, tilted as if handed over, carrying a check.
- * Ticket in, claim approved out. Continuous-corner tile in the brand blue.
+ * AeroClaim mark: a plane climbing inside an open orbit ring, on a white continuous-corner tile.
+ * Reference artwork: public/brand/aeroclaim-logo.jpg
  */
-export function LogoMark({ size = 22, className = "" }: { size?: number; className?: string }) {
+export function LogoMark({ size = 24, className = "" }: { size?: number; className?: string }) {
   const uid = useId().replace(/:/g, "");
+  const tile = `${uid}t`;
+  const blue = `${uid}b`;
   return (
     <svg width={size} height={size} viewBox="0 0 32 32" className={className} aria-hidden>
       <defs>
-        <linearGradient id={`${uid}g`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#1f8bff" />
-          <stop offset="1" stopColor="#0058b8" />
+        <linearGradient id={tile} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ffffff" />
+          <stop offset="1" stopColor="#eef1f6" />
         </linearGradient>
-        <mask id={`${uid}m`}>
-          <rect width="32" height="32" fill="#fff" />
-          <circle cx="6.6" cy="16" r="2.3" fill="#000" />
-          <circle cx="25.4" cy="16" r="2.3" fill="#000" />
-        </mask>
+        <linearGradient id={blue} x1="0.2" y1="0" x2="0.8" y2="1">
+          <stop offset="0" stopColor="#36b4ff" />
+          <stop offset="1" stopColor="#0a6cff" />
+        </linearGradient>
       </defs>
-      <path fill={`url(#${uid}g)`} d="M16 0c9.6 0 12.8 0 14.4 1.6S32 6.4 32 16s0 12.8-1.6 14.4S25.6 32 16 32 3.2 32 1.6 30.4 0 25.6 0 16 0 3.2 1.6 1.6 6.4 0 16 0Z" />
-      <g transform="rotate(-12 16 16)">
-        <rect x="6.6" y="9.6" width="18.8" height="12.8" rx="2.6" fill="#fff" mask={`url(#${uid}m)`} />
-        <path d="M12 16.3l2.7 2.7 5.4-5.6" fill="none" stroke="#0066cc" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        fill={`url(#${tile})`}
+        stroke="rgba(0,0,0,0.09)"
+        strokeWidth="0.6"
+        d="M16 .3c9.5 0 12.6 0 14.2 1.5s1.5 4.7 1.5 14.2 0 12.6-1.5 14.2-4.7 1.5-14.2 1.5S3.4 31.7 1.8 30.2.3 25.5.3 16 .3 3.4 1.8 1.8 6.5.3 16 .3Z"
+      />
+      {/* Open ring: ~84% of the circle, gap at the upper right */}
+      <circle cx="16" cy="16" r="10.2" fill="none" stroke={`url(#${blue})`} strokeWidth="2.1" strokeLinecap="round" strokeDasharray="54 64.1" transform="rotate(-12 16 16)" />
+      {/* Plane (Material "flight" glyph, Apache-2.0), heading up-right */}
+      <g transform="translate(16 16) rotate(45) scale(0.62) translate(-12 -12)">
+        <path fill={`url(#${blue})`} d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
       </g>
     </svg>
   );
 }
 
-export function Logo({ size = 22, className = "" }: { size?: number; className?: string }) {
+export function Logo({ size = 24, className = "" }: { size?: number; className?: string }) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
       <LogoMark size={size} />
-      <span className="text-[16px] font-semibold tracking-[-0.03em] text-ink">AeroClaim</span>
+      <span className="text-[17px] font-bold tracking-[-0.035em]">
+        <span className="text-ink">Aero</span>
+        <span className="bg-gradient-to-b from-[#1f97ff] to-[#0a6cff] bg-clip-text text-transparent">Claim</span>
+      </span>
     </span>
   );
 }
