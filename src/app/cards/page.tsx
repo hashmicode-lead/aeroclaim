@@ -5,39 +5,36 @@ import Link from "next/link";
 import { useState } from "react";
 import { DateTimeField } from "@/components/DateTimeField";
 import { InsuranceAd } from "@/components/InsuranceAd";
+import { detectNetwork, NETWORK_PAIR, NETWORKS, type NetworkId } from "@/lib/networks";
 
-type Brand = "visa" | "mastercard" | null;
+type Brand = NetworkId | null;
 type Kind = "credit" | "debit";
 type Benefit = { id: string; label: string; trigger: string; inr: number };
 
-const TIERS: Record<"visa" | "mastercard", string[]> = {
-  visa: ["Classic", "Signature", "Infinite"],
-  mastercard: ["Standard", "Platinum", "World", "World Elite"],
-};
 
 /** Sample benefit schedules for the demo. Real cover depends on the issuing bank's policy. */
 const SCHEDULE: Record<string, Benefit[]> = {
-  "visa:Signature": [
+  "wise:Gold": [
     { id: "delay", label: "Trip delay", trigger: "Flight delayed more than 6 hours", inr: 5000 },
     { id: "bagdelay", label: "Baggage delay", trigger: "Checked bag more than 12 hours late", inr: 7500 },
     { id: "baglost", label: "Lost baggage", trigger: "Bag declared lost by the airline", inr: 50000 },
   ],
-  "visa:Infinite": [
+  "wise:Platinum": [
     { id: "delay", label: "Trip delay", trigger: "Flight delayed more than 6 hours", inr: 15000 },
     { id: "bagdelay", label: "Baggage delay", trigger: "Checked bag more than 6 hours late", inr: 15000 },
     { id: "baglost", label: "Lost baggage", trigger: "Bag declared lost by the airline", inr: 100000 },
     { id: "missed", label: "Missed connection", trigger: "Onward flight missed because of a delay", inr: 10000 },
   ],
-  "mastercard:Platinum": [
+  "naster:Titanium": [
     { id: "bagdelay", label: "Baggage delay", trigger: "Checked bag more than 12 hours late", inr: 5000 },
     { id: "baglost", label: "Lost baggage", trigger: "Bag declared lost by the airline", inr: 25000 },
   ],
-  "mastercard:World": [
+  "naster:Platinum": [
     { id: "delay", label: "Trip delay", trigger: "Flight delayed more than 6 hours", inr: 10000 },
     { id: "bagdelay", label: "Baggage delay", trigger: "Checked bag more than 8 hours late", inr: 10000 },
     { id: "baglost", label: "Lost baggage", trigger: "Bag declared lost by the airline", inr: 75000 },
   ],
-  "mastercard:World Elite": [
+  "naster:Elite": [
     { id: "delay", label: "Trip delay", trigger: "Flight delayed more than 4 hours", inr: 20000 },
     { id: "bagdelay", label: "Baggage delay", trigger: "Checked bag more than 6 hours late", inr: 20000 },
     { id: "baglost", label: "Lost baggage", trigger: "Bag declared lost by the airline", inr: 150000 },
@@ -47,12 +44,8 @@ const SCHEDULE: Record<string, Benefit[]> = {
 
 const inr = (n: number) => "₹" + n.toLocaleString("en-IN");
 
-function detect(num: string): Brand {
-  const d = num.replace(/\D/g, "");
-  if (/^4/.test(d)) return "visa";
-  if (/^5[1-5]/.test(d) || /^2(2[2-9][1-9]|2[3-9]\d|[3-6]\d\d|7[01]\d|720)/.test(d)) return "mastercard";
-  return null;
-}
+const detect = (num: string): Brand => detectNetwork(num);
+const netName = (b: Brand) => (b ? NETWORKS[b].name : "Card");
 
 function luhn(num: string) {
   const d = num.replace(/\D/g, "");
@@ -80,7 +73,7 @@ function benefitsFor(brand: Brand, tier: string, kind: Kind): Benefit[] {
 function CardFace({ brand, number, name, expiry, tier, kind }: { brand: Brand; number: string; name: string; expiry: string; tier: string; kind: Kind }) {
   const digits = number.replace(/\D/g, "");
   const last4 = digits.slice(-4).padStart(4, "•");
-  const bg = brand === "mastercard" ? "from-[#2b2b2e] to-[#0b0b0c]" : brand === "visa" ? "from-[#1a3a8f] to-[#0b1f5c]" : "from-[#8e8e93] to-[#636366]";
+  const bg = brand === "naster" ? "from-[#24303f] to-[#0e151d]" : brand === "wise" ? "from-[#0c6b5a] to-[#063b32]" : "from-[#8e8e93] to-[#636366]";
   return (
     <div className={`relative aspect-[1.586] w-full max-w-sm overflow-hidden rounded-2xl bg-gradient-to-br ${bg} p-5 text-white shadow-[var(--shadow-raised)] transition-colors duration-500`}>
       <div className="absolute -top-16 -right-16 size-48 rounded-full bg-white/5" aria-hidden />
@@ -99,11 +92,11 @@ function CardFace({ brand, number, name, expiry, tier, kind }: { brand: Brand; n
           <div className="footnote font-medium">{expiry || "MM/YY"}</div>
         </div>
         <div className="h-8">
-          {brand === "visa" && <span className="text-2xl font-extrabold italic tracking-tight">VISA</span>}
-          {brand === "mastercard" && (
-            <span className="flex" aria-label="Mastercard">
-              <span className="size-8 rounded-full bg-[#eb001b]" />
-              <span className="-ml-3.5 size-8 rounded-full bg-[#f79e1b]/90" />
+          {brand === "wise" && <span className="text-xl font-semibold tracking-[0.08em]">{NETWORKS.wise.name.toUpperCase()}</span>}
+          {brand === "naster" && (
+            <span className="flex items-center gap-1.5" aria-label={NETWORKS.naster.name}>
+              <span className="size-5 rotate-45 rounded-[5px] border-2 border-white/80" />
+              <span className="text-[15px] font-semibold tracking-wide">{NETWORKS.naster.name}</span>
             </span>
           )}
         </div>
@@ -128,7 +121,7 @@ export default function CardsPage() {
   const [filed, setFiled] = useState<string | null>(null);
 
   const brand = detect(number);
-  const tiers = brand ? TIERS[brand] : [];
+  const tiers: readonly string[] = brand ? NETWORKS[brand].tiers : [];
   const benefits = benefitsFor(brand, tier, kind);
   const last4 = number.replace(/\D/g, "").slice(-4);
   const chosen = benefits.find((b) => b.id === incident.type);
@@ -136,7 +129,7 @@ export default function CardsPage() {
   function next() {
     setErr("");
     if (step === 0) {
-      if (!brand) return setErr("We support Visa and Mastercard. Check the card number.");
+      if (!brand) return setErr(`We support ${NETWORK_PAIR} cards. Check the card number.`);
       if (!luhn(number)) return setErr("That card number doesn't look right. Check the digits.");
       if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry)) return setErr("Enter the expiry as MM/YY.");
       if (!tier) return setErr("Choose your card variant. It's printed on the card or in your bank app.");
@@ -159,7 +152,7 @@ export default function CardsPage() {
       <div className="reveal mx-auto max-w-lg px-4 py-20 text-center">
         <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-ok-soft text-ok"><CheckCircle2 size={32} aria-hidden /></div>
         <h1 className="title-1 mt-5">Card claim filed</h1>
-        <p className="mt-2 text-muted">Reference <strong className="text-ink">{filed}</strong>. We sent your boarding pass, the airline&apos;s delay letter and the card statement line to the {brand === "visa" ? "Visa" : "Mastercard"} benefits administrator.</p>
+        <p className="mt-2 text-muted">Reference <strong className="text-ink">{filed}</strong>. We sent your boarding pass, the airline&apos;s delay letter and the card statement line to the {netName(brand)} benefits administrator.</p>
         <div className="card mt-8 p-5 text-left">
           {[["Filed", "Today", true], ["Insurer acknowledges", "Within 3 working days", false], ["Decision", "Within 15 days (IRDAI rule)", false], ["Payout to your card", "Within 7 days of approval", false]].map(([a, b, done]) => (
             <div key={a as string} className="flex items-center gap-3 border-b border-line py-3 last:border-0">
@@ -177,7 +170,7 @@ export default function CardsPage() {
     <div className="reveal mx-auto max-w-5xl px-4 py-10">
       <div className="px-1">
         <p className="eyebrow">Card cover</p>
-        <h1 className="title-1 mt-2">Claim from your Visa or Mastercard</h1>
+        <h1 className="title-1 mt-2">Claim from your {NETWORK_PAIR} card</h1>
         <p className="mt-1.5 max-w-2xl text-muted">Many credit and debit cards insure flights bought with them. We check the booking was paid on your card, show what your card covers, and file the claim.</p>
       </div>
 
@@ -219,7 +212,7 @@ export default function CardsPage() {
                       setTier("");
                     }}
                   />
-                  <p className="hint">{brand ? `${brand === "visa" ? "Visa" : "Mastercard"} detected` : "Visa starts with 4, Mastercard with 5 or 2"}</p>
+                  <p className="hint">{brand ? `${netName(brand)} card detected` : `${NETWORKS.wise.name} starts with 4, ${NETWORKS.naster.name} with 5 or 2`}</p>
                 </div>
                 <div className="grid grid-cols-[1fr_110px] gap-3">
                   <div>
@@ -306,7 +299,7 @@ export default function CardsPage() {
 
           {step === 2 && (
             <section key="s2" className="card reveal p-6 sm:p-7">
-              <h2 className="title-2">Your {brand === "visa" ? "Visa" : "Mastercard"} {tier} {kind} cover</h2>
+              <h2 className="title-2">Your {netName(brand)} {tier} {kind} cover</h2>
               {benefits.length === 0 ? (
                 <p className="footnote mt-3 rounded-2xl bg-warn-soft p-4">This card variant doesn&apos;t include travel insurance. You can still claim from the airline, and a standalone travel policy would cover future trips.</p>
               ) : (
@@ -345,7 +338,7 @@ export default function CardsPage() {
               <h2 className="title-2">Review and file</h2>
               <dl className="footnote mt-4 divide-y divide-line">
                 {[
-                  ["Card", `${brand === "visa" ? "Visa" : "Mastercard"} ${tier} ${kind} •••• ${last4}`],
+                  ["Card", `${netName(brand)} ${tier} ${kind} •••• ${last4}`],
                   ["Booking", `${booking.airline || "Airline"} · PNR ${booking.pnr.toUpperCase()} · ${inr(Number(booking.amount.replace(/,/g, "")))}`],
                   ["Benefit", chosen.label],
                   ["Incident", `${incident.when.replace("T", ", ")}${incident.hours ? ` · ${incident.hours} h late` : ""}`],

@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 const KEY = "aeroclaim.adpopup.seen";
 
-/** Sponsored pop-up shown once per browser session, a few seconds after landing. Fictional insurer. */
+/** Sponsored pop-up shown once per browser session, a few seconds after landing. Placeholder insurer. */
 export function AdPopup({ delay = 3500 }: { delay?: number }) {
   const [show, setShow] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -43,13 +43,13 @@ export function AdPopup({ delay = 3500 }: { delay?: number }) {
   return (
     <aside
       role="dialog"
-      aria-label="Sponsored offer from SkyShield"
+      aria-label="Sponsored offer from Ztar Health Insurance"
       className={`fixed right-4 bottom-4 left-4 z-50 overflow-hidden rounded-3xl bg-surface shadow-[var(--shadow-raised)] ring-1 ring-line sm:left-auto sm:w-[360px] ${leaving ? "sheet-out" : "sheet"}`}
     >
       <div className="relative bg-accent px-6 pt-6 pb-5 text-white">
         <div className="absolute -right-8 -bottom-12 size-36 rounded-full bg-white/10" aria-hidden />
         <div className="absolute right-10 -top-10 size-20 rounded-full bg-white/10" aria-hidden />
-        <span className="caption relative rounded-full bg-white/20 px-2 py-0.5 font-medium">Sponsored · SkyShield</span>
+        <span className="caption relative rounded-full bg-white/20 px-2 py-0.5 font-medium">Sponsored · Ztar Health Insurance</span>
         <p className="title-2 relative mt-3">Flying this month? Get paid if you&apos;re delayed.</p>
       </div>
       <button aria-label="Close ad" onClick={close} className="absolute top-3 right-3 flex size-5 items-center justify-center rounded-full bg-black/25 text-white hover:bg-black/40">

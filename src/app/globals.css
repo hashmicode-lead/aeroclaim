@@ -264,6 +264,53 @@ body {
 .sheet { animation: sheet-in 360ms var(--ease-out-quint) both; }
 .sheet-out { animation: sheet-out 180ms ease-in both; }
 
+/* Popovers grow from the edge they are anchored to (set transform-origin on the element). */
+@keyframes pop-in { from { opacity: 0; transform: scale(0.96); } }
+.pop { animation: pop-in 200ms var(--ease-out-quint) both; }
+
+/*
+ * Scroll-driven motion (CSS only). Browsers without animation-timeline simply show the content,
+ * so every section is readable at rest.
+ */
+@supports (animation-timeline: view()) {
+  @keyframes scroll-rise {
+    from { opacity: 0; transform: translateY(40px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes hero-recede {
+    to { opacity: 0.25; transform: translateY(-40px) scale(0.96); }
+  }
+  @keyframes tilt-in {
+    from { transform: perspective(900px) rotateX(18deg) translateY(30px); opacity: 0.4; }
+    to { transform: none; opacity: 1; }
+  }
+  @keyframes grow-x {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  .scroll-rise {
+    animation: scroll-rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 28%;
+  }
+  .hero-recede {
+    animation: hero-recede linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 60vh;
+  }
+  .tilt-in {
+    animation: tilt-in linear both;
+    animation-timeline: view();
+    animation-range: entry 10% cover 40%;
+  }
+  .grow-x {
+    transform-origin: left;
+    animation: grow-x linear both;
+    animation-timeline: view();
+    animation-range: entry 20% cover 45%;
+  }
+}
+
 /* Scroll-edge fade instead of a hard divider under floating chrome */
 .edge-fade::after {
   content: "";
@@ -282,6 +329,12 @@ body {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
+  }
+  .scroll-rise,
+  .hero-recede,
+  .tilt-in,
+  .grow-x {
+    animation: none !important;
   }
   .btn:active,
   .btn-primary:active,

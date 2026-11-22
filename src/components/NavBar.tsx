@@ -1,9 +1,9 @@
 "use client";
 
-import { Plane } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
+import { Logo } from "./Logo";
 import { PricingModal } from "./PricingModal";
 import { ROLE_HOME, ROLE_LABEL, setRole, signOut, useSession, type Role } from "./session";
 
@@ -58,9 +58,8 @@ export function NavBar() {
     <>
     <header className="no-print chrome edge-fade sticky top-0 z-40">
       <div className="mx-auto flex h-12 max-w-5xl items-center gap-4 px-4">
-        <Link href="/" className="flex items-center gap-1.5 text-[15px] font-semibold tracking-[-0.02em]">
-          <Plane size={18} className="text-accent" strokeWidth={2.25} aria-hidden />
-          AeroClaim
+        <Link href="/" aria-label="AeroClaim home" className="flex items-center">
+          <Logo size={22} />
         </Link>
 
         {session && (

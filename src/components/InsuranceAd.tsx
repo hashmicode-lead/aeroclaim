@@ -3,27 +3,27 @@
 import { ShieldCheck, Umbrella, X } from "lucide-react";
 import { useState } from "react";
 
-/** Sample sponsored placements. All insurers are fictional. */
+/** Sample sponsored placements. Insurer names are placeholders chosen for the demo. */
 const ADS = [
   {
-    id: "skyshield",
-    brand: "SkyShield",
+    id: "ztar",
+    brand: "Ztar Health Insurance",
     headline: "Delays over 4 hours pay out automatically",
     body: "Flight-delay cover from ₹149 a trip. No forms: we track your flight and pay to your UPI.",
     cta: "Get a quote",
     hue: "#0066cc",
   },
   {
-    id: "monsoon",
-    brand: "Monsoon Mutual",
+    id: "mivapupa",
+    brand: "Miva Pupa Insurance",
     headline: "Baggage cover up to ₹1,00,000",
     body: "Lost, damaged or delayed bags, plus ₹10,000 for essentials while you wait.",
     cta: "See plans",
     hue: "#248a3d",
   },
   {
-    id: "globetrek",
-    brand: "Globetrek Assure",
+    id: "fbi",
+    brand: "FBI Health Insurance",
     headline: "Annual multi-trip cover for ₹2,999",
     body: "Unlimited international trips, medical cover up to $250,000 and missed connections.",
     cta: "Compare covers",

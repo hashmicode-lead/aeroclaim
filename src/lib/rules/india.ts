@@ -331,7 +331,7 @@ export function evaluateIndia(input: ClaimInput, ctx: RuleContext): Assessment {
         basis: `${MONTREAL}, Art. 17, 19 & 22(2)`,
         explanation:
           (isInternational
-            ? `Airline liability is capped at ${MONTREAL_BAGGAGE_SDR} SDR (about ${inr(limit)}) per passenger, and you must prove your actual loss.`
+            ? `The airline pays up to about ${inr(limit)} per passenger (the Montreal Convention limit of ${MONTREAL_BAGGAGE_SDR} SDR). Keep receipts: you need to show what you lost.`
             : "Domestic carriage falls under the Carriage by Air Act's Montreal-based schedule. Airlines often offer lower per-kg amounts under their conditions of carriage, which can be challenged before a consumer commission.") +
           (claim ? "" : " Enter the amount you are claiming."),
       });
@@ -368,7 +368,7 @@ export function evaluateIndia(input: ClaimInput, ctx: RuleContext): Assessment {
         explanation: `${rule} ${overdue ? `It was due on ${formatDate(due)}. The airline is in breach.` : `It is due by ${formatDate(due)}.`}`,
       });
       if (overdue && (input.paymentMethod === "credit_card" || input.paymentMethod === "debit_card")) {
-        findings.push({ id: "chargeback", track: "chargeback", title: "Card chargeback (credit not processed)", status: "likely", basis: "Card network dispute rules (Visa / Mastercard / RuPay)", explanation: "Your refund is overdue and you paid by card, so you can raise a dispute with your card issuer. Attach the cancellation confirmation and the airline's refund promise." });
+        findings.push({ id: "chargeback", track: "chargeback", title: "Card chargeback (credit not processed)", status: "likely", basis: "Card network dispute rules (via your issuing bank)", explanation: "Your refund is overdue and you paid by card, so you can raise a dispute with your card issuer. Attach the cancellation confirmation and the airline's refund promise." });
         deadlines.push({ id: "chargeback", title: "Card chargeback window (typical)", due: addDays(due, 120), kind: "passenger", hard: false, basis: "Card network rules", description: "Most networks allow about 120 days from the expected refund date. Check your issuer's own deadline." });
       }
       if (overdue && input.paymentMethod === "upi") {

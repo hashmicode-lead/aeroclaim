@@ -1,5 +1,5 @@
-import { Plane } from "lucide-react";
 import Link from "next/link";
+import { Logo } from "./Logo";
 
 const COLUMNS: { title: string; links: { label: string; href: string; external?: boolean }[] }[] = [
   {
@@ -46,8 +46,8 @@ export function Footer() {
       <div className="mx-auto max-w-5xl px-4 py-12">
         <div className="grid gap-10 md:grid-cols-[1.3fr_repeat(4,1fr)]">
           <div>
-            <Link href="/" className="flex items-center gap-1.5 text-[15px] font-semibold tracking-[-0.02em]">
-              <Plane size={18} className="text-accent" strokeWidth={2.25} aria-hidden /> AeroClaim
+            <Link href="/" aria-label="AeroClaim home" className="flex items-center">
+              <Logo size={24} />
             </Link>
             <p className="footnote mt-3 max-w-xs text-muted">Flight delay, cancellation, baggage and refund claims for Indian travellers, prepared in minutes.</p>
           </div>

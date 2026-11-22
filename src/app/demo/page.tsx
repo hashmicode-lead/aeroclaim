@@ -10,7 +10,7 @@ const STEPS = [
   { label: "Reading PIR and receipts", detail: `PIR ${demoClaim.pirNumber} · 2 bags · 9 receipts` },
   { label: "Checking Open-Meteo weather at DEL", detail: "Clear sky, visibility 4.8–6.1 km. No fog." },
   { label: "Applying DGCA CAR & Montreal Convention", detail: "Delay 6h 20m · damaged + delayed baggage" },
-  { label: "Stacking Visa Infinite card cover", detail: "Trip-delay and baggage-delay benefits found" },
+  { label: "Stacking Wise Platinum card cover", detail: "Trip-delay and baggage-delay benefits found" },
 ];
 
 export default function DemoRun() {

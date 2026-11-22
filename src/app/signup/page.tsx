@@ -1,10 +1,11 @@
 "use client";
 
-import { Briefcase, Plane, Scale, Sparkles } from "lucide-react";
+import { Briefcase, Plane, Scale } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { InsuranceAd } from "@/components/InsuranceAd";
+import { LogoMark } from "@/components/Logo";
 import { PricingModal } from "@/components/PricingModal";
 import { ROLE_HOME, signIn, type Role } from "@/components/session";
 
@@ -53,6 +54,7 @@ export default function SignupPage() {
   return (
     <div className="mx-auto grid max-w-5xl gap-10 px-4 py-12 lg:grid-cols-[1fr_340px]">
       <div className="reveal mx-auto w-full max-w-lg">
+        <LogoMark size={48} className="mb-5 drop-shadow-[0_6px_14px_rgba(0,88,184,0.25)]" />
         <h1 className="title-1">Create your account</h1>
         <p className="mt-1.5 text-muted">
           Already have one? <Link href="/login" className="text-accent hover:underline">Sign in</Link>
@@ -142,7 +144,7 @@ export default function SignupPage() {
 
           <div className="flex flex-wrap items-center justify-between gap-3">
             <button type="button" className="footnote inline-flex items-center gap-1.5 text-accent hover:underline" onClick={() => setPricing("browse")}>
-              <Sparkles size={14} aria-hidden /> See plans &amp; pricing
+              See plans &amp; pricing
             </button>
             <button type="submit" className="btn-primary px-6! py-2.5!">Create account</button>
           </div>

@@ -11,7 +11,7 @@ const TO: Record<PacketType, string> = {
   nodal: "The Nodal Officer, Customer Grievance Cell, Air India Limited, Airlines House, New Delhi",
   airsewa: "AirSewa Grievance Portal, Ministry of Civil Aviation",
   ejagriti: "The President, District Consumer Disputes Redressal Commission, New Delhi",
-  chargeback: "Claims Department, Visa Infinite Travel Benefits (via issuing bank)",
+  chargeback: "Claims Department, Wise Platinum Travel Benefits (via issuing bank)",
 };
 
 const BODY: Record<PacketType, string[]> = {
@@ -32,7 +32,7 @@ const BODY: Record<PacketType, string[]> = {
   ],
   chargeback: [
     `Cardholder: ${u.name}. Card: ${c.card}. Transaction: ${c.airline} ticket, PNR ${c.pnr}, paid in full on the card.`,
-    "Benefit claimed: Trip delay (delay of more than 6 hours) and baggage delay (bag delivered after 48 hours), under the Visa Infinite travel benefits schedule.",
+    "Benefit claimed: Trip delay (delay of more than 6 hours) and baggage delay (bag delivered after 48 hours), under the Wise Platinum travel benefits schedule.",
     "Enclosed: airline delay confirmation, PIR, itemised receipts for essentials purchased, boarding passes and card statement showing the ticket purchase.",
   ],
 };
@@ -95,7 +95,7 @@ export default async function PacketDoc({ params }: PageProps<"/packets/demo/[ty
             </tr>
           </tbody>
         </table>
-        {t !== "chargeback" && t !== "ejagriti" && <p className="caption mt-2 text-muted">A Visa Infinite top-up of {inr(demoTotal - total)} is being claimed separately from the card issuer.</p>}
+        {t !== "chargeback" && t !== "ejagriti" && <p className="caption mt-2 text-muted">A Wise Platinum card top-up of {inr(demoTotal - total)} is being claimed separately from the card issuer.</p>}
 
         <p className="mt-8 text-[15px] leading-[1.65]">
           {t === "ejagriti"

@@ -4,6 +4,7 @@ import { Briefcase, Plane, Scale, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { LogoMark } from "@/components/Logo";
 import { ROLE_HOME, signIn, type Role } from "@/components/session";
 
 function GoogleMark() {
@@ -81,9 +82,7 @@ export default function LoginPage() {
 
         <div key={role} className="reveal">
           <div className="mt-8 text-center">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-accent text-white shadow-[var(--shadow-card)]">
-              <tab.Icon size={24} strokeWidth={2.1} aria-hidden />
-            </div>
+            <LogoMark size={56} className="mx-auto drop-shadow-[0_6px_14px_rgba(0,88,184,0.25)]" />
             <h1 className="title-1 mt-5">{tab.title}</h1>
             <p className="footnote mt-1.5 text-muted">{tab.sub}</p>
           </div>

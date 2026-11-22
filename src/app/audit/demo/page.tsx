@@ -54,7 +54,7 @@ export default function AuditPage() {
           </div>
           <div className="caption mt-2 flex gap-5 text-muted">
             <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-accent" /> Airline {inr(airline)}</span>
-            <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#5e5ce6]" /> Visa Infinite cover {inr(card)}</span>
+            <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-[#5e5ce6]" /> Wise Platinum cover {inr(card)}</span>
           </div>
         </div>
 

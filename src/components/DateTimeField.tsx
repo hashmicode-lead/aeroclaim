@@ -39,6 +39,7 @@ export function DateTimeField({
   invalid?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [place, setPlace] = useState<{ up: boolean; right: boolean }>({ up: false, right: false });
   const root = useRef<HTMLDivElement>(null);
   const [datePart, timePart = "09:00"] = (value || "").split("T");
   const base = datePart || todayStr();
@@ -77,7 +78,16 @@ export function DateTimeField({
         type="button"
         aria-haspopup="dialog"
         aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
+        onClick={(e) => {
+          if (!open) {
+            // Open where there is room: above when the space below is short, right-aligned near the right edge.
+            const r = e.currentTarget.getBoundingClientRect();
+            const h = withTime ? 400 : 345;
+            const below = window.innerHeight - r.bottom;
+            setPlace({ up: below < h + 12 && r.top > below, right: r.left + 296 > window.innerWidth - 16 });
+          }
+          setOpen((o) => !o);
+        }}
         className={`field flex items-center gap-2 text-left ${open ? "border-accent! bg-surface! shadow-[0_0_0_4px_var(--accent-soft)]" : ""} ${invalid ? "border-bad!" : ""}`}
       >
         <CalendarDays size={17} className="shrink-0 text-muted" aria-hidden />
@@ -85,7 +95,7 @@ export function DateTimeField({
       </button>
 
       {open && (
-        <div role="dialog" aria-label="Choose date" className="reveal absolute left-0 z-40 mt-2 w-[300px] max-w-[calc(100vw-2rem)] rounded-2xl bg-surface p-4 shadow-[var(--shadow-raised)] ring-1 ring-line">
+        <div role="dialog" aria-label="Choose date" className={`pop absolute z-40 w-[296px] max-w-[calc(100vw-2rem)] rounded-2xl bg-surface p-3.5 shadow-[var(--shadow-raised)] ring-1 ring-line ${place.up ? "bottom-full mb-2 origin-bottom" : "top-full mt-2 origin-top"} ${place.right ? "right-0" : "left-0"}`}>
           <div className="flex items-center justify-between">
             <span className="headline">{MONTHS[view.m]} {view.y}</span>
             <div className="flex gap-1">
@@ -93,7 +103,7 @@ export function DateTimeField({
               <button type="button" aria-label="Next month" onClick={() => shift(1)} className="pressable flex size-8 items-center justify-center rounded-full text-accent hover:bg-fill"><ChevronRight size={18} aria-hidden /></button>
             </div>
           </div>
-          <div className="caption mt-3 grid grid-cols-7 text-center font-semibold text-muted">
+          <div className="caption mt-2 grid grid-cols-7 text-center font-semibold text-muted">
             {DAYS.map((d) => <span key={d} className="py-1">{d}</span>)}
           </div>
           <div className="grid grid-cols-7 gap-y-0.5 text-center">
@@ -112,7 +122,7 @@ export function DateTimeField({
                     emit(ds, timePart);
                     if (!withTime) setOpen(false);
                   }}
-                  className={`mx-auto flex size-9 items-center justify-center rounded-full text-[15px] transition-colors ${sel ? "bg-accent font-semibold text-white" : isToday ? "font-semibold text-accent hover:bg-fill" : "hover:bg-fill"}`}
+                  className={`mx-auto flex size-8 items-center justify-center rounded-full text-[14px] tabular-nums transition-colors ${sel ? "bg-accent font-semibold text-white" : isToday ? "font-semibold text-accent hover:bg-fill" : "hover:bg-fill"}`}
                 >
                   {d}
                 </button>
@@ -121,7 +131,7 @@ export function DateTimeField({
           </div>
 
           {withTime && (
-            <div className="mt-3 border-t border-line pt-3">
+            <div className="mt-2.5 border-t border-line pt-2.5">
               <div className="flex items-center justify-between">
                 <span className="footnote flex items-center gap-1.5 font-medium"><Clock size={15} className="text-muted" aria-hidden /> Time</span>
                 <div className="flex items-center gap-1 rounded-lg bg-fill p-0.5">
@@ -137,7 +147,7 @@ export function DateTimeField({
             </div>
           )}
 
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-2.5 flex items-center justify-between">
             <button type="button" className="footnote text-accent hover:underline" onClick={() => { emit(today, timePart); setView({ y: Number(today.slice(0, 4)), m: Number(today.slice(5, 7)) - 1 }); }}>
               Today
             </button>

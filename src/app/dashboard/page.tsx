@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, CalendarClock, CreditCard, FilePlus2, Plus, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarClock, CreditCard, FilePlus2, Plus } from "lucide-react";
 import { EmptyHome } from "@/components/EmptyHome";
 import Link from "next/link";
 import { Countdown } from "@/components/client";
@@ -23,7 +23,7 @@ export default function Dashboard() {
         sub="Add a flight that went wrong and we'll work out what you're owed."
         actions={[
           { href: "/claims/new", label: "Start your first claim", desc: "Delay, cancellation, denied boarding, baggage or a stuck refund.", Icon: FilePlus2, primary: true },
-          { href: "/cards", label: "Check your card cover", desc: "See if your Visa or Mastercard insures your trip.", Icon: CreditCard },
+          { href: "/cards", label: "Check your card cover", desc: "See if your Wise or Naster card insures your trip.", Icon: CreditCard },
         ]}
         checklist={["Create your account", "Add your first flight", "Add a card for cover checks", "Add your UPI ID for payouts"]}
       />
@@ -37,7 +37,7 @@ export default function Dashboard() {
           <h1 className="title-1 mt-0.5">Hi, {first}</h1>
         </div>
         <div className="flex gap-2">
-          <Link href="/demo" className="btn-ghost"><Sparkles size={16} aria-hidden /> Run live demo</Link>
+          <Link href="/cards" className="btn-ghost"><CreditCard size={16} aria-hidden /> Card cover</Link>
           <Link href="/claims/new" className="btn-primary"><Plus size={16} aria-hidden /> New claim</Link>
         </div>
       </div>
