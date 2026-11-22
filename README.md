@@ -31,13 +31,23 @@ AeroClaim takes what you already have (the e-ticket, the boarding pass, the airl
 
 ## What it looks like
 
-| Assessment | Claim form |
-| --- | --- |
-| <img src="docs/screenshots/assessment.png" alt="Claim assessment" width="420"> | <img src="docs/screenshots/claim-form.png" alt="Claim form" width="420"> |
+The whole journey runs on sample data from **Live demo** in the top bar: a 6h 20m Delhi–London delay blamed on fog, plus a damaged and a delayed bag, worth ₹1,82,400.
 
-| Claim packet | Mobile |
+| Audit | Payout track |
 | --- | --- |
-| <img src="docs/screenshots/packet.png" alt="Printable claim packet" width="420"> | <img src="docs/screenshots/mobile.png" alt="Mobile view" width="240"> |
+| <img src="docs/screenshots/audit.png" alt="Audit with weather proof and legal clocks" width="420"> | <img src="docs/screenshots/payout.png" alt="Payout track with Letter of Authority signature" width="420"> |
+
+| Filing packets | Claim letter |
+| --- | --- |
+| <img src="docs/screenshots/packets.png" alt="Action hub with four filing packets" width="420"> | <img src="docs/screenshots/packet.png" alt="Printable nodal officer notice" width="420"> |
+
+| Advocate consult | Corporate PNR audit |
+| --- | --- |
+| <img src="docs/screenshots/advocate-room.png" alt="Advocate video consult room" width="420"> | <img src="docs/screenshots/corporate.png" alt="Corporate PNR audit dashboard" width="420"> |
+
+| Step-by-step claim form | Sign in | Mobile |
+| --- | --- | --- |
+| <img src="docs/screenshots/claim-form.png" alt="Stepped claim form" width="300"> | <img src="docs/screenshots/login.png" alt="Sign in" width="300"> | <img src="docs/screenshots/mobile.png" alt="Mobile view" width="170"> |
 
 ## A real example
 

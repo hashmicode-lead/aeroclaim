@@ -2,6 +2,7 @@
 
 import { upload } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
+import { ChevronLeft, ChevronRight, FileText, UploadCloud, X } from "lucide-react";
 import { useState } from "react";
 import { AIRLINES, AIRPORTS } from "@/lib/airports";
 import { DOC_KIND_LABELS, type DisruptionType, type DocKind } from "@/lib/types";
@@ -71,6 +72,44 @@ function YesNo({ name, value, onChange, label }: { name: string; value: string; 
   );
 }
 
+const STEP_DEFS = [
+  { id: "docs", label: "Documents" },
+  { id: "what", label: "What happened" },
+  { id: "flight", label: "Flight" },
+  { id: "details", label: "Details" },
+  { id: "fare", label: "Fare" },
+  { id: "you", label: "Your details" },
+] as const;
+type StepId = (typeof STEP_DEFS)[number]["id"];
+
+const FIELD_STEP: Record<string, StepId> = {
+  files: "docs",
+  disruptionType: "what",
+  pnr: "flight", airline: "flight", flightNumber: "flight", origin: "flight", destination: "flight",
+  scheduledDeparture: "flight", scheduledArrival: "flight", actualDeparture: "flight", airlineReason: "flight",
+  basicFarePlusFuel: "fare", totalFare: "fare", bookingDate: "fare", bookingChannel: "fare", paymentMethod: "fare",
+  passengerName: "you", email: "you", phone: "you", notes: "you",
+};
+
+function validateStep(id: StepId, v: Values): Record<string, string> {
+  const e: Record<string, string> = {};
+  if (id === "what" && !v.disruptionType) e.disruptionType = "Choose what happened";
+  if (id === "flight") {
+    if (!v.pnr?.trim()) e.pnr = "Enter your PNR";
+    if (!v.airline?.trim()) e.airline = "Enter the airline";
+    if (!v.flightNumber?.trim()) e.flightNumber = "Enter the flight number";
+    if (!v.origin) e.origin = "Choose an airport";
+    if (!v.destination) e.destination = "Choose an airport";
+    else if (v.destination === v.origin) e.destination = "Must differ from origin";
+    if (!v.scheduledDeparture) e.scheduledDeparture = "Enter the scheduled departure";
+  }
+  if (id === "you") {
+    if (!v.passengerName?.trim()) e.passengerName = "Enter the passenger's name";
+    if (v.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)) e.email = "Check the email address";
+  }
+  return e;
+}
+
 export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) {
   const router = useRouter();
   const [v, setV] = useState<Values>({ airlineReason: "unknown", bookingChannel: "airline", paymentMethod: "credit_card" });
@@ -80,6 +119,8 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
   const [parsed, setParsed] = useState<ParseResponse | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [stepIdx, setStepIdx] = useState(0);
+  const [drag, setDrag] = useState(false);
 
   const set = (k: string) => (val: string) => setV((s) => ({ ...s, [k]: val }));
   const bind = (k: string) => ({ id: k, name: k, value: v[k] ?? "", onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => set(k)(e.target.value) });
@@ -87,6 +128,24 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
   const type = v.disruptionType as DisruptionType | undefined;
 
   const uploading = files.some((f) => f.status === "uploading");
+  const steps = STEP_DEFS.filter((d) => d.id !== "details" || type);
+  const i = Math.min(stepIdx, steps.length - 1);
+  const step = steps[i].id;
+  const last = i === steps.length - 1;
+
+  function go(to: number) {
+    setStepIdx(to);
+    window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  }
+  function next() {
+    const e = validateStep(step, v);
+    setErrors(e);
+    if (Object.keys(e).length) {
+      document.getElementById(Object.keys(e)[0])?.focus();
+      return;
+    }
+    go(i + 1);
+  }
 
   /** Attach files to a request: direct-to-Blob references in production, inline multipart locally. */
   function appendFiles(fd: FormData, withKinds: boolean) {
@@ -135,6 +194,9 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!last) return next();
+    const local = validateStep(step, v);
+    if (Object.keys(local).length) return setErrors(local);
     setSubmitting(true);
     setErrors({});
     const fd = new FormData();
@@ -145,45 +207,80 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
     if (!res.ok) {
       setErrors(data.errors ?? { form: "Something went wrong" });
       setSubmitting(false);
-      document.getElementById(Object.keys(data.errors ?? {})[0])?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const first = Object.keys(data.errors ?? {})[0];
+      const target = steps.findIndex((st) => st.id === (FIELD_STEP[first] ?? "details"));
+      if (target >= 0 && target !== i) go(target);
       return;
     }
     router.push(`/claims/${data.id}`);
   }
 
   return (
-    <form onSubmit={submit} className="space-y-6" noValidate>
-      {/* 1. Auto-fill */}
-      <section className="card p-6 sm:p-7">
-        <h2 className="title-2">1. Upload your documents</h2>
+    <form onSubmit={submit} noValidate>
+      {/* Progress */}
+      <div className="mb-5 px-1">
+        <div className="flex items-baseline justify-between">
+          <span className="footnote font-semibold">{steps[i].label}</span>
+          <span className="footnote text-muted">Step {i + 1} of {steps.length}</span>
+        </div>
+        <div className="mt-2.5 flex gap-1.5" role="progressbar" aria-valuemin={1} aria-valuemax={steps.length} aria-valuenow={i + 1} aria-label="Claim progress">
+          {steps.map((st, k) => (
+            <button
+              key={st.id}
+              type="button"
+              aria-label={`Go to ${st.label}`}
+              disabled={k > i}
+              onClick={() => go(k)}
+              className={`h-1.5 flex-1 rounded-full transition-colors duration-300 disabled:cursor-default ${k <= i ? "bg-accent" : "bg-fill"}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {step === "docs" && (
+      <section key="docs" className="card reveal p-6 sm:p-7">
+        <h2 className="title-2">Upload your documents</h2>
         <p className="mt-1 text-sm text-muted">
           Add your e-ticket, boarding pass, PIR, airline SMS/email and receipts. We read text-based PDFs and pasted text to pre-fill the form, and keep every file as evidence for your claim packet.
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="files" className="label">Documents</label>
-            <input
-              id="files"
-              type="file"
-              multiple
-              accept=".pdf,.png,.jpg,.jpeg,.webp,.heic,.txt"
-              className="block w-full text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-fill file:px-4 file:py-2 file:text-sm file:font-medium file:text-accent"
-              onChange={(e) => {
-                addFiles(Array.from(e.target.files ?? []));
-                e.target.value = "";
-              }}
-            />
-            <p className="hint">PDF, image or text, up to 10 MB each and 12 files in total.</p>
+            <span className="label">Documents</span>
+            <label
+              htmlFor="files"
+              onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+              onDragLeave={() => setDrag(false)}
+              onDrop={(e) => { e.preventDefault(); setDrag(false); addFiles(Array.from(e.dataTransfer.files)); }}
+              className={`pressable flex min-h-[150px] cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed px-6 py-6 text-center has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-accent-soft ${drag ? "border-accent bg-accent-soft" : "border-line bg-fill hover:bg-surface-2"}`}
+            >
+              <span className="flex size-11 items-center justify-center rounded-full bg-surface text-accent shadow-[var(--shadow-card)]">
+                <UploadCloud size={22} aria-hidden />
+              </span>
+              <span className="headline mt-1">Drop files here</span>
+              <span className="footnote text-muted">or <span className="font-medium text-accent">browse</span> · PDF, image or text, 10 MB each</span>
+              <input
+                id="files"
+                type="file"
+                multiple
+                accept=".pdf,.png,.jpg,.jpeg,.webp,.heic,.txt"
+                className="sr-only"
+                onChange={(e) => {
+                  addFiles(Array.from(e.target.files ?? []));
+                  e.target.value = "";
+                }}
+              />
+            </label>
           </div>
           <div>
             <label htmlFor="paste" className="label">Or paste an airline SMS / email / boarding-pass barcode text</label>
-            <textarea id="paste" rows={3} className="field font-mono text-xs" value={paste} onChange={(e) => setPaste(e.target.value)} placeholder="Dear Customer, your flight 6E 2134 DEL-BOM on 14 Dec 2026 at 06:10 has been cancelled… PNR: X7K2QP" />
+            <textarea id="paste" rows={5} className="field min-h-[150px] font-mono text-[13px]!" value={paste} onChange={(e) => setPaste(e.target.value)} placeholder="Dear Customer, your flight 6E 2134 DEL-BOM on 14 Dec 2026 at 06:10 has been cancelled… PNR: X7K2QP" />
           </div>
         </div>
         {files.length > 0 && (
           <ul className="mt-5 divide-y divide-line overflow-hidden rounded-xl bg-fill">
             {files.map((f, idx) => (
-              <li key={f.key} className="flex flex-wrap items-center gap-3 px-3 py-2 text-sm">
+              <li key={f.key} className="flex flex-wrap items-center gap-3 px-4 py-2.5 text-sm">
+                <FileText size={16} className="shrink-0 text-muted" aria-hidden />
                 <span className="min-w-0 flex-1 truncate">{f.file.name}</span>
                 {f.status === "uploading" && <span className="text-xs text-muted">Uploading…</span>}
                 {f.status === "error" && <span className="text-xs text-bad">Upload failed</span>}
@@ -198,7 +295,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
                     <option key={k} value={k}>{l}</option>
                   ))}
                 </select>
-                <button type="button" className="text-xs text-muted hover:text-bad" onClick={() => setFiles((fs) => fs.filter((_, i) => i !== idx))}>Remove</button>
+                <button type="button" aria-label={`Remove ${f.file.name}`} className="flex size-6 items-center justify-center rounded-full text-muted hover:bg-surface hover:text-bad" onClick={() => setFiles((fs) => fs.filter((_, k) => k !== idx))}><X size={14} aria-hidden /></button>
               </li>
             ))}
           </ul>
@@ -212,15 +309,16 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
               {parsed.results.length
                 ? `Found: ${[...new Set(parsed.results.flatMap((r) => r.found))].join(", ") || "nothing recognisable"}.`
                 : "No readable text found."}{" "}
-              {parsed.unreadable.length > 0 && <span>Could not read: {parsed.unreadable.join("; ")}.</span>} Check the fields below.
+              {parsed.unreadable.length > 0 && <span>Could not read: {parsed.unreadable.join("; ")}.</span>} We filled in what we found. Check it on the next steps.
             </p>
           )}
         </div>
       </section>
+      )}
 
-      {/* 2. What happened */}
-      <section className="card p-6 sm:p-7">
-        <h2 className="title-2 mb-5" id="disruptionType">2. What happened?</h2>
+      {step === "what" && (
+      <section key="what" className="card reveal p-6 sm:p-7">
+        <h2 className="title-2 mb-5" id="disruptionType">What happened?</h2>
         <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-5">
           {TYPES.map((t) => (
             <label key={t.id} className={`pressable cursor-pointer rounded-2xl p-4 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-accent-soft ${type === t.id ? "bg-accent-soft shadow-[inset_0_0_0_2px_var(--accent)]" : "bg-fill hover:bg-surface-2"}`}>
@@ -232,10 +330,11 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
         </div>
         {err("disruptionType")}
       </section>
+      )}
 
-      {/* 3. Flight */}
-      <section className="card p-6 sm:p-7">
-        <h2 className="title-2 mb-5">3. Flight details</h2>
+      {step === "flight" && (
+      <section key="flight" className="card reveal p-6 sm:p-7">
+        <h2 className="title-2 mb-5">Flight details</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label htmlFor="pnr" className="label">PNR / booking reference</label>
@@ -290,11 +389,12 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
           )}
         </div>
       </section>
+      )}
 
       {/* 4. Type-specific */}
-      {type && (
+      {step === "details" && type && (
         <section key={type} className="card reveal p-6 sm:p-7">
-          <h2 className="title-2 mb-5">4. About the {TYPES.find((t) => t.id === type)?.title.toLowerCase()}</h2>
+          <h2 className="title-2 mb-5">About the {TYPES.find((t) => t.id === type)?.title.toLowerCase()}</h2>
           <div className="grid gap-5 sm:grid-cols-2">
             {type === "delay" && (
               <>
@@ -383,9 +483,9 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
         </section>
       )}
 
-      {/* 5. Fare */}
-      <section className="card p-6 sm:p-7">
-        <h2 className="title-2 mb-5">{type ? "5" : "4"}. Fare & payment</h2>
+      {step === "fare" && (
+      <section key="fare" className="card reveal p-6 sm:p-7">
+        <h2 className="title-2 mb-5">Fare & payment</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label htmlFor="basicFarePlusFuel" className="label">Basic fare + fuel charge (₹)</label>
@@ -422,10 +522,11 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
           </div>
         </div>
       </section>
+      )}
 
-      {/* 6. You */}
-      <section className="card p-6 sm:p-7">
-        <h2 className="title-2 mb-5">{type ? "6" : "5"}. Your details</h2>
+      {step === "you" && (
+      <section key="you" className="card reveal p-6 sm:p-7">
+        <h2 className="title-2 mb-5">Your details</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label htmlFor="passengerName" className="label">Passenger name</label>
@@ -447,14 +548,26 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
           </div>
         </div>
       </section>
+      )}
 
-      {(errors.form || errors.files) && <p className="text-sm text-bad">{errors.form ?? errors.files}</p>}
-      {Object.keys(errors).length > 0 && !errors.form && !errors.files && <p className="text-sm text-bad">Please fix the highlighted fields.</p>}
-      <div className="no-print sticky bottom-3 z-30 flex items-center justify-between gap-4 rounded-2xl bg-surface px-4 py-3 shadow-[var(--shadow-raised)] ring-1 ring-line">
-        <p className="footnote hidden text-muted sm:block">We only use your details to prepare this claim.</p>
-        <button type="submit" className="btn-primary ml-auto px-6! py-2.5!" disabled={submitting || uploading}>
-          {uploading ? "Waiting for uploads…" : submitting ? "Assessing your claim…" : "Assess my claim"}
-        </button>
+      {(errors.form || errors.files) && <p className="footnote mt-4 text-bad">{errors.form ?? errors.files}</p>}
+      <div className="mt-6 flex items-center justify-between gap-3">
+        {i > 0 ? (
+          <button type="button" className="btn-ghost px-5! py-2.5!" onClick={() => { setErrors({}); go(i - 1); }}>
+            <ChevronLeft size={16} aria-hidden /> Back
+          </button>
+        ) : (
+          <span className="footnote text-muted">We only use your details to prepare this claim.</span>
+        )}
+        {last ? (
+          <button type="submit" className="btn-primary px-6! py-2.5!" disabled={submitting || uploading}>
+            {uploading ? "Waiting for uploads…" : submitting ? "Assessing your claim…" : "Assess my claim"}
+          </button>
+        ) : (
+          <button type="button" className="btn-primary px-6! py-2.5!" onClick={next} disabled={uploading && step === "docs"}>
+            {step === "docs" && !files.length && !paste.trim() ? "Skip for now" : "Continue"} <ChevronRight size={16} aria-hidden />
+          </button>
+        )}
       </div>
     </form>
   );
