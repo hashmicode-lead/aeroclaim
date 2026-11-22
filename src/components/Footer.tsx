@@ -7,6 +7,7 @@ const COLUMNS: { title: string; links: { label: string; href: string; external?:
     links: [
       { label: "Start a claim", href: "/claims/new" },
       { label: "Card cover check", href: "/cards" },
+      { label: "Recommended cards", href: "/cards/recommended" },
       { label: "For business", href: "/signup" },
       { label: "For advocates", href: "/signup" },
     ],

@@ -301,7 +301,7 @@ export default function CardsPage() {
             <section key="s2" className="card reveal p-6 sm:p-7">
               <h2 className="title-2">Your {netName(brand)} {tier} {kind} cover</h2>
               {benefits.length === 0 ? (
-                <p className="footnote mt-3 rounded-2xl bg-warn-soft p-4">This card variant doesn&apos;t include travel insurance. You can still claim from the airline, and a standalone travel policy would cover future trips.</p>
+                <p className="footnote mt-3 rounded-2xl bg-warn-soft p-4">This card variant doesn&apos;t include travel insurance. You can still claim from the airline. For future trips, <Link href="/cards/recommended" className="font-medium text-accent hover:underline">see cards that include travel cover</Link>.</p>
               ) : (
                 <>
                   <ul className="mt-4 divide-y divide-line">
@@ -380,6 +380,11 @@ export default function CardsPage() {
               <li>The airline claim and the card claim can both pay out.</li>
             </ol>
           </div>
+          <Link href="/cards/recommended" className="pressable card block p-5 hover:bg-surface-2">
+            <p className="headline">No travel cover on your card?</p>
+            <p className="footnote mt-1 text-muted">See partner cards with up to ₹10 lakh of travel insurance included.</p>
+            <span className="footnote mt-3 inline-block font-medium text-accent">See recommended cards ›</span>
+          </Link>
           <InsuranceAd index={1} />
         </aside>
       </div>
