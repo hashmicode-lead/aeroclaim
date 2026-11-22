@@ -1,0 +1,330 @@
+{
+  "aeroclaim": {
+    "color": {
+      "bg": {
+        "value": "#f5f5f7",
+        "type": "color",
+        "description": "Page background behind every screen. Cards sit on it."
+      },
+      "surface": {
+        "value": "#ffffff",
+        "type": "color",
+        "description": "Cards, sheets, menus, the sticky bars. The only fully opaque surface."
+      },
+      "surface-2": {
+        "value": "#f2f2f4",
+        "type": "color",
+        "description": "Hover state for rows and cards on surface."
+      },
+      "fill": {
+        "value": "rgba(118, 118, 128, 0.12)",
+        "type": "color",
+        "description": "System fill: text fields, segmented-control tracks, ghost buttons, inner panels inside a card."
+      },
+      "ink": {
+        "value": "#1d1d1f",
+        "type": "color",
+        "description": "Primary text and icons on bg, surface and fill (16:1 on surface)."
+      },
+      "muted": {
+        "value": "#6e6e73",
+        "type": "color",
+        "description": "Secondary text: hints, captions, metadata (4.9:1 on surface, 4.6:1 on bg)."
+      },
+      "line": {
+        "value": "rgba(60, 60, 67, 0.14)",
+        "type": "color",
+        "description": "Hairline separators between list rows and table rows. Never a box outline."
+      },
+      "accent": {
+        "value": "#0066cc",
+        "type": "color",
+        "description": "The one brand colour: primary buttons, links, selected states, progress, focus. 5.6:1 on surface."
+      },
+      "accent-ink": {
+        "value": "#ffffff",
+        "type": "color",
+        "description": "Text and icons on accent fills."
+      },
+      "accent-soft": {
+        "value": "rgba(0, 102, 204, 0.09)",
+        "type": "color",
+        "description": "Tint behind a selected option, icon tiles, the focus ring."
+      },
+      "card-cover": {
+        "value": "#5e5ce6",
+        "type": "color",
+        "description": "Second data hue: the card-insurance track in recovery splits. Use only beside accent in a chart."
+      },
+      "ok": {
+        "value": "#248a3d",
+        "type": "color",
+        "description": "Eligible, verified, sent, settled. Text on ok-soft at caption size is 4.3:1, so keep it semibold."
+      },
+      "ok-soft": {
+        "value": "rgba(52, 199, 89, 0.14)",
+        "type": "color",
+        "description": "Background of success pills and the weather-verified tile."
+      },
+      "warn": {
+        "value": "#b25000",
+        "type": "color",
+        "description": "Contestable amounts, deadlines inside 7 days, chargeback-ready."
+      },
+      "warn-soft": {
+        "value": "rgba(255, 159, 10, 0.16)",
+        "type": "color",
+        "description": "Background of warning pills and the airport baggage notice."
+      },
+      "bad": {
+        "value": "#d70015",
+        "type": "color",
+        "description": "Errors, missing evidence, legal limits, deadlines inside 3 days, sign out."
+      },
+      "bad-soft": {
+        "value": "rgba(255, 59, 48, 0.12)",
+        "type": "color",
+        "description": "Background of the Legal limit pill and live indicators."
+      },
+      "info": {
+        "value": "#0066cc",
+        "type": "color",
+        "description": "Neutral status: Needs info, Airline must act, Claim sent."
+      },
+      "info-soft": {
+        "value": "rgba(0, 122, 255, 0.1)",
+        "type": "color",
+        "description": "Background of info pills and instruction banners."
+      },
+      "chrome": {
+        "value": "rgba(245, 245, 247, 0.72)",
+        "type": "color",
+        "description": "Translucent top bar; pair with a 20px backdrop blur. Falls back to bg with reduced transparency."
+      },
+      "stage": {
+        "value": "#1d1d1f",
+        "type": "color",
+        "description": "Video consult stage. The only dark surface in the product."
+      }
+    },
+    "typography": {
+      "display": {
+        "value": {
+          "fontFamily": "SF Pro",
+          "fontWeight": "700",
+          "fontSize": "72px",
+          "lineHeight": "105%",
+          "letterSpacing": "-0.035em"
+        },
+        "type": "typography",
+        "description": "One per screen: the hero headline or the recovery total. Scales down to 40px on phones."
+      },
+      "title-1": {
+        "value": {
+          "fontFamily": "SF Pro",
+          "fontWeight": "700",
+          "fontSize": "36px",
+          "lineHeight": "112%",
+          "letterSpacing": "-0.028em"
+        },
+        "type": "typography",
+        "description": "Page titles and stat-tile values."
+      },
+      "title-2": {
+        "value": {
+          "fontFamily": "SF Pro",
+          "fontWeight": "600",
+          "fontSize": "22px",
+          "lineHeight": "120%",
+          "letterSpacing": "-0.022em"
+        },
+        "type": "typography",
+        "description": "Section titles above grouped cards, card headings."
+      },
+      "headline": {
+        "value": {
+          "fontFamily": "SF Pro",
+          "fontWeight": "600",
+          "fontSize": "17px",
+          "lineHeight": "130%",
+          "letterSpacing": "-0.022em"
+        },
+        "type": "typography",
+        "description": "Row titles, amounts in lists, option names."
+      },
+      "body": {
+        "value": {
+          "fontFamily": "SF Pro",
+          "fontWeight": "400",
+          "fontSize": "17px",
+          "lineHeight": "147%",
+          "letterSpacing": "-0.022em"
+        },
+        "type": "typography",
+        "description": "Default running text and form input text."
+      },
+      "footnote": {
+        "value": {
+          "fontFamily": "SF Pro",
+          "fontWeight": "400",
+          "fontSize": "13px",
+          "lineHeight": "138%",
+          "letterSpacing": "-0.006em"
+        },
+        "type": "typography",
+        "description": "Explanations under a row, nav links, table cells."
+      },
+      "caption": {
+        "value": {
+          "fontFamily": "SF Pro",
+          "fontWeight": "400",
+          "fontSize": "12px",
+          "lineHeight": "133%",
+          "letterSpacing": "0"
+        },
+        "type": "typography",
+        "description": "Legal citations, pill labels (semibold), table headers."
+      },
+      "eyebrow": {
+        "value": {
+          "fontFamily": "SF Pro",
+          "fontWeight": "600",
+          "fontSize": "12px",
+          "lineHeight": "133%",
+          "letterSpacing": "0.06em"
+        },
+        "type": "typography",
+        "description": "Uppercase context line above a page title. Colour muted."
+      },
+      "mono": {
+        "value": {
+          "fontFamily": "SF Mono",
+          "fontWeight": "400",
+          "fontSize": "13px",
+          "lineHeight": "140%",
+          "letterSpacing": "0"
+        },
+        "type": "typography",
+        "description": "Times in weather tables, PNRs in corporate tables, pasted SMS text."
+      }
+    },
+    "spacing": {
+      "space-1": {
+        "value": "4px",
+        "type": "spacing",
+        "description": "Icon-to-label gaps inside pills."
+      },
+      "space-2": {
+        "value": "8px",
+        "type": "spacing",
+        "description": "Gap between buttons in a row; between a heading and its card."
+      },
+      "space-3": {
+        "value": "12px",
+        "type": "spacing",
+        "description": "Gap between cards in a grid."
+      },
+      "space-4": {
+        "value": "16px",
+        "type": "spacing",
+        "description": "Page side gutter; list row vertical padding; field grid gap."
+      },
+      "space-5": {
+        "value": "20px",
+        "type": "spacing",
+        "description": "Inner padding of list rows and small cards."
+      },
+      "space-6": {
+        "value": "24px",
+        "type": "spacing",
+        "description": "Card padding on phones."
+      },
+      "space-7": {
+        "value": "28px",
+        "type": "spacing",
+        "description": "Card padding from 640px up."
+      },
+      "space-10": {
+        "value": "40px",
+        "type": "spacing",
+        "description": "Gap between grouped sections on a page."
+      },
+      "space-20": {
+        "value": "80px",
+        "type": "spacing",
+        "description": "Top padding of the landing hero."
+      }
+    },
+    "borderRadius": {
+      "radius-sm": {
+        "value": "8px",
+        "type": "borderRadius",
+        "description": "Segments inside a segmented control, menu rows."
+      },
+      "radius-md": {
+        "value": "12px",
+        "type": "borderRadius",
+        "description": "Text fields, selects, icon tiles, inner list containers."
+      },
+      "radius-lg": {
+        "value": "16px",
+        "type": "borderRadius",
+        "description": "Option tiles, drop zone, inner panels inside a card, floating bars."
+      },
+      "radius-xl": {
+        "value": "20px",
+        "type": "borderRadius",
+        "description": "Every card."
+      },
+      "radius-2xl": {
+        "value": "24px",
+        "type": "borderRadius",
+        "description": "The video consult stage."
+      },
+      "radius-pill": {
+        "value": "980px",
+        "type": "borderRadius",
+        "description": "Buttons, pills, progress segments, the role switcher."
+      }
+    },
+    "boxShadow": {
+      "shadow-card": {
+        "value": "0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.04)",
+        "type": "boxShadow",
+        "description": "Resting cards on bg. Cards have no border."
+      },
+      "shadow-raised": {
+        "value": "0 2px 6px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.08)",
+        "type": "boxShadow",
+        "description": "Menus, toasts and floating action bars above content."
+      }
+    },
+    "sizing": {
+      "nav-height": {
+        "value": "48px",
+        "type": "sizing",
+        "description": "Top bar height."
+      },
+      "content-narrow": {
+        "value": "768px",
+        "type": "sizing",
+        "description": "Max width for forms, audit and payout screens."
+      },
+      "content-wide": {
+        "value": "1024px",
+        "type": "sizing",
+        "description": "Max width for dashboards, landing and portals."
+      },
+      "control-height": {
+        "value": "44px",
+        "type": "sizing",
+        "description": "Minimum height of fields and primary buttons: Apple's touch target."
+      }
+    }
+  },
+  "$metadata": {
+    "tokenSetOrder": [
+      "aeroclaim"
+    ]
+  }
+}
