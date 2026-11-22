@@ -23,9 +23,9 @@ export default function Home() {
           We check what happened against DGCA rules, the Montreal Convention and real airport weather, then give you the claim letter and deadlines.
         </p>
         <div className="mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-          <Link href="/claims/new" className="btn-primary px-6! py-3! text-[17px]!">Check my claim</Link>
-          <Link href="/claims" className="text-[17px] text-accent hover:underline">
-            View my claims <span aria-hidden>›</span>
+          <Link href="/demo" className="btn-primary px-6! py-3! text-[17px]!">Run the ₹1,82,400 live demo</Link>
+          <Link href="/claims/new" className="text-[17px] text-accent hover:underline">
+            Check my own claim <span aria-hidden>›</span>
           </Link>
         </div>
       </section>

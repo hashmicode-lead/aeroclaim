@@ -12,7 +12,10 @@
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",
+    "@libsql/kysely-libsql": "^0.4.1",
     "@vercel/blob": "^2.9.0",
+    "better-auth": "^1.7.27",
+    "kysely": "^0.29.9",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
