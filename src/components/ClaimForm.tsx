@@ -59,9 +59,9 @@ function YesNo({ name, value, onChange, label }: { name: string; value: string; 
   return (
     <fieldset>
       <legend className="label">{label}</legend>
-      <div className="flex gap-2">
+      <div className="segmented">
         {[["true", "Yes"], ["false", "No"]].map(([v, l]) => (
-          <label key={v} className={`cursor-pointer rounded-lg border px-4 py-1.5 text-sm ${value === v ? "border-accent bg-accent-soft text-accent" : "border-line bg-surface"}`}>
+          <label key={v} data-on={value === v}>
             <input type="radio" name={name} value={v} checked={value === v} onChange={() => onChange(v)} className="sr-only" />
             {l}
           </label>
@@ -154,8 +154,8 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
   return (
     <form onSubmit={submit} className="space-y-6" noValidate>
       {/* 1. Auto-fill */}
-      <section className="card p-5">
-        <h2 className="text-base font-semibold">1. Upload your documents</h2>
+      <section className="card p-6 sm:p-7">
+        <h2 className="title-2">1. Upload your documents</h2>
         <p className="mt-1 text-sm text-muted">
           Add your e-ticket, boarding pass, PIR, airline SMS/email and receipts. We read text-based PDFs and pasted text to pre-fill the form, and keep every file as evidence for your claim packet.
         </p>
@@ -167,7 +167,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
               type="file"
               multiple
               accept=".pdf,.png,.jpg,.jpeg,.webp,.heic,.txt"
-              className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-surface-2 file:px-3 file:py-2 file:text-sm file:font-medium file:text-ink hover:file:bg-line"
+              className="block w-full text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-fill file:px-4 file:py-2 file:text-sm file:font-medium file:text-accent"
               onChange={(e) => {
                 addFiles(Array.from(e.target.files ?? []));
                 e.target.value = "";
@@ -181,7 +181,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
           </div>
         </div>
         {files.length > 0 && (
-          <ul className="mt-4 divide-y divide-line rounded-lg border border-line">
+          <ul className="mt-5 divide-y divide-line overflow-hidden rounded-xl bg-fill">
             {files.map((f, idx) => (
               <li key={f.key} className="flex flex-wrap items-center gap-3 px-3 py-2 text-sm">
                 <span className="min-w-0 flex-1 truncate">{f.file.name}</span>
@@ -189,7 +189,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
                 {f.status === "error" && <span className="text-xs text-bad">Upload failed</span>}
                 <select
                   aria-label={`Document type for ${f.file.name}`}
-                  className="field w-auto! py-1! text-xs"
+                  className="field w-auto! bg-surface! py-1! text-xs!"
                   value={f.kind}
                   onChange={(e) => setFiles((fs) => fs.map((x, i) => (i === idx ? { ...x, kind: e.target.value as DocKind | "auto" } : x)))}
                 >
@@ -219,11 +219,11 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
       </section>
 
       {/* 2. What happened */}
-      <section className="card p-5">
-        <h2 className="mb-4 text-base font-semibold" id="disruptionType">2. What happened?</h2>
+      <section className="card p-6 sm:p-7">
+        <h2 className="title-2 mb-5" id="disruptionType">2. What happened?</h2>
         <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-5">
           {TYPES.map((t) => (
-            <label key={t.id} className={`cursor-pointer rounded-lg border p-3 transition-colors ${type === t.id ? "border-accent bg-accent-soft" : "border-line hover:bg-surface-2"}`}>
+            <label key={t.id} className={`pressable cursor-pointer rounded-2xl p-4 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-accent-soft ${type === t.id ? "bg-accent-soft shadow-[inset_0_0_0_2px_var(--accent)]" : "bg-fill hover:bg-surface-2"}`}>
               <input type="radio" name="disruptionType" value={t.id} checked={type === t.id} onChange={() => set("disruptionType")(t.id)} className="sr-only" />
               <span className={`block text-sm font-medium ${type === t.id ? "text-accent" : ""}`}>{t.title}</span>
               <span className="mt-0.5 block text-xs text-muted">{t.desc}</span>
@@ -234,8 +234,8 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
       </section>
 
       {/* 3. Flight */}
-      <section className="card p-5">
-        <h2 className="mb-4 text-base font-semibold">3. Flight details</h2>
+      <section className="card p-6 sm:p-7">
+        <h2 className="title-2 mb-5">3. Flight details</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label htmlFor="pnr" className="label">PNR / booking reference</label>
@@ -293,8 +293,8 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
 
       {/* 4. Type-specific */}
       {type && (
-        <section className="card p-5">
-          <h2 className="mb-4 text-base font-semibold">4. About the {TYPES.find((t) => t.id === type)?.title.toLowerCase()}</h2>
+        <section key={type} className="card reveal p-6 sm:p-7">
+          <h2 className="title-2 mb-5">4. About the {TYPES.find((t) => t.id === type)?.title.toLowerCase()}</h2>
           <div className="grid gap-5 sm:grid-cols-2">
             {type === "delay" && (
               <>
@@ -384,8 +384,8 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
       )}
 
       {/* 5. Fare */}
-      <section className="card p-5">
-        <h2 className="mb-4 text-base font-semibold">{type ? "5" : "4"}. Fare & payment</h2>
+      <section className="card p-6 sm:p-7">
+        <h2 className="title-2 mb-5">{type ? "5" : "4"}. Fare & payment</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label htmlFor="basicFarePlusFuel" className="label">Basic fare + fuel charge (₹)</label>
@@ -424,8 +424,8 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
       </section>
 
       {/* 6. You */}
-      <section className="card p-5">
-        <h2 className="mb-4 text-base font-semibold">{type ? "6" : "5"}. Your details</h2>
+      <section className="card p-6 sm:p-7">
+        <h2 className="title-2 mb-5">{type ? "6" : "5"}. Your details</h2>
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label htmlFor="passengerName" className="label">Passenger name</label>
@@ -450,8 +450,9 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
 
       {(errors.form || errors.files) && <p className="text-sm text-bad">{errors.form ?? errors.files}</p>}
       {Object.keys(errors).length > 0 && !errors.form && !errors.files && <p className="text-sm text-bad">Please fix the highlighted fields.</p>}
-      <div className="flex justify-end">
-        <button type="submit" className="btn-primary px-6! py-2.5!" disabled={submitting || uploading}>
+      <div className="no-print sticky bottom-3 z-30 flex items-center justify-between gap-4 rounded-2xl bg-surface px-4 py-3 shadow-[var(--shadow-raised)] ring-1 ring-line">
+        <p className="footnote hidden text-muted sm:block">We only use your details to prepare this claim.</p>
+        <button type="submit" className="btn-primary ml-auto px-6! py-2.5!" disabled={submitting || uploading}>
           {uploading ? "Waiting for uploads…" : submitting ? "Assessing your claim…" : "Assess my claim"}
         </button>
       </div>

@@ -1,59 +1,72 @@
 import Link from "next/link";
 
 const TRACKS = [
-  { t: "Delays & cancellations", d: "DGCA CAR Part IV: compensation slabs by block time, notice window and alternate-flight rules, plus meals, hotel and refund rights." },
-  { t: "Denied boarding", d: "200% or 400% of basic fare + fuel charge, capped at ₹10,000 or ₹20,000, depending on how late your alternate flight was." },
-  { t: "Baggage", d: "Montreal Convention liability up to 1,519 SDR, with the 7-day (damage) and 21-day (delay) written-notice clocks tracked for you." },
-  { t: "Stuck refunds", d: "CAR Part II timelines: 7 days for card payments, 30 working days via agents. Flags chargeback options when the airline misses them." },
+  { t: "Delays & cancellations", stat: "₹10,000", sub: "max cancellation compensation", d: "Compensation slabs based on block time, notice window and the alternate flight offered, plus meals, hotel and refund rights." },
+  { t: "Denied boarding", stat: "400%", sub: "of basic fare + fuel, up to ₹20,000", d: "Depends on how late your alternate flight left." },
+  { t: "Baggage", stat: "1,519 SDR", sub: "Montreal Convention liability", d: "We track the 7-day damage and 21-day delay notice deadlines for you." },
+  { t: "Stuck refunds", stat: "7 days", sub: "airline deadline for card refunds", d: "30 working days through agents. We flag a card chargeback when the airline misses it." },
 ];
 
 const STEPS = [
-  ["Upload", "E-ticket, boarding pass, PIR, airline SMS and receipts. We pull out PNR, flight and route."],
-  ["Verify", "We check the rules and pull Open-Meteo weather at both airports, so a 'bad weather' excuse can be tested."],
-  ["Act", "Get a claim letter, chronology and evidence index, plus a calendar file with every legal deadline."],
+  { t: "Upload", d: "E-ticket, boarding pass, PIR, the airline's SMS. We read out the PNR, flight and route." },
+  { t: "Verify", d: "Rules are checked and airport weather is pulled, so a 'bad weather' excuse can be tested." },
+  { t: "Act", d: "A ready-to-send claim letter, a timeline of events, and every legal deadline added to your calendar." },
 ];
 
 export default function Home() {
   return (
     <div className="mx-auto max-w-5xl px-4">
-      <section className="py-16 sm:py-24">
-        <p className="text-sm font-medium text-accent">Flight, refund & baggage claim recovery for India</p>
-        <h1 className="mt-3 max-w-3xl text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-          Your flight went wrong. Find out what the airline owes you in two minutes.
-        </h1>
-        <p className="mt-5 max-w-2xl text-lg text-muted">
-          AeroClaim checks your disruption against DGCA regulations, the Montreal Convention and recorded airport weather, then hands you a ready-to-send claim and every deadline that matters.
+      <section className="reveal pt-20 pb-16 text-center sm:pt-28 sm:pb-24">
+        <p className="headline text-accent">Flight claims for India</p>
+        <h1 className="display mx-auto mt-3 max-w-3xl text-balance">Your flight went wrong. Get back what you&apos;re owed.</h1>
+        <p className="title-2 mx-auto mt-5 max-w-2xl font-normal! text-balance text-muted">
+          We check what happened against DGCA rules, the Montreal Convention and real airport weather, then give you the claim letter and deadlines.
         </p>
-        <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/claims/new" className="btn-primary px-6! py-3! text-base">Check my claim</Link>
-          <Link href="/claims" className="btn-ghost px-6! py-3! text-base">View my claims</Link>
+        <div className="mt-9 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+          <Link href="/claims/new" className="btn-primary px-6! py-3! text-[17px]!">Check my claim</Link>
+          <Link href="/claims" className="text-[17px] text-accent hover:underline">
+            View my claims <span aria-hidden>›</span>
+          </Link>
         </div>
       </section>
 
-      <section className="grid gap-4 pb-16 sm:grid-cols-3">
-        {STEPS.map(([t, d], i) => (
-          <div key={t} className="card p-5">
-            <div className="font-mono text-xs text-muted">0{i + 1}</div>
-            <div className="mt-2 font-semibold">{t}</div>
-            <p className="mt-1 text-sm text-muted">{d}</p>
+      <section aria-label="What we cover" className="grid gap-3 sm:grid-cols-2">
+        {TRACKS.map((x) => (
+          <div key={x.t} className="card p-7">
+            <div className="headline">{x.t}</div>
+            <div className="title-1 mt-4 text-accent">{x.stat}</div>
+            <div className="footnote text-muted">{x.sub}</div>
+            <p className="footnote mt-4 text-ink/80">{x.d}</p>
           </div>
         ))}
       </section>
 
-      <section className="pb-20">
-        <h2 className="text-xl font-semibold tracking-tight">What we cover</h2>
-        <div className="mt-5 grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2">
-          {TRACKS.map((x) => (
-            <div key={x.t} className="bg-surface p-5">
-              <div className="font-medium">{x.t}</div>
-              <p className="mt-1 text-sm text-muted">{x.d}</p>
-            </div>
+      <section className="mt-20">
+        <h2 className="title-1 text-center">Three steps, about two minutes.</h2>
+        <ol className="mt-10 grid gap-8 sm:grid-cols-3">
+          {STEPS.map((s, i) => (
+            <li key={s.t} className="text-center">
+              <div className="mx-auto flex size-10 items-center justify-center rounded-full bg-accent-soft font-semibold text-accent">{i + 1}</div>
+              <div className="headline mt-4">{s.t}</div>
+              <p className="footnote mx-auto mt-1 max-w-xs text-muted">{s.d}</p>
+            </li>
           ))}
+        </ol>
+      </section>
+
+      <section className="card mt-20 flex flex-col gap-4 p-7 sm:flex-row sm:items-center">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-warn-soft text-warn" aria-hidden>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01" />
+          </svg>
         </div>
-        <div className="mt-6 rounded-xl border border-warn/30 bg-warn-soft p-5 text-sm">
-          <strong className="text-warn">Bag missing or damaged and you are still at the airport?</strong>{" "}
-          Do not leave the arrivals hall without a printed Property Irregularity Report (PIR) and a photo of your bag tag. If you have already left, start a claim now and send the written notice today.
+        <div className="flex-1">
+          <div className="headline">Still at the baggage belt?</div>
+          <p className="footnote mt-0.5 text-muted">
+            Don&apos;t leave arrivals without a printed Property Irregularity Report (PIR) and a photo of your bag tag. If you&apos;ve already left, start a claim now and we&apos;ll draft the written notice for you to send today.
+          </p>
         </div>
+        <Link href="/claims/new" className="btn-ghost">Start now</Link>
       </section>
     </div>
   );

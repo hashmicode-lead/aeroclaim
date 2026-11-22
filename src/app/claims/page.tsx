@@ -3,6 +3,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { Countdown } from "@/components/client";
+import { getAirport } from "@/lib/airports";
 import { listClaims } from "@/lib/db";
 import { formatDate, money, todayIST } from "@/lib/time";
 
@@ -16,34 +17,36 @@ async function ClaimList() {
   const today = todayIST();
   if (!claims.length)
     return (
-      <div className="card p-10 text-center">
-        <p className="text-muted">No claims yet.</p>
-        <Link href="/claims/new" className="btn-primary mt-4">Start your first claim</Link>
+      <div className="card px-6 py-16 text-center">
+        <p className="title-2">No claims yet</p>
+        <p className="footnote mt-1 text-muted">Start one in about two minutes. Have your ticket handy.</p>
+        <Link href="/claims/new" className="btn-primary mt-6">Start a claim</Link>
       </div>
     );
   return (
-    <ul className="card divide-y divide-line">
+    <ul className="card divide-y divide-line overflow-hidden">
       {claims.map((c) => {
         const next = c.assessment.deadlines.find((d) => d.kind === "passenger" && d.due >= today);
         return (
           <li key={c.id}>
-            <Link href={`/claims/${c.id}`} className="flex flex-wrap items-center gap-x-6 gap-y-1 px-5 py-4 hover:bg-surface-2">
+            <Link href={`/claims/${c.id}`} className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-surface-2 active:bg-fill">
               <div className="min-w-0 flex-1">
-                <div className="font-medium">
-                  {c.input.flightNumber} · {c.input.origin} → {c.input.destination}
+                <div className="headline truncate">
+                  {getAirport(c.input.origin)?.city ?? c.input.origin} → {getAirport(c.input.destination)?.city ?? c.input.destination}
                 </div>
-                <div className="text-sm text-muted">
-                  {TYPE[c.input.disruptionType]} · PNR {c.input.pnr} · {formatDate(c.input.scheduledDeparture.slice(0, 10))}
+                <div className="footnote truncate text-muted">
+                  {TYPE[c.input.disruptionType]} · {c.input.flightNumber} · {formatDate(c.input.scheduledDeparture.slice(0, 10))}
                 </div>
               </div>
-              <div className="text-right text-sm">
-                <div className="font-medium">{c.assessment.estimate.max ? money(c.assessment.estimate) : "-"}</div>
+              <div className="shrink-0 text-right">
+                <div className="headline tabular-nums">{c.assessment.estimate.max ? money(c.assessment.estimate) : "-"}</div>
                 {next && (
-                  <div className="text-xs">
-                    {next.title}: <Countdown due={next.due} />
+                  <div className="caption text-muted">
+                    {next.title.split(" (")[0]}: <Countdown due={next.due} />
                   </div>
                 )}
               </div>
+              <span aria-hidden className="text-muted/50">›</span>
             </Link>
           </li>
         );
@@ -54,9 +57,9 @@ async function ClaimList() {
 
 export default function ClaimsPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">My claims</h1>
+    <div className="mx-auto max-w-3xl px-4 py-10">
+      <div className="flex items-end justify-between gap-4 px-1">
+        <h1 className="title-1">My claims</h1>
         <Link href="/claims/new" className="btn-primary">New claim</Link>
       </div>
       <div className="mt-6">

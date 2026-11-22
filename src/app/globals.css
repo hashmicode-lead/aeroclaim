@@ -1,44 +1,55 @@
 @import "tailwindcss";
 
+/* ---------- Tokens (Apple system palette, light + dark) ---------- */
 :root {
-  --bg: #f6f5f1;
+  --bg: #f5f5f7;
   --surface: #ffffff;
-  --surface-2: #f0eee8;
-  --ink: #15191f;
-  --muted: #5d6573;
-  --line: #e2dfd6;
-  --accent: #0c6b5a;
+  --surface-2: #f2f2f4;
+  --fill: rgba(118, 118, 128, 0.12); /* system fill: segmented tracks, chips */
+  --ink: #1d1d1f;
+  --muted: #6e6e73;
+  --line: rgba(60, 60, 67, 0.14); /* hairline separator */
+  --accent: #0071e3;
   --accent-ink: #ffffff;
-  --accent-soft: #e2f1ec;
-  --ok: #1d7a46;
-  --ok-soft: #e3f3e8;
-  --warn: #9a5b00;
-  --warn-soft: #fbf0d9;
-  --bad: #b3261e;
-  --bad-soft: #fbe5e2;
-  --info: #2b5bb5;
-  --info-soft: #e5edfb;
+  --accent-soft: rgba(0, 113, 227, 0.1);
+  --ok: #248a3d;
+  --ok-soft: rgba(52, 199, 89, 0.14);
+  --warn: #b25000;
+  --warn-soft: rgba(255, 159, 10, 0.16);
+  --bad: #d70015;
+  --bad-soft: rgba(255, 59, 48, 0.12);
+  --info: #0066cc;
+  --info-soft: rgba(0, 122, 255, 0.1);
+  --chrome: rgba(245, 245, 247, 0.72);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.04);
+  --shadow-raised: 0 2px 6px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.08);
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #101317;
-    --surface: #171b21;
-    --surface-2: #1e232b;
-    --ink: #eceef1;
-    --muted: #9aa3b1;
-    --line: #2b313b;
-    --accent: #3fbf9f;
-    --accent-ink: #06231c;
-    --accent-soft: #143229;
-    --ok: #5fcf8d;
-    --ok-soft: #15301f;
-    --warn: #e8b45a;
-    --warn-soft: #33270f;
-    --bad: #f08a80;
-    --bad-soft: #3a1a17;
-    --info: #8db1f5;
-    --info-soft: #18233a;
+    --bg: #000000;
+    --surface: #1c1c1e;
+    --surface-2: #2c2c2e;
+    --fill: rgba(118, 118, 128, 0.24);
+    --ink: #f5f5f7;
+    --muted: #98989d;
+    --line: rgba(84, 84, 88, 0.6);
+    --accent: #2997ff;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(41, 151, 255, 0.16);
+    --ok: #30d158;
+    --ok-soft: rgba(48, 209, 88, 0.16);
+    --warn: #ffb340;
+    --warn-soft: rgba(255, 159, 10, 0.18);
+    --bad: #ff6961;
+    --bad-soft: rgba(255, 69, 58, 0.18);
+    --info: #64b5ff;
+    --info-soft: rgba(10, 132, 255, 0.18);
+    --chrome: rgba(22, 22, 23, 0.72);
+    --shadow-card: none;
+    --shadow-raised: 0 12px 32px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
   }
 }
 
@@ -46,6 +57,7 @@
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-fill: var(--fill);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-line: var(--line);
@@ -60,36 +72,258 @@
   --color-bad-soft: var(--bad-soft);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI Variable", "Segoe UI", system-ui, Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family: var(--font-sans);
+  font-size: 1.0625rem; /* 17px, Apple body size */
+  line-height: 1.47;
+  letter-spacing: -0.022em; /* SF tracking at 17pt */
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* ---------- Typography: size-specific tracking & leading ---------- */
+@utility display {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+}
+@utility title-1 {
+  font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+  line-height: 1.12;
+  letter-spacing: -0.028em;
+  font-weight: 700;
+}
+@utility title-2 {
+  font-size: 1.375rem;
+  line-height: 1.2;
+  letter-spacing: -0.022em;
+  font-weight: 600;
+}
+@utility headline {
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  letter-spacing: -0.022em;
+  font-weight: 600;
+}
+@utility footnote {
+  font-size: 0.8125rem;
+  line-height: 1.38;
+  letter-spacing: -0.006em;
+}
+@utility caption {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  letter-spacing: 0;
+}
+@utility eyebrow {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* ---------- Surfaces ---------- */
+@utility card {
+  background: var(--surface);
+  border-radius: 1.25rem;
+  box-shadow: var(--shadow-card);
+}
+/* Bright top edge where light catches the material, blurred content underneath */
+@utility chrome {
+  background: var(--chrome);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* ---------- Controls ---------- */
 @utility field {
-  @apply w-full rounded-lg border border-line bg-surface px-3 py-2 text-[15px] text-ink outline-none transition-colors placeholder:text-muted/70 focus:border-accent focus:ring-2 focus:ring-accent/20;
+  width: 100%;
+  border-radius: 0.75rem;
+  background: var(--fill);
+  padding: 0.6875rem 0.875rem;
+  font-size: 1.0625rem;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+  border: 1px solid transparent;
+  outline: none;
+  transition: background-color 150ms, border-color 150ms, box-shadow 150ms;
+  &::placeholder {
+    color: var(--muted);
+    opacity: 0.55;
+  }
+  &:focus {
+    background: var(--surface);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
 }
 @utility label {
-  @apply mb-1.5 block text-sm font-medium text-ink;
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink);
 }
 @utility hint {
-  @apply mt-1 text-xs text-muted;
+  margin-top: 0.375rem;
+  font-size: 0.8125rem;
+  line-height: 1.38;
+  letter-spacing: -0.006em;
+  color: var(--muted);
 }
-@utility card {
-  @apply rounded-xl border border-line bg-surface;
-}
+
+/* Feedback lives on the press, and it is instant. */
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 980px;
+  padding: 0.5rem 1.125rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: -0.016em;
+  white-space: nowrap;
+  user-select: none;
+  touch-action: manipulation;
+  transition: transform 100ms ease-out, background-color 150ms, opacity 150ms;
+  &:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
 }
 @utility btn-primary {
-  @apply btn bg-accent text-accent-ink hover:opacity-90;
+  @apply btn;
+  background: var(--accent);
+  color: var(--accent-ink);
+  @media (hover: hover) {
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--accent) 88%, black);
+    }
+  }
 }
 @utility btn-ghost {
-  @apply btn border border-line bg-surface text-ink hover:bg-surface-2;
+  @apply btn;
+  background: var(--fill);
+  color: var(--accent);
+  @media (hover: hover) {
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--fill) 100%, var(--accent) 8%);
+    }
+  }
+}
+@utility pressable {
+  transition: transform 100ms ease-out, background-color 150ms, box-shadow 200ms;
+  touch-action: manipulation;
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Segmented control: a track with a raised selected segment */
+@utility segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 0.625rem;
+  background: var(--fill);
+  & > label {
+    position: relative;
+    min-width: 4.5rem;
+    padding: 0.375rem 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 200ms var(--ease-out-quint), box-shadow 200ms var(--ease-out-quint), color 150ms;
+  }
+  & > label[data-on="true"] {
+    background: var(--surface);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 3px 8px rgba(0, 0, 0, 0.06);
+  }
+  & > label:has(:focus-visible) {
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+}
+
+/* Entrance for newly revealed content: short, critically damped feel (no overshoot). */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@utility reveal {
+  animation: rise 420ms var(--ease-out-quint) both;
+}
+
+/* Scroll-edge fade instead of a hard divider under floating chrome */
+.edge-fade::after {
+  content: "";
+  position: absolute;
+  inset: 100% 0 auto 0;
+  height: 12px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, var(--chrome), transparent);
+}
+
+/* ---------- Accessibility preferences ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  .btn:active,
+  .btn-primary:active,
+  .btn-ghost:active,
+  .pressable:active {
+    transform: none;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --chrome: var(--bg);
+  }
+}
+@media (prefers-contrast: more) {
+  :root {
+    --line: rgba(60, 60, 67, 0.5);
+    --muted: #3a3a3c;
+  }
+  .card {
+    box-shadow: none;
+    outline: 1px solid var(--line);
+  }
+  .field {
+    border-color: var(--line);
+  }
 }
 
 @media print {
@@ -99,8 +333,9 @@ body {
   body {
     background: #fff;
     color: #000;
+    font-size: 11pt;
   }
   .card {
-    border-color: #ccc;
+    box-shadow: none;
   }
 }

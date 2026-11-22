@@ -11,11 +11,34 @@ import { DOC_KIND_LABELS, type WeatherSeverity } from "@/lib/types";
 
 const TYPE = { delay: "Flight delay", cancellation: "Flight cancellation", denied_boarding: "Denied boarding", baggage: "Baggage claim", refund: "Ticket refund" };
 const RISK = {
-  low: { label: "Low", cls: "text-ok" },
-  medium: { label: "Medium", cls: "text-warn" },
-  high: { label: "High", cls: "text-bad" },
+  low: { label: "Low risk", cls: "bg-ok-soft text-ok" },
+  medium: { label: "Medium risk", cls: "bg-warn-soft text-warn" },
+  high: { label: "High risk", cls: "bg-bad-soft text-bad" },
 };
-const SEV: Record<WeatherSeverity, string> = { none: "bg-ok-soft text-ok", moderate: "bg-warn-soft text-warn", severe: "bg-bad-soft text-bad", unavailable: "bg-surface-2 text-muted" };
+const SEV: Record<WeatherSeverity, { label: string; cls: string }> = {
+  none: { label: "Clear", cls: "bg-ok-soft text-ok" },
+  moderate: { label: "Marginal", cls: "bg-warn-soft text-warn" },
+  severe: { label: "Severe", cls: "bg-bad-soft text-bad" },
+  unavailable: { label: "No data", cls: "bg-fill text-muted" },
+};
+
+const hm = (m: number) => `${Math.floor(m / 60)}h ${m % 60}m`;
+
+function Check({ state }: { state: "ok" | "missing" | "optional" }) {
+  if (state === "ok")
+    return (
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-label="Provided" className="shrink-0 text-ok">
+        <circle cx="12" cy="12" r="10" fill="currentColor" />
+        <path d="m7.5 12.5 3 3 6-6.5" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" aria-label={state === "missing" ? "Missing" : "Optional"} className={`shrink-0 ${state === "missing" ? "text-bad" : "text-muted/50"}`}>
+      <circle cx="12" cy="12" r="9.25" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      {state === "missing" && <path d="M12 7.5v5.5M12 16.2v.1" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />}
+    </svg>
+  );
+}
 
 async function ClaimReport({ params }: { params: Promise<{ id: string }> }) {
   await connection();
@@ -25,158 +48,164 @@ async function ClaimReport({ params }: { params: Promise<{ id: string }> }) {
   const { input: i, assessment: a, weather } = claim;
   const o = getAirport(i.origin);
   const d = getAirport(i.destination);
+  const missing = a.evidence.filter((e) => e.required && !e.provided).length;
 
   return (
-    <>
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-sm text-muted">{TYPE[i.disruptionType]} · PNR {i.pnr} · {a.isInternational ? "International" : "Domestic"}</p>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">
-            {i.flightNumber} · {o?.city ?? i.origin} → {d?.city ?? i.destination}
-          </h1>
-          <p className="mt-1 text-sm text-muted">
-            {i.airline} · scheduled {formatDateTime(i.scheduledDeparture)}
-            {a.blockTimeMinutes ? ` · block time ${Math.floor(a.blockTimeMinutes / 60)}h ${a.blockTimeMinutes % 60}m` : ""}
-            {a.delayMinutes !== undefined ? ` · delayed ${Math.floor(a.delayMinutes / 60)}h ${a.delayMinutes % 60}m` : ""}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <RecheckButton id={claim.id} />
-          <a href={`/api/claims/${claim.id}/calendar`} className="btn-ghost px-3! py-1.5! text-xs">Add deadlines to calendar</a>
-          <Link href={`/claims/${claim.id}/packet`} className="btn-primary px-3! py-1.5! text-xs">Open claim packet</Link>
-        </div>
-      </div>
+    <div className="reveal">
+      {/* Title */}
+      <header className="px-1">
+        <p className="eyebrow">{TYPE[i.disruptionType]} · PNR {i.pnr}</p>
+        <h1 className="title-1 mt-2">
+          {o?.city ?? i.origin} <span className="text-muted">→</span> {d?.city ?? i.destination}
+        </h1>
+        <p className="footnote mt-1.5 text-muted">
+          {i.airline} {i.flightNumber} · {formatDateTime(i.scheduledDeparture)} · {a.isInternational ? "International" : "Domestic"}
+          {a.blockTimeMinutes ? ` · ${hm(a.blockTimeMinutes)} block` : ""}
+          {a.delayMinutes !== undefined ? ` · delayed ${hm(a.delayMinutes)}` : ""}
+        </p>
+      </header>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        <div className="card p-5 sm:col-span-2">
-          <div className="text-sm text-muted">Estimated recoverable</div>
-          <div className="mt-1 text-3xl font-semibold tracking-tight">{a.estimate.max ? money(a.estimate) : "Needs more info"}</div>
-          <p className="mt-2 text-sm text-muted">
-            {a.estimate.min !== a.estimate.max
-              ? "The range runs from the amount if every contestable item is refused to the full statutory amount. Documented expenses come on top."
+      {/* Hero figure */}
+      <section className="card mt-6 p-7 sm:p-9">
+        <p className="footnote font-medium text-muted">Estimated recoverable</p>
+        <p className="display mt-1 tabular-nums">{a.estimate.max ? money(a.estimate) : "-"}</p>
+        <p className="footnote mt-2 max-w-xl text-muted">
+          {!a.estimate.max
+            ? "Add the missing details below for an estimate."
+            : a.estimate.min !== a.estimate.max
+              ? "The low end assumes the airline wins every contestable point. Documented expenses come on top."
               : "Statutory amounts only. Reimbursement of your documented expenses comes on top."}
-          </p>
+        </p>
+        <div className="mt-5 flex flex-wrap items-start gap-3 border-t border-line pt-5">
+          <span className={`caption shrink-0 rounded-full px-2.5 py-1 font-semibold ${RISK[a.extraordinaryRisk].cls}`}>{RISK[a.extraordinaryRisk].label}</span>
+          <p className="footnote flex-1 text-ink/80">{a.extraordinaryNote}</p>
         </div>
-        <div className="card p-5">
-          <div className="text-sm text-muted">Risk of an &lsquo;extraordinary circumstances&rsquo; defence</div>
-          <div className={`mt-1 text-2xl font-semibold ${RISK[a.extraordinaryRisk].cls}`}>{RISK[a.extraordinaryRisk].label}</div>
-          <p className="mt-2 text-xs text-muted">{a.extraordinaryNote}</p>
+        <div className="no-print mt-6 flex flex-wrap gap-2">
+          <Link href={`/claims/${claim.id}/packet`} className="btn-primary">Open claim packet</Link>
+          <a href={`/api/claims/${claim.id}/calendar`} className="btn-ghost">Add deadlines to calendar</a>
+          <RecheckButton id={claim.id} />
         </div>
-      </div>
+      </section>
 
-      <div className="mt-4 grid gap-4">
-        <Section title="Your entitlements">
-          <ul className="divide-y divide-line">
+      <div className="mt-10 grid gap-10">
+        <Section title="Entitlements">
+          <ul className="-my-1 divide-y divide-line">
             {a.findings.map((f) => (
-              <li key={f.id} className="py-3 first:pt-0 last:pb-0">
+              <li key={f.id} className="py-4 first:pt-1 last:pb-1">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <span className="font-medium">{f.title}</span>
+                  <span className="headline">{f.title}</span>
                   <StatusBadge status={f.status} />
-                  {f.amount && f.status !== "not_eligible" && <span className="ml-auto font-mono text-sm">{money(f.amount)}</span>}
+                  {f.amount && f.status !== "not_eligible" && <span className="headline ml-auto tabular-nums">{money(f.amount)}</span>}
                 </div>
-                <p className="mt-1 text-sm text-muted">{f.explanation}</p>
-                <p className="mt-1 text-xs text-muted/80">{f.basis}</p>
+                <p className="footnote mt-1.5 text-ink/80">{f.explanation}</p>
+                <p className="caption mt-1 text-muted">{f.basis}</p>
               </li>
             ))}
           </ul>
         </Section>
 
         {a.dutyOfCare.length > 0 && (
-          <Section title="Duty of care the airline owed you">
-            <ul className="list-disc space-y-1 pl-5 text-sm">
-              {a.dutyOfCare.map((x) => <li key={x}>{x}</li>)}
+          <Section title="Duty of care">
+            <ul className="space-y-2.5">
+              {a.dutyOfCare.map((x) => (
+                <li key={x} className="flex gap-3">
+                  <span className="mt-2 size-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
+                  <span className="footnote">{x}</span>
+                </li>
+              ))}
             </ul>
-            <p className="mt-3 text-xs text-muted">These apply even when the disruption was caused by genuine bad weather. Extraordinary circumstances only remove cash compensation.</p>
+            <p className="caption mt-4 text-muted">These apply even when the disruption was caused by genuine bad weather. Extraordinary circumstances only remove cash compensation.</p>
           </Section>
         )}
 
         {weather && (
-          <Section title="Weather check" aside={<span className="text-xs text-muted">Open-Meteo · checked {formatDate(weather.checkedAt.slice(0, 10))}</span>}>
-            <p className="text-sm">{weather.verdict}</p>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <Section title="Weather check" aside={<span className="caption text-muted">Open-Meteo · {formatDate(weather.checkedAt.slice(0, 10))}</span>}>
+            <p className="headline">{weather.verdict}</p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
               {weather.airports.map((ap) => (
-                <div key={ap.role} className="rounded-lg border border-line p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium">{ap.airport} · {ap.role}</div>
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${SEV[ap.severity]}`}>{ap.severity}</span>
-                  </div>
-                  <p className="mt-1 text-xs text-muted">{ap.summary}</p>
-                  {ap.hours.length > 0 && (
-                    <div className="mt-3 overflow-x-auto">
-                      <table className="w-full text-xs">
-                        <thead className="text-muted">
-                          <tr className="text-left">
-                            <th className="py-1 pr-2 font-normal">Local</th>
-                            <th className="py-1 pr-2 font-normal">Conditions</th>
-                            <th className="py-1 pr-2 text-right font-normal">Vis.</th>
-                            <th className="py-1 text-right font-normal">Gust</th>
-                          </tr>
-                        </thead>
-                        <tbody className="font-mono">
-                          {ap.hours.map((h) => (
-                            <tr key={h.time} className={h.severity === "severe" ? "text-bad" : h.severity === "moderate" ? "text-warn" : ""}>
-                              <td className="py-0.5 pr-2">{h.time.slice(11)}</td>
-                              <td className="py-0.5 pr-2 font-sans">{h.description}</td>
-                              <td className="py-0.5 pr-2 text-right">{h.visibilityM !== null ? `${(h.visibilityM / 1000).toFixed(1)}km` : "-"}</td>
-                              <td className="py-0.5 text-right">{h.gustKmh !== null ? Math.round(h.gustKmh) : "-"}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                <div key={ap.role} className="rounded-2xl bg-fill p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <div className="headline">{ap.airport}</div>
+                      <div className="caption capitalize text-muted">{ap.role} · around {ap.around.slice(11)}</div>
                     </div>
+                    <span className={`caption rounded-full px-2.5 py-0.5 font-semibold ${SEV[ap.severity].cls}`}>{SEV[ap.severity].label}</span>
+                  </div>
+                  <p className="caption mt-2 text-muted">{ap.summary}</p>
+                  {ap.hours.length > 0 && (
+                    <table className="caption mt-3 w-full tabular-nums">
+                      <thead className="text-muted">
+                        <tr className="text-left">
+                          <th className="pb-1 font-medium">Local</th>
+                          <th className="pb-1 font-medium">Conditions</th>
+                          <th className="pb-1 text-right font-medium">Vis.</th>
+                          <th className="pb-1 text-right font-medium">Gust</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {ap.hours.map((h) => (
+                          <tr key={h.time} className={`border-t border-line ${h.severity === "severe" ? "text-bad" : h.severity === "moderate" ? "text-warn" : ""}`}>
+                            <td className="py-1 font-mono">{h.time.slice(11)}</td>
+                            <td className="py-1">{h.description}</td>
+                            <td className="py-1 text-right font-mono">{h.visibilityM !== null ? `${(h.visibilityM / 1000).toFixed(1)} km` : "-"}</td>
+                            <td className="py-1 text-right font-mono">{h.gustKmh !== null ? Math.round(h.gustKmh) : "-"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   )}
                 </div>
               ))}
             </div>
-            <p className="mt-3 text-xs text-muted">
-              This uses modelled hourly weather at the airport, not official METAR observations. It shows whether a weather explanation is plausible but cannot account for weather en route or knock-on delays from earlier flights.
+            <p className="caption mt-4 text-muted">
+              Modelled hourly weather at the airport, not official METAR observations. It shows whether a weather explanation is plausible, but it cannot account for weather en route or knock-on delays from earlier flights.
             </p>
           </Section>
         )}
 
-        <Section title="Deadlines" aside={<a href={`/api/claims/${claim.id}/calendar`} className="text-xs text-accent hover:underline">Download .ics</a>}>
-          <ul className="divide-y divide-line">
+        <Section title="Deadlines" aside={<a href={`/api/claims/${claim.id}/calendar`} className="footnote text-accent hover:underline">Download .ics</a>}>
+          <ul className="-my-1 divide-y divide-line">
             {a.deadlines.map((dl) => (
-              <li key={dl.id} className="flex flex-wrap items-baseline gap-x-4 gap-y-1 py-3 first:pt-0 last:pb-0">
+              <li key={dl.id} className="flex items-start gap-4 py-4 first:pt-1 last:pb-1">
                 <div className="min-w-0 flex-1">
-                  <div className="text-sm font-medium">
-                    {dl.title}
-                    {dl.hard && <span className="ml-2 rounded bg-bad-soft px-1.5 py-0.5 text-[10px] font-semibold uppercase text-bad">Legal limit</span>}
-                    {dl.kind === "airline" && <span className="ml-2 rounded bg-info-soft px-1.5 py-0.5 text-[10px] font-semibold uppercase text-info">Airline must act</span>}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="headline">{dl.title}</span>
+                    {dl.hard && <span className="caption rounded-full bg-bad-soft px-2 py-0.5 font-semibold text-bad">Legal limit</span>}
+                    {dl.kind === "airline" && <span className="caption rounded-full bg-info-soft px-2 py-0.5 font-semibold text-info">Airline must act</span>}
                   </div>
-                  <p className="text-xs text-muted">{dl.description} <span className="text-muted/80">({dl.basis})</span></p>
+                  <p className="footnote mt-1 text-muted">{dl.description}</p>
+                  <p className="caption mt-0.5 text-muted/80">{dl.basis}</p>
                 </div>
-                <div className="text-right text-sm">
-                  <div className="font-mono">{formatDate(dl.due)}</div>
-                  <div className="text-xs"><Countdown due={dl.due} /></div>
+                <div className="shrink-0 text-right">
+                  <div className="headline tabular-nums">{formatDate(dl.due)}</div>
+                  <div className="footnote"><Countdown due={dl.due} /></div>
                 </div>
               </li>
             ))}
           </ul>
         </Section>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Section title="Evidence checklist">
-            <ul className="space-y-2 text-sm">
+        <div className="grid gap-10 lg:grid-cols-2">
+          <Section title="Evidence" aside={missing > 0 ? <span className="footnote font-medium text-bad">{missing} missing</span> : <span className="footnote font-medium text-ok">Complete</span>}>
+            <ul className="space-y-3.5">
               {a.evidence.map((e) => (
-                <li key={e.id} className="flex gap-2">
-                  <span aria-hidden className={e.provided ? "text-ok" : e.required ? "text-bad" : "text-muted"}>{e.provided ? "✓" : e.required ? "!" : "○"}</span>
-                  <div>
-                    <span className={e.provided ? "" : e.required ? "font-medium" : "text-muted"}>{e.label}</span>
-                    {!e.provided && e.required && <span className="ml-1 text-xs text-bad">missing</span>}
-                    {!e.provided && e.tip && <p className="text-xs text-muted">{e.tip}</p>}
+                <li key={e.id} className="flex gap-3">
+                  <Check state={e.provided ? "ok" : e.required ? "missing" : "optional"} />
+                  <div className="min-w-0">
+                    <span className={`footnote ${e.provided || e.required ? "" : "text-muted"}`}>{e.label}</span>
+                    {!e.provided && e.tip && <p className="caption mt-0.5 text-muted">{e.tip}</p>}
                   </div>
                 </li>
               ))}
             </ul>
             {claim.documents.length > 0 && (
-              <div className="mt-4 border-t border-line pt-3">
-                <div className="mb-1 text-xs font-medium text-muted">Uploaded</div>
-                <ul className="space-y-1 text-sm">
+              <div className="mt-5 border-t border-line pt-4">
+                <p className="eyebrow mb-2">Uploaded</p>
+                <ul className="space-y-1.5">
                   {claim.documents.map((doc) => (
-                    <li key={doc.id} className="flex justify-between gap-2">
-                      <a href={`/api/documents/${doc.id}`} target="_blank" rel="noreferrer" className="truncate text-accent hover:underline">{doc.filename}</a>
-                      <span className="shrink-0 text-xs text-muted">{DOC_KIND_LABELS[doc.kind]}</span>
+                    <li key={doc.id} className="flex justify-between gap-3">
+                      <a href={`/api/documents/${doc.id}`} target="_blank" rel="noreferrer" className="footnote truncate text-accent hover:underline">{doc.filename}</a>
+                      <span className="caption shrink-0 text-muted">{DOC_KIND_LABELS[doc.kind]}</span>
                     </li>
                   ))}
                 </ul>
@@ -184,22 +213,39 @@ async function ClaimReport({ params }: { params: Promise<{ id: string }> }) {
             )}
           </Section>
           <Section title="Next steps">
-            <ol className="list-decimal space-y-2 pl-5 text-sm">
-              {a.nextSteps.map((s) => <li key={s}>{s}</li>)}
+            <ol className="space-y-3.5">
+              {a.nextSteps.map((s, n) => (
+                <li key={s} className="flex gap-3">
+                  <span className="caption flex size-[22px] shrink-0 items-center justify-center rounded-full bg-accent-soft font-semibold text-accent">{n + 1}</span>
+                  <span className="footnote">{s}</span>
+                </li>
+              ))}
             </ol>
           </Section>
         </div>
       </div>
-    </>
+    </div>
+  );
+}
+
+function Skeleton() {
+  return (
+    <div aria-busy className="space-y-6">
+      <div className="h-20 w-2/3 animate-pulse rounded-2xl bg-fill" />
+      <div className="card h-64 animate-pulse" />
+      <div className="card h-48 animate-pulse" />
+    </div>
   );
 }
 
 export default function ClaimPage({ params }: PageProps<"/claims/[id]">) {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
-      <Link href="/claims" className="text-sm text-muted hover:text-ink">← All claims</Link>
-      <div className="mt-4">
-        <Suspense fallback={<div className="card h-64 animate-pulse" />}>
+    <div className="mx-auto max-w-4xl px-4 py-8">
+      <Link href="/claims" className="no-print footnote inline-flex items-center gap-1 text-accent hover:underline">
+        <span aria-hidden>‹</span> All claims
+      </Link>
+      <div className="mt-5">
+        <Suspense fallback={<Skeleton />}>
           <ClaimReport params={params} />
         </Suspense>
       </div>

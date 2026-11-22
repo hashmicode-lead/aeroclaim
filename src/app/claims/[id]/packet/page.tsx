@@ -18,29 +18,29 @@ async function Packet({ params }: { params: Promise<{ id: string }> }) {
   return (
     <>
       <div className="no-print mb-6 flex flex-wrap items-center justify-between gap-3">
-        <Link href={`/claims/${claim.id}`} className="text-sm text-muted hover:text-ink">← Back to assessment</Link>
+        <Link href={`/claims/${claim.id}`} className="footnote text-accent hover:underline">‹ Back to assessment</Link>
         <div className="flex gap-2">
           <CopyButton text={`${p.subject}\n\n${p.body}`} label="Copy letter" />
           <PrintButton />
         </div>
       </div>
-      <p className="no-print mb-6 rounded-lg bg-info-soft p-4 text-sm text-info">
+      <p className="no-print mb-6 rounded-2xl bg-info-soft p-5 footnote text-ink">
         Send this letter by email to the airline&apos;s customer care and copy its nodal grievance officer. Contact details are on the airline&apos;s &ldquo;Grievance redressal&rdquo; page. Attach the annexures listed. Keep the sent email: it is your proof of written notice.
       </p>
 
-      <article className="card space-y-8 p-8 print:border-0 print:p-0">
+      <article className="card space-y-10 p-8 sm:p-12 print:p-0">
         <header>
-          <div className="text-xs uppercase tracking-wide text-muted">Part 1 · Claim letter</div>
+          <div className="eyebrow">Part 1 · Claim letter</div>
           <div className="mt-4 text-sm">
             <div>{formatDate(today)}</div>
             <div className="mt-2">To,</div>
             <div>{p.to}</div>
           </div>
         </header>
-        <pre className="whitespace-pre-wrap font-sans text-[15px] leading-relaxed">{p.body}</pre>
+        <pre className="whitespace-pre-wrap font-sans text-[16px] leading-[1.6]">{p.body}</pre>
 
         <section className="break-before-page">
-          <div className="text-xs uppercase tracking-wide text-muted">Part 2 · Chronology of events</div>
+          <div className="eyebrow">Part 2 · Chronology of events</div>
           <table className="mt-3 w-full text-sm">
             <tbody>
               {p.chronology.map((c, idx) => (
@@ -54,7 +54,7 @@ async function Packet({ params }: { params: Promise<{ id: string }> }) {
         </section>
 
         <section>
-          <div className="text-xs uppercase tracking-wide text-muted">Part 3 · Index of annexures</div>
+          <div className="eyebrow">Part 3 · Index of annexures</div>
           {p.annexures.length ? (
             <table className="mt-3 w-full text-sm">
               <tbody>

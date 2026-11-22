@@ -24,7 +24,7 @@ export function RecheckButton({ id }: { id: string }) {
   const [busy, setBusy] = useState(false);
   return (
     <button
-      className="btn-ghost px-3! py-1.5! text-xs"
+      className="btn-ghost"
       disabled={busy}
       onClick={async () => {
         setBusy(true);
@@ -42,7 +42,7 @@ export function CopyButton({ text, label = "Copy" }: { text: string; label?: str
   const [done, setDone] = useState(false);
   return (
     <button
-      className="btn-ghost px-3! py-1.5! text-xs"
+      className="btn-ghost"
       onClick={async () => {
         await navigator.clipboard.writeText(text);
         setDone(true);
