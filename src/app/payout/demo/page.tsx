@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SignaturePad } from "@/components/SignaturePad";
 import { demoClaim, demoTotal, demoUser, feeModels, inr } from "@/lib/demo";
+import { FEES } from "@/lib/pricing";
+
+const DEMO_SCORE = 88;
 
 type Track = "nowin" | "diy";
 
@@ -21,10 +24,10 @@ export default function PayoutPage() {
   const options: { id: Track; title: string; price: string; youGet: number; points: string[]; Icon: typeof Wallet }[] = [
     {
       id: "nowin",
-      title: "We file it for you",
-      price: "₹0 upfront · 15% success fee",
+      title: "We file it for you*",
+      price: `₹0 upfront · ${FEES.standardPct}% if we win`,
       youGet: feeModels.noWin.youGet,
-      points: ["We send every notice and chase the airline, insurer and bank", "Escalation to AirSewa and e-Jagriti included", "Paid only if you recover. Payout goes to your UPI"],
+      points: [`Offered because your claim scored ${DEMO_SCORE}/100`, "We send every notice and chase the airline, insurer and bank", `${FEES.escalatedPct}% only if it has to go to the consumer commission`, "Nothing to pay if you don't recover"],
       Icon: FileSignature,
     },
     {
@@ -68,6 +71,12 @@ export default function PayoutPage() {
                 <div className="caption text-muted">You receive</div>
                 <div className="title-1 tabular-nums">{inr(o.youGet)}</div>
                 {o.id === "nowin" && <div className="caption text-muted">Fee {inr(feeModels.noWin.fee)}, deducted only on success</div>}
+                {o.id === "nowin" && (
+                  <div className="mt-3">
+                    <div className="caption flex justify-between text-muted"><span>Claim strength</span><span className="font-semibold text-ok">{DEMO_SCORE}/100</span></div>
+                    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-fill"><div className="h-full rounded-full bg-ok" style={{ width: `${DEMO_SCORE}%` }} /></div>
+                  </div>
+                )}
               </div>
               <ul className="mt-4 space-y-2">
                 {o.points.map((p) => (
@@ -82,11 +91,13 @@ export default function PayoutPage() {
         })}
       </div>
 
+      <p className="caption mt-3 px-1 text-muted">*No win, no fee is offered only after we check your claim&apos;s risk. Depending on that check, the fee can change (25% if a consumer-commission filing is needed), or we may offer the ₹299 self-file kit instead.</p>
+
       {track === "nowin" ? (
         <section key="loa" className="card reveal mt-6 p-6 sm:p-7">
           <h2 className="title-2">Digital Letter of Authority</h2>
           <p className="footnote mt-2 text-muted">
-            I, <strong className="text-ink">{demoUser.name}</strong>, authorise AeroClaim OS to pursue compensation, refunds and insurance benefits for {demoClaim.airline} {demoClaim.flight} (PNR {demoClaim.pnr}) on my behalf. Amounts recovered will be paid to <strong className="text-ink">{demoUser.upi}</strong> after deducting a 15% success fee. I can revoke this authority at any time before settlement.
+            I, <strong className="text-ink">{demoUser.name}</strong>, authorise AeroClaim OS to pursue compensation, refunds and insurance benefits for {demoClaim.airline} {demoClaim.flight} (PNR {demoClaim.pnr}) on my behalf. Amounts recovered will be paid to <strong className="text-ink">{demoUser.upi}</strong> after deducting a {FEES.standardPct}% success fee ({FEES.escalatedPct}% if a consumer-commission filing is needed). I can revoke this authority before AeroClaim files. If I withdraw after filing, or accept payment directly from the airline or insurer, I will pay AeroClaim its fee on that payment or ₹{FEES.withdrawalFee}, whichever is higher.
           </p>
           <div className="mt-5">
             <SignaturePad onChange={setSigned} />

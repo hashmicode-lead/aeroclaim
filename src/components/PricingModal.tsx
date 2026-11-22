@@ -20,11 +20,11 @@ export const PLANS: Record<Audience, Plan[]> = {
   travellers: [
     {
       id: "nowin",
-      name: "No win, no fee",
-      price: "₹0",
-      unit: "upfront · 15% on success",
-      blurb: "We file and chase everything. You pay only from what you recover.",
-      features: ["Airline, insurer and bank claims filed for you", "AirSewa and e-Jagriti escalation", "Payout straight to your UPI", "Digital Letter of Authority"],
+      name: "No win, no fee*",
+      price: "₹0*",
+      unit: "upfront · 15% if we win",
+      blurb: "For strong claims worth ₹5,000 or more. We check yours first and tell you in seconds.",
+      features: ["Airline, insurer and bank claims filed for you", "25% only if it goes to the consumer commission", "Nothing to pay if you don't recover", "Payout straight to your UPI"],
       cta: "Start free",
       featured: true,
     },
@@ -34,7 +34,7 @@ export const PLANS: Record<Audience, Plan[]> = {
       price: "₹299",
       unit: "one-time, per claim",
       blurb: "Every packet ready to send. The airline pays you directly.",
-      features: ["Four filing packets as PDF", "Step-by-step filing guide", "Deadline reminders by email", "Keep 100% of the payout"],
+      features: ["Any claim, any size", "Four filing packets as PDF", "Step-by-step filing guide and reminders", "Keep 100% of the payout"],
       cta: "Get the kit",
     },
   ],
@@ -201,7 +201,8 @@ export function PricingModal({
             </div>
           ))}
         </div>
-        <p className="caption mt-5 text-center text-muted">Prices include GST. Demo build: no payment is taken.</p>
+        <p className="caption mt-5 rounded-xl bg-fill px-4 py-3 text-left text-muted"><span className="font-semibold text-ink">*</span> No win, no fee is offered only after we check your claim&apos;s risk. Depending on that check, the fee can change (25% if a consumer-commission filing is needed), or we may offer the ₹299 self-file kit instead.</p>
+        <p className="caption mt-3 text-center text-muted">Prices include GST. Withdrawing after we file, or taking payment directly from the airline, costs our fee or ₹499, whichever is higher. Demo build: no payment is taken.</p>
       </div>
     </div>
   );

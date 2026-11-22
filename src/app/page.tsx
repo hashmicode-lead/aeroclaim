@@ -39,7 +39,8 @@ export default function Home() {
             Log in <span aria-hidden>›</span>
           </Link>
         </div>
-        <p className="footnote mt-4 text-muted">No card required. You pay only if you recover.</p>
+        <p className="footnote mt-4 text-muted">No card required. You pay only if you recover.*</p>
+        <p className="caption mx-auto mt-1 max-w-md text-muted/80">*No win, no fee is offered only after we check your claim&apos;s risk. Depending on that check, the fee can change (25% if a consumer-commission filing is needed), or we may offer the ₹299 self-file kit instead.</p>
         </div>
       </section>
 

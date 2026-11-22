@@ -6,6 +6,7 @@ import { Countdown, RecheckButton } from "@/components/client";
 import { Section, StatusBadge } from "@/components/ui";
 import { getAirport } from "@/lib/airports";
 import { getClaim } from "@/lib/db";
+import { FEES, payoutSplit, qualifyNoWin } from "@/lib/pricing";
 import { formatDate, formatDateTime, money } from "@/lib/time";
 import { DOC_KIND_LABELS, type WeatherSeverity } from "@/lib/types";
 
@@ -49,6 +50,7 @@ async function ClaimReport({ params }: { params: Promise<{ id: string }> }) {
   const o = getAirport(i.origin);
   const d = getAirport(i.destination);
   const missing = a.evidence.filter((e) => e.required && !e.provided).length;
+  const q = qualifyNoWin(a);
 
   return (
     <div className="reveal">
@@ -85,6 +87,42 @@ async function ClaimReport({ params }: { params: Promise<{ id: string }> }) {
           <a href={`/api/claims/${claim.id}/calendar`} className="btn-ghost">Add deadlines to calendar</a>
           <RecheckButton id={claim.id} />
         </div>
+      </section>
+
+      {/* Recovery tracks: success fee only for claims that pass the qualification check */}
+      <section className="no-print mt-10">
+        <div className="mb-2 flex items-baseline justify-between gap-4 px-1">
+          <h2 className="title-2">Ways to recover</h2>
+          <span className="footnote text-muted">Claim strength <strong className={q.qualifies ? "text-ok" : "text-warn"}>{q.score}/100</strong></span>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className={`card p-6 ${q.qualifies ? "shadow-[inset_0_0_0_2px_var(--accent),var(--shadow-card)]" : "opacity-70"}`}>
+            <div className="flex items-center justify-between gap-2">
+              <span className="headline">We file it for you*</span>
+              {q.qualifies ? <span className="caption rounded-full bg-ok-soft px-2 py-0.5 font-semibold text-ok">You qualify</span> : <span className="caption rounded-full bg-fill px-2 py-0.5 font-semibold text-muted">Not available</span>}
+            </div>
+            <p className="footnote mt-1 text-muted">₹0 upfront · {FEES.standardPct}% if we win ({FEES.escalatedPct}% if it goes to the consumer commission)</p>
+            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-fill"><div className={`h-full rounded-full ${q.qualifies ? "bg-ok" : "bg-warn"}`} style={{ width: `${q.score}%` }} /></div>
+            {q.qualifies ? (
+              <>
+                <p className="footnote mt-3">You would receive about <strong>{money({ min: payoutSplit(a.estimate.min).youGet, max: payoutSplit(a.estimate.max).youGet })}</strong>.</p>
+                {q.strengths.length > 0 && <p className="caption mt-1 text-muted">{q.strengths.join(" · ")}</p>}
+              </>
+            ) : (
+              <ul className="footnote mt-3 space-y-1 text-muted">{q.reasons.map((r) => <li key={r}>{r}</li>)}</ul>
+            )}
+          </div>
+          <div className={`card p-6 ${q.qualifies ? "" : "shadow-[inset_0_0_0_2px_var(--accent),var(--shadow-card)]"}`}>
+            <div className="flex items-center justify-between gap-2">
+              <span className="headline">Self-file kit</span>
+              {!q.qualifies && <span className="caption rounded-full bg-accent px-2 py-0.5 font-semibold text-white">Recommended</span>}
+            </div>
+            <p className="footnote mt-1 text-muted">₹{FEES.diyKit} one-time · keep 100%</p>
+            <p className="footnote mt-3">Every letter and packet ready to send yourself, with reminders before each deadline.</p>
+            <Link href={`/claims/${claim.id}/packet`} className={`${q.qualifies ? "btn-ghost" : "btn-primary"} mt-4`}>Get the kit</Link>
+          </div>
+        </div>
+        <p className="caption mt-3 px-1 text-muted">*No win, no fee is offered only after we check your claim&apos;s risk. Depending on that check, the fee can change (25% if a consumer-commission filing is needed), or we may offer the ₹299 self-file kit instead.</p>
       </section>
 
       <div className="mt-10 grid gap-10">
