@@ -1,5 +1,5 @@
 /**
- * Partner cards we recommend for travel cover. Banks and cards are fictional placeholders;
+ * Partner cards we recommend for travel cover. Bank names are placeholders chosen for the demo;
  * swap in real affiliate partners (and their approved logos) once agreements are signed.
  * Each `applyUrl` would be the partner's tracked affiliate link that earns a referral commission.
  */
@@ -20,44 +20,44 @@ export interface PartnerCard {
 
 export const PARTNER_CARDS: PartnerCard[] = [
   {
-    id: "northstar-voyager",
-    bank: "Northstar Bank",
+    id: "zbi-voyager",
+    bank: "ZBI",
     card: "Voyager Card",
-    monogram: "N",
+    monogram: "Z",
     hue: "#0b3d91",
     network: "Wise",
     annualFee: "₹2,500 (waived on ₹3 lakh yearly spend)",
     travelCover: "Up to ₹10 lakh",
     highlights: ["Trip delay ₹15,000 after 6 hours", "Lost baggage up to ₹1,00,000", "8 domestic lounge visits a year"],
     bestFor: "Frequent flyers",
-    applyUrl: "#apply-northstar",
+    applyUrl: "#apply-zbi",
     featured: true,
   },
   {
-    id: "kaveri-altitude",
-    bank: "Kaveri Bank",
+    id: "ibibi-altitude",
+    bank: "IBIBI",
     card: "Altitude Card",
-    monogram: "K",
+    monogram: "I",
     hue: "#a4123f",
     network: "Naster",
     annualFee: "₹999",
     travelCover: "Up to ₹5 lakh",
     highlights: ["Baggage delay ₹10,000 after 8 hours", "Missed connection ₹10,000", "1% fuel surcharge waiver"],
     bestFor: "Occasional travellers",
-    applyUrl: "#apply-kaveri",
+    applyUrl: "#apply-ibibi",
   },
   {
-    id: "saffron-jetset",
-    bank: "Saffron Bank",
+    id: "oxis-jetset",
+    bank: "OXIS",
     card: "Jetset Card",
-    monogram: "S",
+    monogram: "O",
     hue: "#d26a00",
     network: "Wise",
     annualFee: "Lifetime free",
     travelCover: "Up to ₹2 lakh",
     highlights: ["Lost baggage up to ₹50,000", "No joining fee", "5% back on flight bookings"],
     bestFor: "First credit card",
-    applyUrl: "#apply-saffron",
+    applyUrl: "#apply-oxis",
   },
 ];
 
