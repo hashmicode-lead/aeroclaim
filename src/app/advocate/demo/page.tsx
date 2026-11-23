@@ -4,6 +4,7 @@ import { FileText, Mic, MicOff, MonitorUp, PhoneOff, Send, ShieldCheck, Video, V
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { demoClaim as c, demoTotal, demoUser, inr } from "@/lib/demo";
+import { useSession } from "@/components/session";
 
 const SCRIPT = [
   { from: "adv", text: "Hi Ananya, I'm Rahul Khanna. I've gone through your brief. The weather certificate is strong evidence." },
@@ -19,6 +20,9 @@ function CtrlButton({ on, label, onClick, children }: { on: boolean; label: stri
 }
 
 export default function ConsultRoom() {
+  const session = useSession();
+  const advocateName = session?.role === "advocate" && session?.name ? session.name : "Adv. Rahul Khanna";
+  const initials = advocateName.replace(/^Adv\.?\s*/i, "").split(" ").map((w) => w[0]).slice(0, 2).join("") || "RK";
   const [state, setState] = useState<"connecting" | "live" | "ended">("connecting");
   const [secs, setSecs] = useState(0);
   const [mic, setMic] = useState(true);
@@ -68,7 +72,7 @@ export default function ConsultRoom() {
     return (
       <div className="reveal mx-auto max-w-md px-4 py-24 text-center">
         <h1 className="title-1">Consultation ended</h1>
-        <p className="mt-2 text-muted">{mm}:{ss} with Adv. Rahul Khanna. A summary and next steps have been added to your claim.</p>
+        <p className="mt-2 text-muted">{mm}:{ss} with {advocateName}. A summary and next steps have been added to your claim.</p>
         <Link href="/packets/demo" className="btn-primary mt-6">Back to action hub</Link>
       </div>
     );
@@ -78,7 +82,7 @@ export default function ConsultRoom() {
       <div className="flex flex-wrap items-center justify-between gap-3 px-1">
         <div>
           <p className="eyebrow">Advocate consult · {c.ref}</p>
-          <h1 className="title-2 mt-1">Adv. Rahul Khanna · Consumer disputes, Delhi</h1>
+          <h1 className="title-2 mt-1">{advocateName} · Consumer disputes, Delhi</h1>
         </div>
         <span className={`caption inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-semibold ${state === "live" ? "bg-bad-soft text-bad" : "bg-fill text-muted"}`}>
           <span className={`size-1.5 rounded-full ${state === "live" ? "animate-pulse bg-bad" : "bg-muted"}`} />
@@ -91,8 +95,8 @@ export default function ConsultRoom() {
         <div className="relative aspect-video overflow-hidden rounded-3xl bg-[#1d1d1f]">
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center">
-              <div className="mx-auto flex size-24 items-center justify-center rounded-full bg-gradient-to-br from-[#0066cc] to-[#5e5ce6] text-2xl font-semibold text-white">RK</div>
-              <p className="footnote mt-3 text-white/70">{state === "live" ? "Rahul Khanna" : "Joining room…"}</p>
+              <div className="mx-auto flex size-24 items-center justify-center rounded-full bg-gradient-to-br from-[#0066cc] to-[#5e5ce6] text-2xl font-semibold text-white">{initials}</div>
+              <p className="footnote mt-3 text-white/70">{state === "live" ? advocateName : "Joining room…"}</p>
             </div>
           </div>
           {/* Self view */}

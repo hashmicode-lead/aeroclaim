@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, CalendarDays, Clock, Lock, MapPin, ShieldCheck, Unlock } from "lucide-react";
+import { BadgeCheck, CalendarDays, Check, Clock, Lock, MapPin, ShieldCheck, Unlock, X } from "lucide-react";
 import { useSession, signIn } from "@/components/session";
 import Link from "next/link";
 import { useState } from "react";
@@ -12,10 +12,104 @@ const SLOTS = [
   { time: "Thu, 3:00 pm", who: "Fatima Sheikh · UK 811", live: false },
 ];
 
+function ProfileModal({ onClose, onSave }: { onClose: () => void; onSave: (profile: { name: string; city: string; fee: string }) => void }) {
+  const session = useSession();
+  const [name, setName] = useState(session?.name ?? "Adv. Rahul Khanna");
+  const [city, setCity] = useState("Delhi NCR");
+  const [fee, setFee] = useState("999");
+  const [practice, setPractice] = useState("Consumer Commission, Aviation Disputes");
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="reveal card w-full max-w-md p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="title-2">Complete advocate profile</h2>
+          <button onClick={onClose} className="text-muted hover:text-ink" aria-label="Close"><X size={18} /></button>
+        </div>
+        <p className="footnote mb-4 text-muted">Complete your details to finish Bar Council verification and receive verified consumer briefs.</p>
+        <div className="space-y-3">
+          <div>
+            <label className="label">Advocate full name</label>
+            <input className="field mt-1" value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div>
+            <label className="label">Jurisdiction / City</label>
+            <input className="field mt-1" value={city} onChange={(e) => setCity(e.target.value)} />
+          </div>
+          <div>
+            <label className="label">Practice areas</label>
+            <input className="field mt-1" value={practice} onChange={(e) => setPractice(e.target.value)} />
+          </div>
+          <div>
+            <label className="label">Video consultation fee (₹)</label>
+            <input className="field mt-1" type="number" value={fee} onChange={(e) => setFee(e.target.value)} />
+          </div>
+        </div>
+        <div className="mt-5 flex justify-end gap-2">
+          <button onClick={onClose} className="btn-ghost">Cancel</button>
+          <button className="btn-primary" onClick={() => onSave({ name, city, fee })}>
+            Save &amp; activate portal
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AvailabilityModal({ onClose, onSave }: { onClose: () => void; onSave: () => void }) {
+  const [slots, setSlots] = useState(["10:00 AM - 1:00 PM", "3:00 PM - 6:00 PM"]);
+  const allSlots = ["9:00 AM - 12:00 PM", "10:00 AM - 1:00 PM", "2:00 PM - 5:00 PM", "3:00 PM - 6:00 PM", "6:00 PM - 8:00 PM"];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="reveal card w-full max-w-md p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="title-2">Set consult availability</h2>
+          <button onClick={onClose} className="text-muted hover:text-ink" aria-label="Close"><X size={18} /></button>
+        </div>
+        <p className="footnote mb-4 text-muted">Choose the time slots when travellers with claims &gt;₹50,000 can book direct video consults.</p>
+        <div className="space-y-2">
+          {allSlots.map((s) => {
+            const active = slots.includes(s);
+            return (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setSlots((prev) => active ? prev.filter((x) => x !== s) : [...prev, s])}
+                className={`flex w-full items-center justify-between rounded-xl border p-3 text-sm transition-colors ${active ? "border-accent bg-accent-soft text-accent font-medium" : "border-line bg-surface hover:bg-surface-2"}`}
+              >
+                <span>{s}</span>
+                {active && <Check size={16} />}
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-5 flex justify-end gap-2">
+          <button onClick={onClose} className="btn-ghost">Cancel</button>
+          <button className="btn-primary" onClick={onSave}>Save availability</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdvocatePortal() {
   const session = useSession();
   const [unlocked, setUnlocked] = useState<Record<string, boolean>>({ "L-2291": true });
+  const [showProfile, setShowProfile] = useState(false);
+  const [showAvail, setShowAvail] = useState(false);
   const spent = leads.filter((l) => unlocked[l.id]).reduce((s, l) => s + l.fee, 0);
+
+  const advocateName = session?.name || "Adv. Rahul Khanna";
+
+  function activatePortal(updatedName?: string) {
+    signIn({
+      name: updatedName ?? session?.name ?? "Adv. Rahul Khanna",
+      email: session?.email ?? "advocate@lawchambers.in",
+      role: "advocate",
+      isNew: false,
+    });
+  }
 
   if (session?.isNew)
     return (
@@ -28,29 +122,37 @@ export default function AdvocatePortal() {
 
         <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_320px]">
           <div className="space-y-3">
-            <a href="#" className="pressable card group flex items-center gap-4 p-5 hover:bg-surface-2 shadow-[inset_0_0_0_2px_var(--accent),var(--shadow-card)]">
+            <button
+              type="button"
+              onClick={() => setShowProfile(true)}
+              className="pressable card group flex w-full items-center gap-4 p-5 text-left hover:bg-surface-2 shadow-[inset_0_0_0_2px_var(--accent),var(--shadow-card)]"
+            >
               <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-white"><BadgeCheck size={20} /></span>
               <span className="min-w-0 flex-1">
                 <span className="headline block">Complete your profile</span>
                 <span className="footnote block text-muted">Practice areas, city and consultation fee.</span>
               </span>
               <span className="text-muted">→</span>
-            </a>
-            <a href="#" className="pressable card group flex items-center gap-4 p-5 hover:bg-surface-2">
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowAvail(true)}
+              className="pressable card group flex w-full items-center gap-4 p-5 text-left hover:bg-surface-2"
+            >
               <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent"><Clock size={20} /></span>
               <span className="min-w-0 flex-1">
                 <span className="headline block">Set your availability</span>
                 <span className="footnote block text-muted">Slots travellers can book for video consults.</span>
               </span>
               <span className="text-muted">→</span>
-            </a>
+            </button>
             <div className="card mt-6 px-6 py-10 text-center">
               <p className="headline">Leads appear after verification</p>
               <p className="footnote mx-auto mt-1 max-w-sm text-muted">Pre-audited consumer dispute briefs (&gt;₹50,000) with verified evidence appear here once Bar Council confirmation is complete.</p>
               <button
                 type="button"
                 className="btn-ghost mt-4"
-                onClick={() => { signIn({ name: session?.name ?? "Adv. Rahul Khanna", email: session?.email ?? "rahul@example.com", role: "advocate", isNew: false }); }}
+                onClick={() => activatePortal()}
               >
                 Preview demo leads
               </button>
@@ -72,6 +174,26 @@ export default function AdvocatePortal() {
             </div>
           </aside>
         </div>
+
+        {showProfile && (
+          <ProfileModal
+            onClose={() => setShowProfile(false)}
+            onSave={({ name }) => {
+              setShowProfile(false);
+              activatePortal(name);
+            }}
+          />
+        )}
+
+        {showAvail && (
+          <AvailabilityModal
+            onClose={() => setShowAvail(false)}
+            onSave={() => {
+              setShowAvail(false);
+              activatePortal();
+            }}
+          />
+        )}
       </div>
     );
 
@@ -83,7 +205,7 @@ export default function AdvocatePortal() {
           <h1 className="title-1 mt-0.5">Verified case leads</h1>
         </div>
         <span className="caption inline-flex items-center gap-1.5 rounded-full bg-ok-soft px-3 py-1.5 font-semibold text-ok">
-          <ShieldCheck size={14} aria-hidden /> Bar Council verified · Adv. Rahul Khanna
+          <ShieldCheck size={14} aria-hidden /> Bar Council verified · {advocateName}
         </span>
       </div>
 
