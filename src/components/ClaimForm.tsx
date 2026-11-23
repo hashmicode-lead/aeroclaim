@@ -271,6 +271,12 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
                 }}
               />
             </label>
+            <p className="caption mt-2 text-muted">
+              No documents handy? Try a sample:{" "}
+              <a href="/samples/boarding-pass-sample.pdf" download className="text-accent hover:underline">boarding pass</a>,{" "}
+              <a href="/samples/airline-sms-sample.txt" download className="text-accent hover:underline">airline SMS</a> or{" "}
+              <a href="/samples/pir-sample.pdf" download className="text-accent hover:underline">baggage report (PIR)</a>.
+            </p>
           </div>
           <div>
             <label htmlFor="paste" className="label">Or paste an airline SMS / email / boarding-pass barcode text</label>

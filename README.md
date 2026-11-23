@@ -49,6 +49,14 @@ The whole journey runs on sample data from **Live demo** in the top bar: a 6h 20
 | --- | --- | --- |
 | <img src="docs/screenshots/claim-form.png" alt="Stepped claim form" width="300"> | <img src="docs/screenshots/login.png" alt="Sign in" width="300"> | <img src="docs/screenshots/mobile.png" alt="Mobile view" width="170"> |
 
+## Try it with sample documents
+
+Upload these on **New claim** to see auto-fill work. They are marked as samples and are not valid travel documents.
+
+- [`public/samples/boarding-pass-sample.pdf`](public/samples/boarding-pass-sample.pdf): 6E 2134, DEL → BOM, PNR X7K2QP, with IATA barcode data
+- [`public/samples/airline-sms-sample.txt`](public/samples/airline-sms-sample.txt): cancellation notice for the same flight
+- [`public/samples/pir-sample.pdf`](public/samples/pir-sample.pdf): Property Irregularity Report for a damaged bag
+
 ## A real example
 
 > 6E 2134, DEL → BOM, 10 Nov 2026, 06:10. Cancelled; passenger told 4 hours before. Airline says: weather. Basic fare + fuel charge: ₹5,200.
