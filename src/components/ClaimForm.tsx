@@ -393,6 +393,9 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
               >
                 Load sample e-ticket
               </button>
+              <a href="/samples/e-ticket-sample.pdf" download className="footnote text-xs text-accent hover:underline">
+                Download sample PDF
+              </a>
             </div>
 
             {activePaste === "ticket" && (
