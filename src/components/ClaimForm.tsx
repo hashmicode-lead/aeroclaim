@@ -2,7 +2,7 @@
 
 import { upload } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, ChevronRight, FileText, UploadCloud, X } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, FileText, UploadCloud, X } from "lucide-react";
 import { useState } from "react";
 import { AIRLINES, AIRPORTS } from "@/lib/airports";
 import { DateTimeField } from "./DateTimeField";
@@ -252,6 +252,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
     setErrors({});
     const fd = new FormData();
     fd.set("data", JSON.stringify({ ...v, protectionTier: currentProtection() ?? undefined }));
+    if (paste.trim()) fd.set("text", paste.trim());
     appendFiles(fd, true);
     const res = await fetch("/api/claims", { method: "POST", body: fd });
     const data = await res.json();
@@ -292,7 +293,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
       <section key="docs" className="card reveal p-6 sm:p-7">
         <h2 className="title-2">Upload your documents</h2>
         <p className="mt-1 text-sm text-muted">
-          Add your e-ticket, boarding pass, PIR, airline SMS/email and receipts. We read text-based PDFs and pasted text to pre-fill the form, and keep every file as evidence for your claim packet.
+          Add your e-ticket, boarding pass, PIR, airline SMS/email and receipts. We read text-based PDFs and pasted text to pre-fill the form, and preserve them as official evidence. You can also upload any missing files directly from your claim assessment page.
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
@@ -609,8 +610,8 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
             <p className="footnote mt-0.5 text-muted">Airlines calculate DGCA caps from basic fare + fuel, and refunds from total paid.</p>
           </div>
           {(autofilled.basicFarePlusFuel || autofilled.totalFare || autofilled.bookingDate) && (
-            <span className="caption inline-flex items-center gap-1 rounded-full bg-ok-soft px-2.5 py-1 font-semibold text-ok">
-              ✨ Auto-filled from Step 1
+            <span className="caption inline-flex items-center gap-1.5 rounded-full bg-ok-soft px-2.5 py-1 font-semibold text-ok">
+              <Check size={13} strokeWidth={2.5} aria-hidden /> Pre-filled from document
             </span>
           )}
         </div>
@@ -695,21 +696,39 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
 
       {step === "you" && (
       <section key="you" className="card reveal p-6 sm:p-7">
-        <h2 className="title-2 mb-5">Your details</h2>
+        <h2 className="title-2">Passenger contact details</h2>
+        <p className="footnote mt-1 mb-5 text-muted">
+          Under DGCA CAR Section 3 Series M, formal legal demands and AirSewa tickets must be issued in the ticketed passenger&apos;s legal name and contact details for airline nodal officer verification.
+        </p>
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
-            <label htmlFor="passengerName" className="label">Passenger name</label>
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="passengerName" className="label mb-0!">Passenger name</label>
+              {v.passengerName && (
+                <span className="caption inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 font-medium text-accent">
+                  Verified
+                </span>
+              )}
+            </div>
             <input className="field" {...bind("passengerName")} autoComplete="name" />
             {err("passengerName")}
           </div>
           <div>
-            <label htmlFor="email" className="label">Email</label>
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="email" className="label mb-0!">Email</label>
+              {v.email && (
+                <span className="caption inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 font-medium text-accent">
+                  Verified
+                </span>
+              )}
+            </div>
             <input type="email" className="field" {...bind("email")} autoComplete="email" />
             {err("email")}
           </div>
           <div>
             <label htmlFor="phone" className="label">Phone</label>
-            <input type="tel" className="field" {...bind("phone")} autoComplete="tel" />
+            <input type="tel" className="field" {...bind("phone")} autoComplete="tel" placeholder="e.g. +91 98765 43210" />
+            <p className="hint">Used for airline nodal officer verification & updates.</p>
           </div>
           <div className="sm:col-span-3">
             <label htmlFor="notes" className="label">Anything else? (optional)</label>

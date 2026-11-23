@@ -58,6 +58,29 @@ export async function createClaimBlob(args: {
   return id;
 }
 
+export async function addDocumentsBlob(
+  claimId: string,
+  documents: { id: string; filename: string; mime: string; size: number; kind: StoredDocument["kind"]; storedKey: string; extracted?: string }[]
+): Promise<void> {
+  if (!ID.test(claimId)) return;
+  const c = await readJson<StoredClaim>(`db/claims/${claimId}.json`);
+  if (!c) return;
+  const now = new Date().toISOString();
+  const docs: StoredDoc[] = documents.map((d) => ({
+    id: d.id,
+    claimId,
+    filename: d.filename,
+    mime: d.mime,
+    size: d.size,
+    kind: d.kind,
+    extracted: d.extracted,
+    createdAt: now,
+    storedKey: d.storedKey,
+  }));
+  await Promise.all(docs.map((d) => writeJson(`db/docs/${d.id}.json`, d)));
+  await writeJson(`db/claims/${claimId}.json`, { ...c, documents: [...c.documents, ...docs] });
+}
+
 export async function getClaimBlob(id: string): Promise<ClaimRecord | null> {
   if (!ID.test(id)) return null;
   const c = await readJson<StoredClaim>(`db/claims/${id}.json`);

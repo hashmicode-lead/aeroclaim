@@ -2,7 +2,7 @@ import "server-only";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { createClient, type Client, type InStatement } from "@libsql/client";
-import { createClaimBlob, getClaimBlob, listClaimsBlob, readDocumentBlob, updateAssessmentBlob, blobDbActive } from "./blobdb";
+import { addDocumentsBlob, createClaimBlob, getClaimBlob, listClaimsBlob, readDocumentBlob, updateAssessmentBlob, blobDbActive } from "./blobdb";
 import { DATA_DIR, loadFile } from "./storage";
 import type { Assessment, ClaimInput, ClaimRecord, DocKind, StoredDocument, WeatherReport } from "./types";
 
@@ -109,6 +109,16 @@ export async function createClaim(args: {
   ];
   await (await db()).batch(stmts, "write");
   return id;
+}
+
+export async function addDocuments(claimId: string, documents: NewDocument[]): Promise<void> {
+  if (blobDbActive()) return addDocumentsBlob(claimId, documents);
+  const now = new Date().toISOString();
+  const stmts: InStatement[] = documents.map((d) => ({
+    sql: "INSERT INTO documents (id, claim_id, filename, mime, size, kind, stored_name, extracted, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    args: [d.id, claimId, d.filename, d.mime, d.size, d.kind, d.storedKey, d.extracted ?? null, now],
+  }));
+  await (await db()).batch(stmts, "write");
 }
 
 export async function getClaim(id: string): Promise<ClaimRecord | null> {

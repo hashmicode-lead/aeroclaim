@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { Countdown, RecheckButton } from "@/components/client";
+import { Countdown, EvidenceUploader, RecheckButton } from "@/components/client";
 import { Section, StatusBadge } from "@/components/ui";
 import { getAirport } from "@/lib/airports";
 import { getClaim } from "@/lib/db";
@@ -241,6 +241,7 @@ async function ClaimReport({ params }: { params: Promise<{ id: string }> }) {
                 </li>
               ))}
             </ul>
+            {missing > 0 && <EvidenceUploader claimId={claim.id} />}
             {claim.documents.length > 0 && (
               <div className="mt-5 border-t border-line pt-4">
                 <p className="eyebrow mb-2">Uploaded</p>
