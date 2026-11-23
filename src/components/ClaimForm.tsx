@@ -3,7 +3,7 @@
 import { upload } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
 import { AlertCircle, Check, ChevronLeft, ChevronRight, FileText, UploadCloud, X } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AIRLINES, AIRPORTS } from "@/lib/airports";
 import { DateTimeField } from "./DateTimeField";
 import { currentProtection } from "./session";
@@ -146,6 +146,15 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
   const [v, setV] = useState<Values>({ airlineReason: "unknown", bookingChannel: "airline", paymentMethod: "credit_card" });
   const [files, setFiles] = useState<Upload[]>([]);
   const [paste, setPaste] = useState("");
+  const [ticketText, setTicketText] = useState("");
+  const [noticeText, setNoticeText] = useState("");
+  const [activePaste, setActivePaste] = useState<"ticket" | "notice" | null>(null);
+
+  const ticketInputRef = useRef<HTMLInputElement>(null);
+  const noticeInputRef = useRef<HTMLInputElement>(null);
+  const bpInputRef = useRef<HTMLInputElement>(null);
+  const miscInputRef = useRef<HTMLInputElement>(null);
+
   const [parsing, setParsing] = useState(false);
   const [parsed, setParsed] = useState<ParseResponse | null>(null);
   const [autofilled, setAutofilled] = useState<Record<string, boolean>>({});
@@ -153,7 +162,6 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [stepIdx, setStepIdx] = useState(0);
-  const [drag, setDrag] = useState(false);
 
   const set = (k: string) => (val: string) => setV((s) => ({ ...s, [k]: val }));
   const bind = (k: string) => ({ id: k, name: k, value: v[k] ?? "", onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => set(k)(e.target.value) });
@@ -193,14 +201,20 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
     fd.set("blobs", JSON.stringify(refs));
   }
 
-  function addFiles(list: File[]) {
-    const added: Upload[] = list.map((file) => ({ key: crypto.randomUUID(), file, kind: "auto", status: directUpload ? "uploading" : "local" }));
-    setFiles((fs) => [...fs, ...added].slice(0, 12));
-    if (!directUpload) return;
+  function addFiles(list: File[], targetKind: DocKind | "auto" = "auto") {
+    const added: Upload[] = list.map((file) => ({ key: crypto.randomUUID(), file, kind: targetKind, status: directUpload ? "uploading" : "local" }));
+    setFiles((fs) => [...fs, ...added].slice(0, 16));
+    if (!directUpload) {
+      setTimeout(() => autofill(), 60);
+      return;
+    }
     for (const u of added) {
       const safe = u.file.name.replace(/[^\w.-]+/g, "_").slice(-80);
       upload(`uploads/${safe}`, u.file, { access: "private", handleUploadUrl: "/api/uploads", contentType: u.file.type || undefined })
-        .then((res) => setFiles((fs) => fs.map((x) => (x.key === u.key ? { ...x, status: "done", pathname: res.pathname } : x))))
+        .then((res) => {
+          setFiles((fs) => fs.map((x) => (x.key === u.key ? { ...x, status: "done", pathname: res.pathname } : x)));
+          setTimeout(() => autofill(), 60);
+        })
         .catch(() => setFiles((fs) => fs.map((x) => (x.key === u.key ? { ...x, status: "error" } : x))));
     }
   }
@@ -208,8 +222,8 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
   async function autofill(customText?: string) {
     setParsing(true);
     const fd = new FormData();
-    const textToParse = customText ?? paste;
-    fd.set("text", textToParse);
+    const textToParse = customText ?? [ticketText, noticeText, paste].filter(Boolean).join("\n\n---\n\n");
+    if (textToParse.trim()) fd.set("text", textToParse.trim());
     appendFiles(fd, false);
     try {
       const res = await fetch("/api/parse", { method: "POST", body: fd });
@@ -237,7 +251,15 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
 
   function loadSample(key: keyof typeof SAMPLES, name: string) {
     const text = SAMPLES[key];
-    setPaste(text);
+    if (key === "ticket") {
+      setTicketText(text);
+      setActivePaste("ticket");
+    } else if (key === "sms") {
+      setNoticeText(text);
+      setActivePaste("notice");
+    } else if (key === "pir") {
+      setNoticeText(text);
+    }
     setSampleBadge(name);
     autofill(text);
     setTimeout(() => setSampleBadge(null), 4000);
@@ -252,7 +274,8 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
     setErrors({});
     const fd = new FormData();
     fd.set("data", JSON.stringify({ ...v, protectionTier: currentProtection() ?? undefined }));
-    if (paste.trim()) fd.set("text", paste.trim());
+    const combinedText = [ticketText, noticeText, paste].filter(Boolean).join("\n\n---\n\n");
+    if (combinedText.trim()) fd.set("text", combinedText.trim());
     appendFiles(fd, true);
     const res = await fetch("/api/claims", { method: "POST", body: fd });
     const data = await res.json();
@@ -295,109 +318,329 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
         <p className="mt-1 text-sm text-muted">
           Add your e-ticket, boarding pass, PIR, airline SMS/email and receipts. We read text-based PDFs and pasted text to pre-fill the form, and preserve them as official evidence. You can also upload any missing files directly from your claim assessment page.
         </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div>
-            <span className="label">Documents</span>
-            <label
-              htmlFor="files"
-              onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
-              onDragLeave={() => setDrag(false)}
-              onDrop={(e) => { e.preventDefault(); setDrag(false); addFiles(Array.from(e.dataTransfer.files)); }}
-              className={`pressable flex min-h-[150px] cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed px-6 py-6 text-center has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-accent-soft ${drag ? "border-accent bg-accent-soft" : "border-line bg-fill hover:bg-surface-2"}`}
-            >
-              <span className="flex size-11 items-center justify-center rounded-full bg-surface text-accent shadow-[var(--shadow-card)]">
-                <UploadCloud size={22} aria-hidden />
-              </span>
-              <span className="headline mt-1">Drop files here</span>
-              <span className="footnote text-muted">or <span className="font-medium text-accent">browse</span> · PDF, image or text, 10 MB each</span>
+        <div className="mt-5 space-y-4">
+          {/* Section 1: E-Ticket */}
+          <div className="rounded-2xl border border-line bg-surface p-4 sm:p-5 transition-shadow hover:shadow-[var(--shadow-card)]">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2.5">
+                <span className="flex size-7 items-center justify-center rounded-lg bg-accent-soft text-xs font-bold text-accent">1</span>
+                <div>
+                  <h3 className="headline text-[15px]">E-Ticket or Booking Itinerary</h3>
+                  <p className="caption text-muted">PDF receipt, booking confirmation, or e-ticket with PNR and fare.</p>
+                </div>
+              </div>
+              {files.some((f) => f.kind === "e_ticket") || ticketText.trim() ? (
+                <span className="caption inline-flex items-center gap-1 rounded-full bg-ok-soft px-2.5 py-1 font-semibold text-ok">
+                  <Check size={13} strokeWidth={2.5} /> Attached
+                </span>
+              ) : (
+                <span className="caption rounded-full bg-fill px-2.5 py-1 font-medium text-muted">
+                  Required
+                </span>
+              )}
+            </div>
+
+            {/* Uploaded ticket files */}
+            {files.filter((f) => f.kind === "e_ticket").map((f) => (
+              <div key={f.key} className="mt-2.5 flex items-center justify-between rounded-xl bg-fill px-3.5 py-2 text-xs">
+                <span className="flex items-center gap-2 truncate font-medium text-ink">
+                  <FileText size={15} className="shrink-0 text-muted" /> {f.file.name}
+                  {f.status === "uploading" && <span className="text-muted">(Uploading…)</span>}
+                </span>
+                <button type="button" aria-label={`Remove ${f.file.name}`} onClick={() => setFiles((fs) => fs.filter((x) => x.key !== f.key))} className="text-muted hover:text-bad">
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+
+            {ticketText && (
+              <div className="mt-2.5 flex items-center justify-between rounded-xl bg-fill px-3.5 py-2 text-xs">
+                <span className="truncate font-mono text-ink/80 max-w-md">E-ticket text entered ({ticketText.length} characters)</span>
+                <button type="button" onClick={() => setTicketText("")} className="text-muted hover:text-bad"><X size={14} /></button>
+              </div>
+            )}
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <input
-                id="files"
+                ref={ticketInputRef}
                 type="file"
                 multiple
-                accept=".pdf,.png,.jpg,.jpeg,.webp,.heic,.txt"
-                className="sr-only"
+                accept=".pdf,.png,.jpg,.jpeg,.webp,.txt"
+                className="hidden"
                 onChange={(e) => {
-                  addFiles(Array.from(e.target.files ?? []));
+                  if (e.target.files) addFiles(Array.from(e.target.files), "e_ticket");
                   e.target.value = "";
                 }}
               />
-            </label>
-            <div className="mt-3 flex flex-wrap items-center gap-1.5">
-              <span className="caption font-medium text-muted">Try sample:</span>
+              <button
+                type="button"
+                onClick={() => ticketInputRef.current?.click()}
+                className="btn-primary py-1.5! px-3.5! text-xs! flex items-center gap-1.5"
+              >
+                <UploadCloud size={14} /> Upload e-ticket file
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivePaste(activePaste === "ticket" ? null : "ticket")}
+                className="btn-ghost py-1.5! px-3! text-xs! border border-line"
+              >
+                {activePaste === "ticket" ? "Close text box" : "Paste ticket text"}
+              </button>
               <button
                 type="button"
                 onClick={() => loadSample("ticket", "E-Ticket")}
-                className="caption pressable inline-flex items-center gap-1 rounded-full border border-accent/30 bg-accent-soft px-2.5 py-1 text-accent hover:bg-accent/15"
+                className="btn-ghost py-1.5! px-3! text-xs! text-muted hover:text-ink"
               >
-                E-ticket (fare &amp; PNR)
+                Load sample e-ticket
+              </button>
+            </div>
+
+            {activePaste === "ticket" && (
+              <div className="mt-3 space-y-2">
+                <textarea
+                  rows={3}
+                  className="field text-xs! font-mono"
+                  value={ticketText}
+                  onChange={(e) => setTicketText(e.target.value)}
+                  placeholder="Paste e-ticket itinerary receipt or confirmation email here…"
+                />
+                <div className="flex justify-end">
+                  <button type="button" onClick={() => { autofill(ticketText); setActivePaste(null); }} className="btn-primary py-1! px-3! text-xs!">
+                    Extract details
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Section 2: Airline Disruption Notice / SMS */}
+          <div className="rounded-2xl border border-line bg-surface p-4 sm:p-5 transition-shadow hover:shadow-[var(--shadow-card)]">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2.5">
+                <span className="flex size-7 items-center justify-center rounded-lg bg-accent-soft text-xs font-bold text-accent">2</span>
+                <div>
+                  <h3 className="headline text-[15px]">Airline Cancellation / Delay Notice or SMS</h3>
+                  <p className="caption text-muted">Screenshot or text of SMS, WhatsApp, or email from the airline announcing disruption.</p>
+                </div>
+              </div>
+              {files.some((f) => f.kind === "airline_notice") || noticeText.trim() ? (
+                <span className="caption inline-flex items-center gap-1 rounded-full bg-ok-soft px-2.5 py-1 font-semibold text-ok">
+                  <Check size={13} strokeWidth={2.5} /> Attached
+                </span>
+              ) : (
+                <span className="caption rounded-full bg-warn-soft px-2.5 py-1 font-medium text-warn">
+                  Required for DGCA compensation
+                </span>
+              )}
+            </div>
+
+            {/* Uploaded notice files */}
+            {files.filter((f) => f.kind === "airline_notice").map((f) => (
+              <div key={f.key} className="mt-2.5 flex items-center justify-between rounded-xl bg-fill px-3.5 py-2 text-xs">
+                <span className="flex items-center gap-2 truncate font-medium text-ink">
+                  <FileText size={15} className="shrink-0 text-muted" /> {f.file.name}
+                  {f.status === "uploading" && <span className="text-muted">(Uploading…)</span>}
+                </span>
+                <button type="button" aria-label={`Remove ${f.file.name}`} onClick={() => setFiles((fs) => fs.filter((x) => x.key !== f.key))} className="text-muted hover:text-bad">
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+
+            {noticeText && (
+              <div className="mt-2.5 flex items-center justify-between rounded-xl bg-fill px-3.5 py-2 text-xs">
+                <span className="truncate font-mono text-ink/80 max-w-md">&quot;{noticeText.slice(0, 50)}…&quot;</span>
+                <button type="button" onClick={() => setNoticeText("")} className="text-muted hover:text-bad"><X size={14} /></button>
+              </div>
+            )}
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <input
+                ref={noticeInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.png,.jpg,.jpeg,.webp,.txt"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files) addFiles(Array.from(e.target.files), "airline_notice");
+                  e.target.value = "";
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => noticeInputRef.current?.click()}
+                className="btn-primary py-1.5! px-3.5! text-xs! flex items-center gap-1.5"
+              >
+                <UploadCloud size={14} /> Upload SMS / email screenshot
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivePaste(activePaste === "notice" ? null : "notice")}
+                className="btn-ghost py-1.5! px-3! text-xs! border border-line"
+              >
+                {activePaste === "notice" ? "Close text box" : "Paste SMS / notice text"}
               </button>
               <button
                 type="button"
                 onClick={() => loadSample("sms", "Cancellation SMS")}
-                className="caption pressable inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-ink/80 hover:bg-surface-2"
+                className="btn-ghost py-1.5! px-3! text-xs! text-muted hover:text-ink"
               >
-                Cancellation SMS
+                Load sample cancellation SMS
+              </button>
+            </div>
+
+            {activePaste === "notice" && (
+              <div className="mt-3 space-y-2">
+                <textarea
+                  rows={3}
+                  className="field text-xs! font-mono"
+                  value={noticeText}
+                  onChange={(e) => setNoticeText(e.target.value)}
+                  placeholder="Paste the SMS or email text (e.g. Flight 6E 2134 has been cancelled/delayed…)"
+                />
+                <div className="flex justify-end">
+                  <button type="button" onClick={() => { autofill(noticeText); setActivePaste(null); }} className="btn-primary py-1! px-3! text-xs!">
+                    Extract details
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Section 3: Boarding Pass */}
+          <div className="rounded-2xl border border-line bg-surface p-4 sm:p-5 transition-shadow hover:shadow-[var(--shadow-card)]">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2.5">
+                <span className="flex size-7 items-center justify-center rounded-lg bg-fill text-xs font-bold text-muted">3</span>
+                <div>
+                  <h3 className="headline text-[15px]">Boarding Pass</h3>
+                  <p className="caption text-muted">Digital boarding pass (PDF/image), Apple Wallet pkpass, or check-in confirmation.</p>
+                </div>
+              </div>
+              {files.some((f) => f.kind === "boarding_pass") ? (
+                <span className="caption inline-flex items-center gap-1 rounded-full bg-ok-soft px-2.5 py-1 font-semibold text-ok">
+                  <Check size={13} strokeWidth={2.5} /> Attached
+                </span>
+              ) : (
+                <span className="caption rounded-full bg-fill px-2.5 py-1 font-medium text-muted">
+                  Optional
+                </span>
+              )}
+            </div>
+
+            {files.filter((f) => f.kind === "boarding_pass").map((f) => (
+              <div key={f.key} className="mt-2.5 flex items-center justify-between rounded-xl bg-fill px-3.5 py-2 text-xs">
+                <span className="flex items-center gap-2 truncate font-medium text-ink">
+                  <FileText size={15} className="shrink-0 text-muted" /> {f.file.name}
+                  {f.status === "uploading" && <span className="text-muted">(Uploading…)</span>}
+                </span>
+                <button type="button" aria-label={`Remove ${f.file.name}`} onClick={() => setFiles((fs) => fs.filter((x) => x.key !== f.key))} className="text-muted hover:text-bad">
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <input
+                ref={bpInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.png,.jpg,.jpeg,.webp,.txt"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files) addFiles(Array.from(e.target.files), "boarding_pass");
+                  e.target.value = "";
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => bpInputRef.current?.click()}
+                className="btn-ghost py-1.5! px-3.5! text-xs! flex items-center gap-1.5 border border-line"
+              >
+                <UploadCloud size={14} /> Upload boarding pass
+              </button>
+              <a href="/samples/boarding-pass-sample.pdf" download className="footnote text-xs text-accent hover:underline">
+                Download test boarding pass
+              </a>
+            </div>
+          </div>
+
+          {/* Section 4: Receipts & PIR */}
+          <div className="rounded-2xl border border-line bg-surface p-4 sm:p-5 transition-shadow hover:shadow-[var(--shadow-card)]">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <div className="flex items-center gap-2.5">
+                <span className="flex size-7 items-center justify-center rounded-lg bg-fill text-xs font-bold text-muted">4</span>
+                <div>
+                  <h3 className="headline text-[15px]">Expense Receipts &amp; Baggage PIR</h3>
+                  <p className="caption text-muted">Invoices for meals/hotel/taxi paid during disruption, or Property Irregularity Report for baggage.</p>
+                </div>
+              </div>
+              {files.some((f) => ["receipt", "pir", "photo", "other"].includes(f.kind)) ? (
+                <span className="caption inline-flex items-center gap-1 rounded-full bg-ok-soft px-2.5 py-1 font-semibold text-ok">
+                  <Check size={13} strokeWidth={2.5} /> Attached
+                </span>
+              ) : (
+                <span className="caption rounded-full bg-fill px-2.5 py-1 font-medium text-muted">
+                  Optional
+                </span>
+              )}
+            </div>
+
+            {files.filter((f) => ["receipt", "pir", "photo", "other"].includes(f.kind)).map((f) => (
+              <div key={f.key} className="mt-2.5 flex items-center justify-between rounded-xl bg-fill px-3.5 py-2 text-xs">
+                <span className="flex items-center gap-2 truncate font-medium text-ink">
+                  <FileText size={15} className="shrink-0 text-muted" /> {f.file.name}
+                  {f.status === "uploading" && <span className="text-muted">(Uploading…)</span>}
+                </span>
+                <button type="button" aria-label={`Remove ${f.file.name}`} onClick={() => setFiles((fs) => fs.filter((x) => x.key !== f.key))} className="text-muted hover:text-bad">
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <input
+                ref={miscInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.png,.jpg,.jpeg,.webp,.txt"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files) addFiles(Array.from(e.target.files), "receipt");
+                  e.target.value = "";
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => miscInputRef.current?.click()}
+                className="btn-ghost py-1.5! px-3.5! text-xs! flex items-center gap-1.5 border border-line"
+              >
+                <UploadCloud size={14} /> Upload receipt or PIR
               </button>
               <button
                 type="button"
                 onClick={() => loadSample("pir", "Baggage PIR")}
-                className="caption pressable inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-ink/80 hover:bg-surface-2"
+                className="btn-ghost py-1.5! px-3! text-xs! text-muted hover:text-ink"
               >
-                Baggage PIR
+                Load sample PIR
               </button>
-              {sampleBadge && (
-                <span className="caption inline-flex items-center gap-1 rounded-full bg-ok-soft px-2 py-0.5 font-medium text-ok">
-                  ✓ {sampleBadge} loaded &amp; parsed
-                </span>
-              )}
             </div>
-            <p className="caption mt-2 text-muted">
-              Download test files:{" "}
-              <a href="/samples/e-ticket-sample.txt" download className="text-accent hover:underline">e-ticket</a>,{" "}
-              <a href="/samples/boarding-pass-sample.pdf" download className="text-accent hover:underline">boarding pass</a>,{" "}
-              <a href="/samples/airline-sms-sample.txt" download className="text-accent hover:underline">airline SMS</a> or{" "}
-              <a href="/samples/pir-sample.pdf" download className="text-accent hover:underline">baggage report (PIR)</a>.
-            </p>
-          </div>
-          <div>
-            <label htmlFor="paste" className="label">Or paste an airline SMS / email / boarding-pass barcode text</label>
-            <textarea id="paste" rows={5} className="field min-h-[150px] font-mono text-[13px]!" value={paste} onChange={(e) => setPaste(e.target.value)} placeholder="Dear Customer, your flight 6E 2134 DEL-BOM on 14 Dec 2026 at 06:10 has been cancelled… PNR: X7K2QP" />
           </div>
         </div>
-        {files.length > 0 && (
-          <ul className="mt-5 divide-y divide-line overflow-hidden rounded-xl bg-fill">
-            {files.map((f, idx) => (
-              <li key={f.key} className="flex flex-wrap items-center gap-3 px-4 py-2.5 text-sm">
-                <FileText size={16} className="shrink-0 text-muted" aria-hidden />
-                <span className="min-w-0 flex-1 truncate">{f.file.name}</span>
-                {f.status === "uploading" && <span className="text-xs text-muted">Uploading…</span>}
-                {f.status === "error" && <span className="text-xs text-bad">Upload failed</span>}
-                <select
-                  aria-label={`Document type for ${f.file.name}`}
-                  className="field w-auto! bg-surface! py-1! text-xs!"
-                  value={f.kind}
-                  onChange={(e) => setFiles((fs) => fs.map((x, i) => (i === idx ? { ...x, kind: e.target.value as DocKind | "auto" } : x)))}
-                >
-                  <option value="auto">Detect automatically</option>
-                  {Object.entries(DOC_KIND_LABELS).map(([k, l]) => (
-                    <option key={k} value={k}>{l}</option>
-                  ))}
-                </select>
-                <button type="button" aria-label={`Remove ${f.file.name}`} className="flex size-6 items-center justify-center rounded-full text-muted hover:bg-surface hover:text-bad" onClick={() => setFiles((fs) => fs.filter((_, k) => k !== idx))}><X size={14} aria-hidden /></button>
-              </li>
-            ))}
-          </ul>
+
+        {sampleBadge && (
+          <p className="caption mt-3 text-ok font-medium">✓ {sampleBadge} loaded and details extracted.</p>
         )}
+
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button type="button" className={`btn-ghost ${(parsing || uploading || (!paste.trim() && !files.length)) ? "" : "!bg-[#0066CC] !text-white hover:!bg-[#005bb5]"}`} disabled={parsing || uploading || (!paste.trim() && !files.length)} onClick={() => autofill()}>
-            {parsing ? "Reading…" : "Extract details"}
-          </button>
-          {parsed && (
+          {parsing && (
+            <span className="footnote text-accent">Reading document details…</span>
+          )}
+          {parsed && !parsing && (
             <p className="text-sm text-muted">
               {parsed.results.length
-                ? `Found: ${[...new Set(parsed.results.flatMap((r) => r.found))].join(", ") || "nothing recognisable"}.`
-                : "No readable text found."}{" "}
-              {parsed.unreadable.length > 0 && <span>Could not read: {parsed.unreadable.join("; ")}.</span>} We filled in what we found. Check it on the next steps.
+                ? `Extracted: ${[...new Set(parsed.results.flatMap((r) => r.found))].join(", ") || "details recorded"}.`
+                : "Details recorded."} Check and confirm on the next steps.
             </p>
           )}
         </div>
@@ -735,7 +978,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
           </button>
         ) : (
           <button type="button" className="btn-primary px-6! py-2.5!" onClick={next} disabled={uploading && step === "docs"}>
-            {step === "docs" && !files.length && !paste.trim() ? "Skip for now" : "Continue"} <ChevronRight size={16} aria-hidden />
+            {step === "docs" && !files.length && !ticketText.trim() && !noticeText.trim() && !paste.trim() ? "Skip for now" : "Continue"} <ChevronRight size={16} aria-hidden />
           </button>
         )}
       </div>
