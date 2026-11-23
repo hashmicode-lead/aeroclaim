@@ -1,0 +1,34 @@
+======================================================================
+                  AIR INDIA E-TICKET ITINERARY RECEIPT
+======================================================================
+Passenger Name:       Ananya Sharma
+Booking Reference:    K4TQ7M
+Issue Date / Booking: 05 Nov 2026
+Booking Channel:      Airline Direct (airindia.com)
+Payment Method:       Credit Card (Visa Platinum ···· 4821)
+
+FLIGHT DETAILS:
+----------------------------------------------------------------------
+Flight:        AI 161 (Air India)
+Status:        Confirmed
+Origin:        DEL (Indira Gandhi International, Delhi)
+Destination:   LHR (London Heathrow, United Kingdom)
+Travel Date:   19 Nov 2026
+Scheduled Dep: 02:15 IST
+Scheduled Arr: 08:35 GMT
+Disruption:    Delayed 6h 20m due to operational reasons
+
+FARE & TAX BREAKUP (INR):
+----------------------------------------------------------------------
+Basic Fare:                     ₹38,500
+Airline Fuel Charge (YQ):       ₹12,000
+----------------------------------------------------------------------
+Basic Fare + Fuel Charge:       ₹50,500
+User Development Fee (UDF):     ₹1,850
+Passenger Service Fee (PSF):    ₹420
+Goods & Services Tax (GST):     ₹2,530
+----------------------------------------------------------------------
+Total Fare Paid:                ₹55,300
+======================================================================
+Payment Confirmed via Visa Platinum Credit Card ending in 4821.
+Passenger entitled to statutory relief under DGCA CAR & Montreal Convention.

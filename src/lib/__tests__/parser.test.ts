@@ -32,6 +32,22 @@ describe("parser", () => {
     expect(f).toMatchObject({ pnr: "X7K2QP", origin: "DEL", destination: "BOM", flightNumber: "6E2134", airline: "IndiGo", passengerName: "Asha Rao" });
     expect(f.scheduledDeparture).toBe("2026-11-14T00:00");
   });
+
+  it("extracts fare breakdown, booking date and payment method from an e-ticket", () => {
+    const ticket = `AIR INDIA E-TICKET
+PNR: K4TQ7M
+Booking Date: 05 Nov 2026
+Flight: AI 161 DEL to LHR on 19 Nov 2026 at 02:15
+Basic Fare + Fuel Charge: ₹50,500
+Total Fare Paid: ₹55,300
+Payment Method: Credit Card (Visa)`;
+    const r = parseText(ticket);
+    expect(r.fields.pnr).toBe("K4TQ7M");
+    expect(r.fields.basicFarePlusFuel).toBe(50500);
+    expect(r.fields.totalFare).toBe(55300);
+    expect(r.fields.bookingDate).toBe("2026-11-05");
+    expect(r.fields.paymentMethod).toBe("credit_card");
+  });
 });
 
 describe("weather classification", () => {

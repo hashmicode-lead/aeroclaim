@@ -118,8 +118,36 @@ export function parseText(text: string, filename = ""): ParseResult {
     fields.pirFiled = true;
   }
 
-  const amount = text.match(/(?:₹|INR|Rs\.?)\s*([\d,]+(?:\.\d{1,2})?)/i);
-  if (amount) fields.totalFare = Number(amount[1].replace(/,/g, ""));
+  // Fare & price breakdown
+  const basicMatch = text.match(/(?:basic\s*fare\s*(?:\+\s*fuel(?:\s*charge|\s*surcharge)?)?|base\s*fare(?:\s*\+\s*fuel)?|basic\s*\+\s*fuel)\s*[:=-]?\s*(?:₹|INR|Rs\.?)?\s*([\d,]+(?:\.\d{1,2})?)/i);
+  if (basicMatch) fields.basicFarePlusFuel = Number(basicMatch[1].replace(/,/g, ""));
+
+  const totalMatch = text.match(/(?:total(?:\s+fare)?(?:\s+paid)?(?:\s+amount)?|gross(?:\s+amount)?|amount\s+paid)\s*[:=-]?\s*(?:₹|INR|Rs\.?)?\s*([\d,]+(?:\.\d{1,2})?)/i);
+  if (totalMatch) {
+    fields.totalFare = Number(totalMatch[1].replace(/,/g, ""));
+  } else {
+    const amount = text.match(/(?:₹|INR|Rs\.?)\s*([\d,]+(?:\.\d{1,2})?)/i);
+    if (amount) fields.totalFare = Number(amount[1].replace(/,/g, ""));
+  }
+
+  // Booking date
+  const bDateMatch = text.match(/(?:booking\s*date|date\s*of\s*booking|booked\s*on|issue\s*date)\s*[:=-]?\s*([^\r\n,]+)/i);
+  if (bDateMatch) {
+    const d = findDate(bDateMatch[1]);
+    if (d) fields.bookingDate = d;
+  }
+
+  // Payment method
+  const payMatch = text.match(/(?:payment\s*(?:method|mode)|paid\s*(?:by|via|with))\s*[:=-]?\s*([^\r\n,]+)/i);
+  if (payMatch) {
+    const p = payMatch[1].toLowerCase();
+    if (/credit|visa|mastercard|amex|diners|rupay/.test(p)) fields.paymentMethod = "credit_card";
+    else if (/debit/.test(p)) fields.paymentMethod = "debit_card";
+    else if (/upi|gpay|phonepe|paytm/.test(p)) fields.paymentMethod = "upi";
+    else if (/net\s*banking|internet|bank\s*transfer/.test(p)) fields.paymentMethod = "netbanking";
+    else if (/wallet/.test(p)) fields.paymentMethod = "wallet";
+    else if (/cash/.test(p)) fields.paymentMethod = "cash";
+  }
 
   const lower = text.toLowerCase();
   if (/cancel+ed|cancellation/.test(lower)) fields.disruptionType = "cancellation";
@@ -136,16 +164,21 @@ export function parseText(text: string, filename = ""): ParseResult {
 }
 
 function report(f: Partial<ClaimInput>): { found: string[]; missing: string[] } {
-  const labels: [keyof ClaimInput, string][] = [
+  const mandatory: [keyof ClaimInput, string][] = [
     ["pnr", "PNR"],
     ["flightNumber", "Flight number"],
     ["origin", "Origin"],
     ["destination", "Destination"],
     ["scheduledDeparture", "Departure date"],
   ];
+  const optional: [keyof ClaimInput, string][] = [
+    ["basicFarePlusFuel", "Basic fare + fuel"],
+    ["totalFare", "Total fare"],
+    ["bookingDate", "Booking date"],
+  ];
   return {
-    found: labels.filter(([k]) => f[k] !== undefined).map(([, l]) => l),
-    missing: labels.filter(([k]) => f[k] === undefined).map(([, l]) => l),
+    found: [...mandatory, ...optional].filter(([k]) => f[k] !== undefined).map(([, l]) => l),
+    missing: mandatory.filter(([k]) => f[k] === undefined).map(([, l]) => l),
   };
 }
 

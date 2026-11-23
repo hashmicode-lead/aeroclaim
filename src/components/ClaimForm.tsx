@@ -37,6 +37,35 @@ const REASONS: [string, string][] = [
   ["other", "Other"],
 ];
 
+const SAMPLES = {
+  ticket: `AIR INDIA E-TICKET ITINERARY RECEIPT
+Passenger: Ananya Sharma
+Booking Reference (PNR): K4TQ7M
+Issue Date / Booking Date: 05 Nov 2026
+Flight: AI 161 (Air India)
+Route: DEL to LHR on 19 Nov 2026 at 02:15
+Disruption: Delayed 6h 20m due to operational reasons
+
+FARE BREAKDOWN:
+Basic Fare: ₹38,500
+Airline Fuel Charge (YQ): ₹12,000
+Basic Fare + Fuel Charge: ₹50,500
+User Development Fee (UDF): ₹1,850
+Passenger Service Fee (PSF): ₹420
+GST: ₹2,530
+Total Fare Paid: ₹55,300
+
+Payment Method: Credit Card (Visa Platinum ···· 4821)
+Booking Channel: Airline Direct`,
+  sms: `Dear Customer, your IndiGo flight 6E 2134 DEL-BOM on 14 Dec 2026 at 06:10 has been cancelled due to operational reasons. You may choose a full refund or free reschedule. PNR: X7K2QP`,
+  pir: `Property Irregularity Report (PIR)
+File Reference: DELAI48213
+Passenger: Ananya Sharma
+Flight: AI 161 DEL to LHR on 19 Nov 2026
+Issue: Damaged suitcase shell and delayed arrival
+PIR Filed: Yes at London Heathrow baggage desk`,
+};
+
 const india = AIRPORTS.filter((a) => a.country === "IN");
 const intl = AIRPORTS.filter((a) => a.country !== "IN");
 
@@ -119,6 +148,8 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
   const [paste, setPaste] = useState("");
   const [parsing, setParsing] = useState(false);
   const [parsed, setParsed] = useState<ParseResponse | null>(null);
+  const [autofilled, setAutofilled] = useState<Record<string, boolean>>({});
+  const [sampleBadge, setSampleBadge] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [stepIdx, setStepIdx] = useState(0);
@@ -174,24 +205,42 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
     }
   }
 
-  async function autofill() {
+  async function autofill(customText?: string) {
     setParsing(true);
     const fd = new FormData();
-    fd.set("text", paste);
+    const textToParse = customText ?? paste;
+    fd.set("text", textToParse);
     appendFiles(fd, false);
     try {
       const res = await fetch("/api/parse", { method: "POST", body: fd });
       const data = (await res.json()) as ParseResponse;
       setParsed(data);
+      const filledMap: Record<string, boolean> = {};
       setV((s) => {
         const next = { ...s };
-        for (const [k, val] of Object.entries(data.fields)) if (!next[k]) next[k] = String(val);
+        for (const [k, val] of Object.entries(data.fields)) {
+          if (!next[k] || next[k] === "unknown" || next[k] === "") {
+            next[k] = String(val);
+            filledMap[k] = true;
+          } else if (data.fields[k] !== undefined) {
+            filledMap[k] = true;
+          }
+        }
         return next;
       });
+      setAutofilled((prev) => ({ ...prev, ...filledMap }));
       setFiles((fs) => fs.map((f) => ({ ...f, kind: f.kind === "auto" ? (data.results.find((r) => r.filename === f.file.name)?.kind ?? "auto") : f.kind })));
     } finally {
       setParsing(false);
     }
+  }
+
+  function loadSample(key: keyof typeof SAMPLES, name: string) {
+    const text = SAMPLES[key];
+    setPaste(text);
+    setSampleBadge(name);
+    autofill(text);
+    setTimeout(() => setSampleBadge(null), 4000);
   }
 
   async function submit(e: React.FormEvent) {
@@ -272,8 +321,38 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
                 }}
               />
             </label>
+            <div className="mt-3 flex flex-wrap items-center gap-1.5">
+              <span className="caption font-medium text-muted">Try sample:</span>
+              <button
+                type="button"
+                onClick={() => loadSample("ticket", "E-Ticket")}
+                className="caption pressable inline-flex items-center gap-1 rounded-full border border-accent/30 bg-accent-soft px-2.5 py-1 text-accent hover:bg-accent/15"
+              >
+                🎟️ E-ticket (fare &amp; PNR)
+              </button>
+              <button
+                type="button"
+                onClick={() => loadSample("sms", "Cancellation SMS")}
+                className="caption pressable inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-ink/80 hover:bg-surface-2"
+              >
+                📱 Cancellation SMS
+              </button>
+              <button
+                type="button"
+                onClick={() => loadSample("pir", "Baggage PIR")}
+                className="caption pressable inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-ink/80 hover:bg-surface-2"
+              >
+                🧳 Baggage PIR
+              </button>
+              {sampleBadge && (
+                <span className="caption inline-flex items-center gap-1 rounded-full bg-ok-soft px-2 py-0.5 font-medium text-ok">
+                  ✓ {sampleBadge} loaded &amp; parsed
+                </span>
+              )}
+            </div>
             <p className="caption mt-2 text-muted">
-              No documents handy? Try a sample:{" "}
+              Download test files:{" "}
+              <a href="/samples/e-ticket-sample.txt" download className="text-accent hover:underline">e-ticket</a>,{" "}
               <a href="/samples/boarding-pass-sample.pdf" download className="text-accent hover:underline">boarding pass</a>,{" "}
               <a href="/samples/airline-sms-sample.txt" download className="text-accent hover:underline">airline SMS</a> or{" "}
               <a href="/samples/pir-sample.pdf" download className="text-accent hover:underline">baggage report (PIR)</a>.
@@ -309,7 +388,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
           </ul>
         )}
         <div className="mt-4 flex flex-wrap items-center gap-3">
-      <button type="button" className={`btn-ghost ${(parsing || uploading || (!paste.trim() && !files.length)) ? "" : "!bg-[#0066CC] !text-white hover:!bg-[#005bb5]"}`} disabled={parsing || uploading || (!paste.trim() && !files.length)} onClick={autofill}>
+          <button type="button" className={`btn-ghost ${(parsing || uploading || (!paste.trim() && !files.length)) ? "" : "!bg-[#0066CC] !text-white hover:!bg-[#005bb5]"}`} disabled={parsing || uploading || (!paste.trim() && !files.length)} onClick={() => autofill()}>
             {parsing ? "Reading…" : "Extract details"}
           </button>
           {parsed && (
@@ -524,40 +603,91 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
 
       {step === "fare" && (
       <section key="fare" className="card reveal p-6 sm:p-7">
-        <h2 className="title-2 mb-5">Fare & payment</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
           <div>
-            <label htmlFor="basicFarePlusFuel" className="label">Basic fare + fuel charge (₹)</label>
-            <input type="number" min={0} className="field" {...bind("basicFarePlusFuel")} />
+            <h2 className="title-2">Fare & payment</h2>
+            <p className="footnote mt-0.5 text-muted">Airlines calculate DGCA caps from basic fare + fuel, and refunds from total paid.</p>
+          </div>
+          {(autofilled.basicFarePlusFuel || autofilled.totalFare || autofilled.bookingDate) && (
+            <span className="caption inline-flex items-center gap-1 rounded-full bg-ok-soft px-2.5 py-1 font-semibold text-ok">
+              ✨ Auto-filled from Step 1
+            </span>
+          )}
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="basicFarePlusFuel" className="label mb-0!">Basic fare + fuel charge (₹)</label>
+              {autofilled.basicFarePlusFuel && (
+                <span className="caption inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 font-medium text-accent">
+                  Pre-filled
+                </span>
+              )}
+            </div>
+            <input type="number" min={0} className="field" {...bind("basicFarePlusFuel")} placeholder="e.g. 50500" />
             <p className="hint">From the fare breakup, for this one-way sector. DGCA caps compensation at this amount.</p>
+            {Number(v.basicFarePlusFuel || 0) > 0 && Number(v.totalFare || 0) > 0 && Number(v.basicFarePlusFuel) > Number(v.totalFare) && (
+              <p className="caption mt-2 rounded-lg bg-warn-soft px-3 py-1.5 font-medium text-warn flex items-center gap-1.5" role="alert">
+                <span>⚠️</span> Excludes taxes/airport fees; must be ≤ Total paid.
+              </p>
+            )}
             {err("basicFarePlusFuel")}
           </div>
+
           <div>
-            <label htmlFor="totalFare" className="label">Total paid (₹)</label>
-            <input type="number" min={0} className="field" {...bind("totalFare")} />
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="totalFare" className="label mb-0!">Total paid (₹)</label>
+              {autofilled.totalFare && (
+                <span className="caption inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 font-medium text-accent">
+                  Pre-filled
+                </span>
+              )}
+            </div>
+            <input type="number" min={0} className="field" {...bind("totalFare")} placeholder="e.g. 55300" />
+            <p className="hint">Total invoice amount including all taxes, airport development fees and surcharges.</p>
             {err("totalFare")}
           </div>
+
           <div>
-            <label htmlFor="bookingDate" className="label">Booking date</label>
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="bookingDate" className="label mb-0!">Booking date</label>
+              {autofilled.bookingDate && (
+                <span className="caption inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 font-medium text-accent">
+                  Pre-filled
+                </span>
+              )}
+            </div>
             <DateTimeField id="bookingDate" value={v.bookingDate ?? ""} onChange={set("bookingDate")} invalid={!!errors.bookingDate} />
+            <p className="hint">Date the ticket was issued.</p>
           </div>
+
           <div>
-            <label htmlFor="bookingChannel" className="label">Booked through</label>
-            <select className="field" {...bind("bookingChannel")}>
-              <option value="airline">Airline website / app / office</option>
-              <option value="agent">Travel agent / portal (MakeMyTrip, etc.)</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="paymentMethod" className="label">Paid by</label>
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="paymentMethod" className="label mb-0!">Paid by / Card selector <span className="font-normal text-muted">(optional)</span></label>
+              {v.paymentMethod === "credit_card" && (
+                <span className="caption rounded-full bg-ok-soft px-2 py-0.5 font-medium text-ok">
+                  Card cover eligible
+                </span>
+              )}
+            </div>
             <select className="field" {...bind("paymentMethod")}>
-              <option value="credit_card">Credit card</option>
+              <option value="credit_card">Credit card (Visa, Mastercard, Amex, RuPay)</option>
               <option value="debit_card">Debit card</option>
-              <option value="upi">UPI</option>
+              <option value="upi">UPI (GPay, PhonePe, Paytm)</option>
               <option value="netbanking">Net banking</option>
               <option value="wallet">Wallet</option>
               <option value="cash">Cash</option>
             </select>
+            <p className="hint">Links card-cover and chargeback recovery paths from one set of records.</p>
+          </div>
+
+          <div className="sm:col-span-2">
+            <label htmlFor="bookingChannel" className="label">Booked through</label>
+            <select className="field" {...bind("bookingChannel")}>
+              <option value="airline">Airline website / app / office (refund deadline: within 7 days)</option>
+              <option value="agent">Travel agent / portal (MakeMyTrip, etc. - refund deadline: 30 working days)</option>
+            </select>
+            <p className="hint">Airlines refund card payments within 7 days; booking through an OTA allows up to 30 working days under DGCA rules.</p>
           </div>
         </div>
       </section>
