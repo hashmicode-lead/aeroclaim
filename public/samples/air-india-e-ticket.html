@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Air India E-Ticket Itinerary Receipt - K4TQ7M</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 12mm 15mm;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #1a1a1a;
+      background: #ffffff;
+      font-size: 11px;
+      line-height: 1.4;
+      padding: 10px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 3px solid #D81427;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    .airline-brand {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #D81427;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .brand-sub {
+      font-size: 9px;
+      font-weight: 600;
+      color: #71717A;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+    .receipt-title-block {
+      text-align: right;
+    }
+    .receipt-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #111827;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .pnr-box {
+      display: inline-block;
+      margin-top: 6px;
+      background: #FFF1F2;
+      border: 1.5px solid #D81427;
+      border-radius: 6px;
+      padding: 4px 12px;
+      text-align: right;
+    }
+    .pnr-label {
+      font-size: 9px;
+      font-weight: 700;
+      color: #991B1B;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .pnr-code {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 0px;
+      color: #D81427;
+      font-family: "Courier New", Courier, monospace;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .card {
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      padding: 10px 12px;
+      background: #F9FAFB;
+    }
+    .card-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #4B5563;
+      border-bottom: 1px solid #E5E7EB;
+      padding-bottom: 4px;
+      margin-bottom: 8px;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .info-label {
+      color: #6B7280;
+      font-size: 10px;
+    }
+    .info-value {
+      font-weight: 600;
+      color: #111827;
+      text-align: right;
+      font-size: 10.5px;
+    }
+    .highlight-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .table-container {
+      margin-bottom: 14px;
+    }
+    .section-heading {
+      font-size: 11px;
+      font-weight: 700;
+      color: #111827;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-heading::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 12px;
+      background: #D81427;
+      border-radius: 2px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #E5E7EB;
+      border-radius: 6px;
+      overflow: hidden;
+      font-size: 10.5px;
+    }
+    th {
+      background: #F3F4F6;
+      color: #374151;
+      font-weight: 700;
+      text-align: left;
+      padding: 7px 10px;
+      border-bottom: 1px solid #E5E7EB;
+      font-size: 9.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    td {
+      padding: 9px 10px;
+      border-bottom: 1px solid #E5E7EB;
+      vertical-align: top;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .airport-code {
+      font-size: 13px;
+      font-weight: 800;
+      color: #111827;
+    }
+    .airport-city {
+      font-size: 10px;
+      color: #4B5563;
+    }
+    .flight-badge {
+      display: inline-block;
+      background: #1E3A8A;
+      color: white;
+      font-weight: 700;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .status-confirmed {
+      display: inline-block;
+      background: #DCFCE7;
+      color: #166534;
+      font-weight: 700;
+      font-size: 9.5px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .disruption-box {
+      margin-top: 4px;
+      background: #FEF3C7;
+      border: 1px solid #F59E0B;
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 9.5px;
+      color: #92400E;
+      font-weight: 600;
+    }
+    .fare-table th, .fare-table td {
+      padding: 5px 10px;
+    }
+    .fare-table td.amount {
+      text-align: right;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 11px;
+    }
+    .fare-subtotal {
+      background: #F9FAFB;
+      font-weight: 700;
+      border-top: 1px solid #D1D5DB;
+      border-bottom: 1px solid #D1D5DB;
+    }
+    .fare-subtotal td {
+      color: #111827;
+    }
+    .fare-total {
+      background: #111827;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .fare-total td {
+      color: #ffffff;
+      padding: 7px 10px;
+    }
+    .fare-total td.amount {
+      font-size: 13px;
+      color: #FBBF24;
+    }
+    .barcode-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px dashed #D1D5DB;
+      border-radius: 6px;
+      padding: 8px 14px;
+      margin-bottom: 14px;
+      background: #FAF5FF;
+    }
+    .barcode-svg {
+      height: 38px;
+    }
+    .barcode-text {
+      font-size: 9px;
+      font-family: "Courier New", Courier, monospace;
+      color: #4B5563;
+      letter-spacing: 0px;
+      text-align: center;
+      margin-top: 2px;
+    }
+    .statutory-box {
+      font-size: 9px;
+      color: #4B5563;
+      max-width: 400px;
+      text-align: right;
+      line-height: 1.35;
+    }
+    .legal-footer {
+      border-top: 1px solid #E5E7EB;
+      padding-top: 8px;
+      font-size: 8px;
+      color: #6B7280;
+      line-height: 1.3;
+    }
+    .legal-footer strong {
+      color: #374151;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="airline-brand">
+      <div class="brand-title">AIR INDIA</div>
+      <div class="brand-sub">A Star Alliance Member · Carriage By Air</div>
+    </div>
+    <div class="receipt-title-block">
+      <div class="receipt-title">E-Ticket Itinerary / Receipt</div>
+      <div class="pnr-box">
+        <div class="pnr-label">Booking Reference (PNR)</div>
+        <div class="pnr-code">K4TQ7M</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOOKING & PASSENGER METADATA -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Passenger Details</div>
+      <div class="info-row">
+        <span class="info-label">Passenger Name:</span>
+        <span class="info-value highlight-name">SHARMA / ANANYA MS</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">E-Ticket Number:</span>
+        <span class="info-value" style="font-family: monospace;">098-2458910243</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Frequent Flyer / Tier:</span>
+        <span class="info-value">FR 892019402 (Silver)</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Ticket Status:</span>
+        <span class="info-value"><span class="status-confirmed">CONFIRMED / ISSUED</span></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Booking & Payment Details</div>
+      <div class="info-row">
+        <span class="info-label">Issue Date / Booking:</span>
+        <span class="info-value">05 Nov 2026</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Booking Channel:</span>
+        <span class="info-value">Airline Direct (airindia.com)</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Payment Method:</span>
+        <span class="info-value">Credit Card (Visa Platinum ···· 4821)</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Payment Auth / Status:</span>
+        <span class="info-value" style="color: #166534; font-weight: 700;">APPROVED (AUTH: 084291)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLIGHT DETAILS -->
+  <div class="table-container">
+    <div class="section-heading">Flight Details & Itinerary</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Flight</th>
+          <th>Origin / Departure</th>
+          <th>Destination / Arrival</th>
+          <th>Class & Baggage</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="flight-badge">AI 161</div>
+            <div style="font-size: 9px; color: #6B7280; margin-top: 3px;">Air India</div>
+            <div style="font-size: 8.5px; color: #9CA3AF;">Boeing 777-300ER</div>
+          </td>
+          <td>
+            <div class="airport-code">DEL</div>
+            <div class="airport-city">Delhi, Indira Gandhi Intl</div>
+            <div style="font-size: 9px; color: #6B7280; margin-top: 1px;">Terminal 3</div>
+            <div style="font-weight: 700; color: #111827; margin-top: 3px;">19 Nov 2026 · 02:15 IST</div>
+          </td>
+          <td>
+            <div class="airport-code">LHR</div>
+            <div class="airport-city">London Heathrow</div>
+            <div style="font-size: 9px; color: #6B7280; margin-top: 1px;">Terminal 2</div>
+            <div style="font-weight: 700; color: #111827; margin-top: 3px;">19 Nov 2026 · 08:35 GMT</div>
+          </td>
+          <td>
+            <div><strong>Economy (Y)</strong></div>
+            <div style="font-size: 9px; color: #4B5563; margin-top: 2px;">Seat: <strong>18A</strong></div>
+            <div style="font-size: 9px; color: #6B7280;">Baggage: 2 PC (23 kg) + 7 kg</div>
+          </td>
+          <td>
+            <span class="status-confirmed">Confirmed</span>
+            <div class="disruption-box">
+              ⚠️ Delayed 6h 20m<br>
+              <span style="font-weight: normal; font-size: 8.5px;">Operational reasons</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FARE & TAX BREAKUP -->
+  <div class="table-container">
+    <div class="section-heading">Fare & Tax Breakup (INR)</div>
+    <table class="fare-table">
+      <thead>
+        <tr>
+          <th>Component Description</th>
+          <th>Statutory Code / Rule Reference</th>
+          <th style="text-align: right;">Amount (INR)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Basic Air Fare (Sector: DEL → LHR)</td>
+          <td style="color: #6B7280; font-size: 9.5px;">Fare Basis: YOWIN</td>
+          <td class="amount">₹38,500.00</td>
+        </tr>
+        <tr>
+          <td>Airline Fuel Charge (YQ)</td>
+          <td style="color: #6B7280; font-size: 9.5px;">Carrier Imposed Surcharge</td>
+          <td class="amount">₹12,000.00</td>
+        </tr>
+        <tr class="fare-subtotal">
+          <td><strong>Basic Fare + Fuel Charge (Statutory DGCA Cap Basis)</strong></td>
+          <td style="color: #4B5563; font-size: 9.5px;">DGCA CAR Sec 3 Ser M Pt IV</td>
+          <td class="amount" style="font-weight: 700; color: #1E3A8A;">₹50,500.00</td>
+        </tr>
+        <tr>
+          <td>User Development Fee (UDF)</td>
+          <td style="color: #6B7280; font-size: 9.5px;">Airport Authority (IN)</td>
+          <td class="amount">₹1,850.00</td>
+        </tr>
+        <tr>
+          <td>Passenger Service Fee (PSF)</td>
+          <td style="color: #6B7280; font-size: 9.5px;">Aviation Security & Facilitation</td>
+          <td class="amount">₹420.00</td>
+        </tr>
+        <tr>
+          <td>Goods & Services Tax (GST)</td>
+          <td style="color: #6B7280; font-size: 9.5px;">CGST + SGST (5% Economy Passenger)</td>
+          <td class="amount">₹2,530.00</td>
+        </tr>
+        <tr class="fare-total">
+          <td>TOTAL FARE PAID (ALL TAXES & FEES INCLUDED)</td>
+          <td style="font-size: 10px; font-weight: normal; opacity: 0.9;">Payment Verified · Non-transferable</td>
+          <td class="amount">₹55,300.00</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- BARCODE & STATUTORY DECLARATION -->
+  <div class="barcode-section">
+    <div>
+      <svg class="barcode-svg" viewBox="0 0 260 40" preserveAspectRatio="none">
+        <rect x="0" y="0" width="3" height="38" fill="#111827"/>
+        <rect x="5" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="9" y="0" width="4" height="38" fill="#111827"/>
+        <rect x="15" y="0" width="1" height="38" fill="#111827"/>
+        <rect x="18" y="0" width="3" height="38" fill="#111827"/>
+        <rect x="23" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="28" y="0" width="5" height="38" fill="#111827"/>
+        <rect x="35" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="39" y="0" width="3" height="38" fill="#111827"/>
+        <rect x="44" y="0" width="1" height="38" fill="#111827"/>
+        <rect x="47" y="0" width="4" height="38" fill="#111827"/>
+        <rect x="53" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="57" y="0" width="3" height="38" fill="#111827"/>
+        <rect x="62" y="0" width="6" height="38" fill="#111827"/>
+        <rect x="70" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="74" y="0" width="4" height="38" fill="#111827"/>
+        <rect x="80" y="0" width="1" height="38" fill="#111827"/>
+        <rect x="83" y="0" width="3" height="38" fill="#111827"/>
+        <rect x="88" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="92" y="0" width="4" height="38" fill="#111827"/>
+        <rect x="98" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="102" y="0" width="5" height="38" fill="#111827"/>
+        <rect x="109" y="0" width="1" height="38" fill="#111827"/>
+        <rect x="112" y="0" width="3" height="38" fill="#111827"/>
+        <rect x="117" y="0" width="4" height="38" fill="#111827"/>
+        <rect x="123" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="127" y="0" width="1" height="38" fill="#111827"/>
+        <rect x="130" y="0" width="4" height="38" fill="#111827"/>
+        <rect x="136" y="0" width="3" height="38" fill="#111827"/>
+        <rect x="141" y="0" width="5" height="38" fill="#111827"/>
+        <rect x="148" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="152" y="0" width="3" height="38" fill="#111827"/>
+        <rect x="157" y="0" width="1" height="38" fill="#111827"/>
+        <rect x="160" y="0" width="4" height="38" fill="#111827"/>
+        <rect x="166" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="170" y="0" width="3" height="38" fill="#111827"/>
+        <rect x="175" y="0" width="5" height="38" fill="#111827"/>
+        <rect x="182" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="186" y="0" width="4" height="38" fill="#111827"/>
+        <rect x="192" y="0" width="1" height="38" fill="#111827"/>
+        <rect x="195" y="0" width="3" height="38" fill="#111827"/>
+        <rect x="200" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="204" y="0" width="5" height="38" fill="#111827"/>
+        <rect x="211" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="215" y="0" width="3" height="38" fill="#111827"/>
+        <rect x="220" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="224" y="0" width="4" height="38" fill="#111827"/>
+        <rect x="230" y="0" width="1" height="38" fill="#111827"/>
+        <rect x="233" y="0" width="3" height="38" fill="#111827"/>
+        <rect x="238" y="0" width="5" height="38" fill="#111827"/>
+        <rect x="245" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="249" y="0" width="3" height="38" fill="#111827"/>
+        <rect x="254" y="0" width="2" height="38" fill="#111827"/>
+        <rect x="258" y="0" width="2" height="38" fill="#111827"/>
+      </svg>
+      <div class="barcode-text">0982458910243 DEL LHR AI161 K4TQ7M</div>
+    </div>
+    <div class="statutory-box">
+      <strong>Payment Confirmation & Legal Endorsement:</strong><br>
+      Paid via Visa Platinum Credit Card (ending in 4821). Auth Code: 084291.<br>
+      Passenger entitled to statutory relief under DGCA CAR Section 3, Series M, Part IV and Montreal Convention 1999 (Carriage by Air Act, 1972).
+    </div>
+  </div>
+
+  <!-- LEGAL FOOTER -->
+  <div class="legal-footer">
+    <p><strong>Notice & Conditions of Contract:</strong> Carriage is subject to the Carriage by Air Act, 1972 and rules established by the Montreal Convention 1999. In case of flight delays exceeding mandated thresholds or cancellations without stipulated statutory notice under DGCA CAR Section 3, Series M, Part IV, passengers are entitled to meals, refreshments, alternative flights, or statutory cash compensation. Air India Limited · Registered Office: Airlines House, 113 Gurudwara Rakabganj Road, New Delhi 110001, India. For nodal officer escalations or consumer complaints, visit airindia.com/grievance or airsewa.gov.in.</p>
+  </div>
+
+</body>
+</html>

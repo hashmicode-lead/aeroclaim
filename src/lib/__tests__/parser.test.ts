@@ -48,6 +48,22 @@ Payment Method: Credit Card (Visa)`;
     expect(r.fields.bookingDate).toBe("2026-11-05");
     expect(r.fields.paymentMethod).toBe("credit_card");
   });
+
+  it("extracts fields from official air india e-ticket sample pdf", async () => {
+    const fs = await import("node:fs");
+    const { extractText } = await import("unpdf");
+    const bytes = fs.readFileSync("public/samples/air-india-e-ticket-AI161.pdf");
+    const res = await extractText(new Uint8Array(bytes), { mergePages: true });
+    const fullText = Array.isArray(res.text) ? res.text.join("\n") : String(res.text);
+    expect(fullText).toContain("K4TQ7M");
+    expect(fullText).toContain("AIR INDIA");
+    const r = parseText(fullText, "air-india-e-ticket-AI161.pdf");
+    expect(r.kind).toBe("e_ticket");
+    expect(r.fields.pnr).toBe("K4TQ7M");
+    expect(r.fields.flightNumber).toBe("AI161");
+    expect(r.fields.totalFare).toBe(55300);
+    expect(r.fields.basicFarePlusFuel).toBe(50500);
+  });
 });
 
 describe("weather classification", () => {

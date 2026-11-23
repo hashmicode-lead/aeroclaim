@@ -82,7 +82,7 @@ export function parseText(text: string, filename = ""): ParseResult {
     }
   }
 
-  const pnr = text.match(/\b(?:PNR|Booking\s*(?:Ref(?:erence)?|ID|Code)|Confirmation\s*(?:No\.?|Number|Code)?|Airline\s*PNR)\s*[:#-]?\s*([A-Z0-9]{6})\b/i);
+  const pnr = text.match(/\b(?:PNR|Booking\s*(?:Reference|Ref|ID|Code)|Confirmation\s*(?:No\.?|Number|Code)?|Airline\s*PNR)\b(?:\s*\(PNR\))?\s*[:#-]?\s*([A-Z0-9]{6})\b/i);
   if (pnr) fields.pnr = pnr[1].toUpperCase();
 
   const codes = Object.keys(AIRLINES).join("|");
@@ -119,10 +119,16 @@ export function parseText(text: string, filename = ""): ParseResult {
   }
 
   // Fare & price breakdown
-  const basicMatch = text.match(/(?:basic\s*fare\s*(?:\+\s*fuel(?:\s*charge|\s*surcharge)?)?|base\s*fare(?:\s*\+\s*fuel)?|basic\s*\+\s*fuel)\s*[:=-]?\s*(?:₹|INR|Rs\.?)?\s*([\d,]+(?:\.\d{1,2})?)/i);
-  if (basicMatch) fields.basicFarePlusFuel = Number(basicMatch[1].replace(/,/g, ""));
+  // Prioritize combined basic fare + fuel if present, otherwise basic/base fare
+  const combinedMatch = text.match(/(?:basic\s*fare\s*\+\s*fuel(?:\s*charge|\s*surcharge)?|base\s*fare\s*\+\s*fuel|basic\s*\+\s*fuel)[^\n\r]*?(?:₹|INR|Rs\.?)\s*([\d,]+(?:\.\d{1,2})?)/i);
+  const basicMatch = text.match(/(?:basic\s*fare|base\s*fare)[^\n\r]*?(?:₹|INR|Rs\.?)\s*([\d,]+(?:\.\d{1,2})?)/i);
+  if (combinedMatch) {
+    fields.basicFarePlusFuel = Number(combinedMatch[1].replace(/,/g, ""));
+  } else if (basicMatch) {
+    fields.basicFarePlusFuel = Number(basicMatch[1].replace(/,/g, ""));
+  }
 
-  const totalMatch = text.match(/(?:total(?:\s+fare)?(?:\s+paid)?(?:\s+amount)?|gross(?:\s+amount)?|amount\s+paid)\s*[:=-]?\s*(?:₹|INR|Rs\.?)?\s*([\d,]+(?:\.\d{1,2})?)/i);
+  const totalMatch = text.match(/(?:total(?:\s+fare)?(?:\s+paid)?(?:\s+amount)?|gross(?:\s+amount)?|amount\s+paid)[^\n\r]*?(?:₹|INR|Rs\.?)\s*([\d,]+(?:\.\d{1,2})?)/i);
   if (totalMatch) {
     fields.totalFare = Number(totalMatch[1].replace(/,/g, ""));
   } else {
