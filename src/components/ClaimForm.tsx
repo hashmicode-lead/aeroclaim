@@ -2,7 +2,7 @@
 
 import { upload } from "@vercel/blob/client";
 import { useRouter } from "next/navigation";
-import { Check, ChevronLeft, ChevronRight, FileText, UploadCloud, X } from "lucide-react";
+import { AlertCircle, Check, ChevronLeft, ChevronRight, FileText, UploadCloud, X } from "lucide-react";
 import { useState } from "react";
 import { AIRLINES, AIRPORTS } from "@/lib/airports";
 import { DateTimeField } from "./DateTimeField";
@@ -329,21 +329,21 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
                 onClick={() => loadSample("ticket", "E-Ticket")}
                 className="caption pressable inline-flex items-center gap-1 rounded-full border border-accent/30 bg-accent-soft px-2.5 py-1 text-accent hover:bg-accent/15"
               >
-                🎟️ E-ticket (fare &amp; PNR)
+                E-ticket (fare &amp; PNR)
               </button>
               <button
                 type="button"
                 onClick={() => loadSample("sms", "Cancellation SMS")}
                 className="caption pressable inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-ink/80 hover:bg-surface-2"
               >
-                📱 Cancellation SMS
+                Cancellation SMS
               </button>
               <button
                 type="button"
                 onClick={() => loadSample("pir", "Baggage PIR")}
                 className="caption pressable inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2.5 py-1 text-ink/80 hover:bg-surface-2"
               >
-                🧳 Baggage PIR
+                Baggage PIR
               </button>
               {sampleBadge && (
                 <span className="caption inline-flex items-center gap-1 rounded-full bg-ok-soft px-2 py-0.5 font-medium text-ok">
@@ -629,7 +629,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
             <p className="hint">From the fare breakup, for this one-way sector. DGCA caps compensation at this amount.</p>
             {Number(v.basicFarePlusFuel || 0) > 0 && Number(v.totalFare || 0) > 0 && Number(v.basicFarePlusFuel) > Number(v.totalFare) && (
               <p className="caption mt-2 rounded-lg bg-warn-soft px-3 py-1.5 font-medium text-warn flex items-center gap-1.5" role="alert">
-                <span>⚠️</span> Excludes taxes/airport fees; must be ≤ Total paid.
+                <AlertCircle size={13} className="shrink-0" /> Excludes taxes/airport fees; must be ≤ Total paid.
               </p>
             )}
             {err("basicFarePlusFuel")}
