@@ -607,33 +607,15 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
         <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
           <div>
             <h2 className="title-2">Fare & payment</h2>
-            <p className="footnote mt-0.5 text-muted">Airlines calculate DGCA caps from basic fare + fuel, and refunds from total paid.</p>
+            <p className="footnote mt-0.5 text-muted">Airlines calculate refunds and statutory claims from the total amount paid.</p>
           </div>
-          {(autofilled.basicFarePlusFuel || autofilled.totalFare || autofilled.bookingDate) && (
+          {(autofilled.totalFare || autofilled.bookingDate) && (
             <span className="caption inline-flex items-center gap-1.5 rounded-full bg-ok-soft px-2.5 py-1 font-semibold text-ok">
               <Check size={13} strokeWidth={2.5} aria-hidden /> Pre-filled from document
             </span>
           )}
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label htmlFor="basicFarePlusFuel" className="label mb-0!">Basic fare + fuel charge (₹)</label>
-              {autofilled.basicFarePlusFuel && (
-                <span className="caption inline-flex items-center gap-1 rounded-full bg-accent-soft px-2 py-0.5 font-medium text-accent">
-                  Pre-filled
-                </span>
-              )}
-            </div>
-            <input type="number" min={0} className="field" {...bind("basicFarePlusFuel")} placeholder="e.g. 50500" />
-            <p className="hint">From the fare breakup, for this one-way sector. DGCA caps compensation at this amount.</p>
-            {Number(v.basicFarePlusFuel || 0) > 0 && Number(v.totalFare || 0) > 0 && Number(v.basicFarePlusFuel) > Number(v.totalFare) && (
-              <p className="caption mt-2 rounded-lg bg-warn-soft px-3 py-1.5 font-medium text-warn flex items-center gap-1.5" role="alert">
-                <AlertCircle size={13} className="shrink-0" /> Excludes taxes/airport fees; must be ≤ Total paid.
-              </p>
-            )}
-            {err("basicFarePlusFuel")}
-          </div>
 
           <div>
             <div className="flex items-center justify-between mb-1">
@@ -682,7 +664,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
             <p className="hint">Links card-cover and chargeback recovery paths from one set of records.</p>
           </div>
 
-          <div className="sm:col-span-2">
+          <div>
             <label htmlFor="bookingChannel" className="label">Booked through</label>
             <select className="field" {...bind("bookingChannel")}>
               <option value="airline">Airline website / app / office (refund deadline: within 7 days)</option>
