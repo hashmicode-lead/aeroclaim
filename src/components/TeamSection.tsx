@@ -4,7 +4,7 @@ import Image from "next/image";
 const TEAM = [
   {
     name: "Abdul Rahman Hashmi",
-    role: "Founder · Lead Architect",
+    role: "Developer · Lead Architect",
     photo: "/team/abdul-rahman-hashmi.png",
     bio: "MCA candidate at LEAD College and BCA graduate. Leads AeroClaim's product architecture, platform engineering, and passenger-rights automation systems.",
   },
