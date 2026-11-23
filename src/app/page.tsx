@@ -14,9 +14,9 @@ const TRACKS = [
 ];
 
 const AUDIENCES = [
-  { t: "Travellers", d: "Claim compensation, refunds and baggage payouts for your own flights. Free to start.", cta: "Sign up free" },
-  { t: "Businesses", d: "Audit every employee booking and recover unused and delayed travel spend.", cta: "Start a trial" },
-  { t: "Advocates", d: "Receive evidence-checked consumer cases above ₹50,000 and consult by video.", cta: "Join as advocate" },
+  { href: "/for/travellers", t: "Travellers", d: "Claim compensation, refunds and baggage payouts for your own flights. Free to start.", cta: "Sign up free" },
+  { href: "/for/businesses", t: "Businesses", d: "Audit every employee booking and recover unused and delayed travel spend.", cta: "Start a trial" },
+  { href: "/for/advocates", t: "Advocates", d: "Receive evidence-checked consumer cases above ₹50,000 and consult by video.", cta: "Join as advocate" },
 ];
 
 const STEPS = [
@@ -51,7 +51,7 @@ export default function Home() {
       <section aria-label="Who it's for" className="grid gap-3 sm:grid-cols-3">
         {AUDIENCES.map((a) => (
           <div key={a.t} className="scroll-rise">
-          <Link href="/signup" className="pressable card group flex h-full flex-col p-6 hover:bg-surface-2">
+          <Link href={a.href} className="pressable card group flex h-full flex-col p-6 hover:bg-surface-2">
             <span className="eyebrow">For</span>
             <span className="title-2 mt-1">{a.t}</span>
             <span className="footnote mt-1 flex-1 text-muted">{a.d}</span>

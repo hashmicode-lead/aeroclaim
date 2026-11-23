@@ -3,7 +3,7 @@
 import { Briefcase, Plane, Scale } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { InsuranceAd } from "@/components/InsuranceAd";
 import { LogoMark } from "@/components/Logo";
 import { PricingModal } from "@/components/PricingModal";
@@ -15,9 +15,20 @@ const ROLES: { id: Role; title: string; desc: string; Icon: typeof Plane; audien
   { id: "advocate", title: "Advocate", desc: "Take on verified cases", Icon: Scale, audience: "advocates" },
 ];
 
+const AS_ROLE: Record<string, Role> = { travellers: "flyer", businesses: "corporate", advocates: "advocate" };
+const noopSubscribe = () => () => {};
+
 export default function SignupPage() {
   const router = useRouter();
-  const [role, setRole] = useState<Role>("flyer");
+  // Preselect the account type when arriving from a "For businesses / advocates" page (?as=...);
+  // the user's own choice takes over once they pick one.
+  const fromUrl = useSyncExternalStore(
+    noopSubscribe,
+    () => AS_ROLE[new URLSearchParams(window.location.search).get("as") ?? ""] ?? null,
+    () => null,
+  );
+  const [picked, setRole] = useState<Role | null>(null);
+  const role: Role = picked ?? fromUrl ?? "flyer";
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", org: "", enrolment: "" });
   const [agree, setAgree] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
