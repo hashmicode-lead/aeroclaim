@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { TeamSection } from "@/components/TeamSection";
 
 export const metadata: Metadata = { title: "About us" };
 
@@ -34,7 +35,11 @@ export default function AboutPage() {
         ))}
       </div>
 
-      <h2 id="careers" className="title-2 mt-12 scroll-mt-20">Team and careers</h2>
+      <div className="mt-12">
+        <TeamSection />
+      </div>
+
+      <h2 id="careers" className="title-2 mt-12 scroll-mt-20">What we work on</h2>
       <ul className="card mt-4 divide-y divide-line">
         {TEAM.map((t) => (
           <li key={t.n} className="p-5">

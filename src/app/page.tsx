@@ -2,6 +2,7 @@ import { ArrowRight, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { AdPopup } from "@/components/AdPopup";
 import { CardOfferBanner } from "@/components/CardOfferBanner";
+import { ClientStories } from "@/components/ClientStories";
 import { InsuranceAd } from "@/components/InsuranceAd";
 import { NETWORK_PAIR, NETWORKS } from "@/lib/networks";
 
@@ -102,6 +103,8 @@ export default function Home() {
       <div className="scroll-rise mt-6">
         <InsuranceAd variant="banner" index={0} />
       </div>
+
+      <ClientStories />
 
       <section className="mt-20">
         <h2 className="title-1 scroll-rise text-center">Three steps to your claim</h2>

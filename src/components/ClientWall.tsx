@@ -38,25 +38,25 @@ const STYLE: Record<Style, string> = {
 
 export function ClientWall() {
   return (
-    <section aria-labelledby="clients-title" className="mt-16 overflow-hidden rounded-3xl bg-[#0b0b0c] px-6 py-12 text-white sm:px-10">
+    <section aria-labelledby="clients-title" className="card mt-16 overflow-hidden px-6 py-12 sm:px-10">
       <div className="text-center">
         <h2 id="clients-title" className="title-1">
-          Our <span className="text-[#ffd60a]">Clients</span>
+          Our <span className="text-accent">Clients</span>
         </h2>
-        <p className="footnote mt-2 text-white/60">Travel desks across India recover delayed and unused travel spend with AeroClaim.</p>
+        <p className="footnote mt-2 text-muted">Travel desks across India recover delayed and unused travel spend with AeroClaim.</p>
       </div>
       <ul className="mt-10 grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-6">
         {CLIENTS.map(({ name, tag, Icon, style }) => (
-          <li key={name} className="scroll-rise flex flex-col items-center justify-center text-center opacity-80 transition-opacity hover:opacity-100">
+          <li key={name} className="scroll-rise flex flex-col items-center justify-center text-center text-ink/70 transition-colors hover:text-ink">
             <span className="flex items-center gap-1.5">
               <Icon size={18} strokeWidth={2} aria-hidden />
               <span className={STYLE[style]}>{name}</span>
             </span>
-            {tag && <span className="mt-1 text-[10px] uppercase tracking-[0.18em] text-white/50">{tag}</span>}
+            {tag && <span className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted">{tag}</span>}
           </li>
         ))}
       </ul>
-      <p className="caption mt-10 text-center text-white/40">Sample client names for this demo.</p>
+      <p className="caption mt-10 text-center text-muted">Sample client names for this demo.</p>
     </section>
   );
 }

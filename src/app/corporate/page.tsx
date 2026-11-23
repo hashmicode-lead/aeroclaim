@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, FileSpreadsheet, Search, Upload, Users } from "lucide-react";
+import { ClientStories } from "@/components/ClientStories";
 import { ClientWall } from "@/components/ClientWall";
 import { EmptyHome } from "@/components/EmptyHome";
 import { useSession } from "@/components/session";
@@ -119,6 +120,7 @@ export default function CorporatePage() {
       </section>
 
       <ClientWall />
+      <ClientStories />
 
       {toast && (
         <div role="status" className="reveal fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#1d1d1f] px-5 py-2.5 text-[14px] text-white shadow-[var(--shadow-raised)]">
