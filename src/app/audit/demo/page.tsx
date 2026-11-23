@@ -175,8 +175,8 @@ export default function AuditPage() {
           </div>
         </Section>
         <section>
-          <h2 className="title-2 mb-2 px-1">Cover your next trip</h2>
-          <InsuranceAd variant="banner" index={1} />
+          <h2 className="title-2 mb-2 px-1">Protect your next flight</h2>
+          <InsuranceAd variant="banner" index={0} />
         </section>
       </div>
     </div>
