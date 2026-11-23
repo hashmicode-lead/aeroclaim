@@ -308,7 +308,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
           </ul>
         )}
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button type="button" className="btn-ghost" disabled={parsing || uploading || (!paste.trim() && !files.length)} onClick={autofill}>
+      <button type="button" className={`btn-ghost ${(parsing || uploading || (!paste.trim() && !files.length)) ? "" : "!bg-[#0066CC] !text-white hover:!bg-[#005bb5]"}`} disabled={parsing || uploading || (!paste.trim() && !files.length)} onClick={autofill}>
             {parsing ? "Reading…" : "Extract details"}
           </button>
           {parsed && (
@@ -328,13 +328,22 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
         <h2 className="title-2 mb-5" id="disruptionType">What happened?</h2>
         <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-5">
           {TYPES.map((t) => (
-            <label key={t.id} className={`pressable cursor-pointer rounded-2xl p-4 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-accent-soft ${type === t.id ? "bg-accent-soft shadow-[inset_0_0_0_2px_var(--accent)]" : "bg-fill hover:bg-surface-2"}`}>
+            <label key={t.id} className={`pressable cursor-pointer rounded-2xl p-4 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-accent-soft ${type === t.id ? "border-2 border-[#0066CC] bg-blue-50/40 shadow-[inset_0_0_0_2px_var(--accent)]" : "bg-fill hover:bg-surface-2"}`}>
               <input type="radio" name="disruptionType" value={t.id} checked={type === t.id} onChange={() => set("disruptionType")(t.id)} className="sr-only" />
               <span className={`block text-sm font-medium ${type === t.id ? "text-accent" : ""}`}>{t.title}</span>
               <span className="mt-0.5 block text-xs text-muted">{t.desc}</span>
             </label>
           ))}
         </div>
+        {type && (
+          <p className="footnote mt-3 rounded-xl bg-accent-soft px-4 py-2 text-accent">
+            {type === "delay" ? "Compensation depends on delay duration at arrival. Over 6 hours: meals, hotel (if overnight), and re-routing/refund options." :
+             type === "cancellation" ? "If notified less than 24 hours before departure without a suitable alternate flight, cash compensation applies." :
+             type === "denied_boarding" ? "Compensation ranges from base fare to 4× base fare depending on alternate flight timing." :
+             type === "baggage" ? "Report damage within 7 days, delay within 21 days. Montreal Convention limits: ~1,519 SDR (≈₹1.8 lakh) per passenger." :
+             "Airlines must refund within 7 days (card) or 30 working days (agent). We help escalate overdue refunds."}
+          </p>
+        )}
         {err("disruptionType")}
       </section>
       )}
@@ -350,7 +359,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
           </div>
           <div>
             <label htmlFor="airline" className="label">Airline</label>
-            <input className="field" list="airlines" {...bind("airline")} placeholder="IndiGo" />
+            <input className="field" list="airlines" {...bind("airline")} placeholder="IndiGo" onChange={(e) => { set("airline")(e.target.value); const prefix = e.target.value.trim().toUpperCase(); const match = Object.entries(AIRLINES).find(([code]) => prefix === code); if (match) set("airline")(match[1]); }} />
             <datalist id="airlines">{[...new Set(Object.values(AIRLINES))].map((a) => <option key={a} value={a} />)}</datalist>
             {err("airline")}
           </div>
@@ -371,7 +380,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
           </div>
           <div>
             <label htmlFor="airlineReason" className="label">Reason the airline gave</label>
-            <select className="field" {...bind("airlineReason")}>
+            <select className="field truncate" {...bind("airlineReason")}>
               {REASONS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
             </select>
           </div>
@@ -422,17 +431,39 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
               <>
                 <YesNo name="alternateOffered" label="Was an alternate flight offered?" value={v.alternateOffered ?? ""} onChange={set("alternateOffered")} />
                 {v.alternateOffered === "true" && (
-                  <div>
-                    <label htmlFor="alternateDeparture" className="label">Alternate flight departure</label>
-                    <DateTimeField id="alternateDeparture" withTime value={v.alternateDeparture ?? ""} onChange={set("alternateDeparture")} invalid={!!errors.alternateDeparture} placeholder="Select date and time" />
-                  </div>
+                  <>
+                    <div>
+                      <label htmlFor="alternateDeparture" className="label">Alternate flight departure</label>
+                      <DateTimeField id="alternateDeparture" withTime value={v.alternateDeparture ?? ""} onChange={set("alternateDeparture")} invalid={!!errors.alternateDeparture} placeholder="Select date and time" />
+                    </div>
+                    <div>
+                      <label htmlFor="alternateDelayTier" className="label">How much later was the alternate?</label>
+                      <select className="field" {...bind("alternateDelayTier")}>
+                        <option value="">Select</option>
+                        <option value="under1h">Under 1 hour later</option>
+                        <option value="1to2h">1–2 hours later</option>
+                        <option value="2to4h">2–4 hours later</option>
+                        <option value="over4h">Over 4 hours later</option>
+                        <option value="nextday">Next day or later</option>
+                      </select>
+                    </div>
+                  </>
                 )}
               </>
             )}
             {(type === "delay" || type === "cancellation" || type === "denied_boarding") && (
               <>
                 <YesNo name="missedConnection" label="Did you miss a connecting flight?" value={v.missedConnection ?? ""} onChange={set("missedConnection")} />
-                {v.missedConnection === "true" && <YesNo name="singlePnr" label="Were both flights on the same PNR?" value={v.singlePnr ?? ""} onChange={set("singlePnr")} />}
+                {v.missedConnection === "true" && (
+                  <>
+                    <YesNo name="singlePnr" label="Were both flights on the same PNR?" value={v.singlePnr ?? ""} onChange={set("singlePnr")} />
+                    {v.singlePnr === "false" && (
+                      <p className="footnote rounded-xl bg-warn-soft px-4 py-2 text-warn sm:col-span-2">
+                        Separate-PNR connections are not protected by the airline. Travel insurance or card cover may help — we'll check this in the assessment.
+                      </p>
+                    )}
+                  </>
+                )}
               </>
             )}
             {type === "baggage" && (

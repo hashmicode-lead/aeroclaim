@@ -26,10 +26,10 @@ function MicrosoftMark() {
   );
 }
 
-const TABS: { id: Role; label: string; Icon: typeof Plane; title: string; sub: string }[] = [
-  { id: "flyer", label: "Individual", Icon: Plane, title: "Welcome back", sub: "Track your claims, deadlines and payouts." },
-  { id: "corporate", label: "Business", Icon: Briefcase, title: "Business sign in", sub: "For travel desks and finance teams." },
-  { id: "advocate", label: "Advocate", Icon: Scale, title: "Advocate portal", sub: "For advocates enrolled with a State Bar Council." },
+const TABS: { id: Role; label: string; Icon: typeof Plane; title: string; sub: string; emailPlaceholder: string }[] = [
+  { id: "flyer", label: "Traveller", Icon: Plane, title: "Welcome back", sub: "Track your claims, deadlines and payouts.", emailPlaceholder: "ananya@example.com" },
+  { id: "corporate", label: "Business", Icon: Briefcase, title: "Business sign in", sub: "For travel desks and finance teams.", emailPlaceholder: "you@company.com" },
+  { id: "advocate", label: "Advocate", Icon: Scale, title: "Advocate portal", sub: "For advocates enrolled with a State Bar Council.", emailPlaceholder: "advocate@lawchambers.in" },
 ];
 
 export default function LoginPage() {
@@ -71,6 +71,10 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-[calc(100vh-3rem)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
+        <Link href="/" className="mb-6 inline-flex items-center gap-2" aria-label="AeroClaim home">
+          <LogoMark size={28} />
+          <span className="headline text-ink">AeroClaim</span>
+        </Link>
         <div className="segmented mx-auto flex! w-full" role="tablist" aria-label="Account type">
           {TABS.map((t) => (
             <label key={t.id} data-on={role === t.id} className="flex-1 inline-flex items-center justify-center gap-1.5">
@@ -117,14 +121,19 @@ export default function LoginPage() {
               )}
               <div>
                 <label htmlFor="id" className="label">{role === "corporate" ? "Work email" : role === "advocate" ? "Email" : "Email or username"}</label>
-                <input id="id" className="field" autoComplete="username" value={id} onChange={(e) => setId(e.target.value)} placeholder={role === "corporate" ? "you@company.com" : "ananya@example.com"} />
+                <input id="id" className="field" autoComplete="username" value={id} onChange={(e) => setId(e.target.value)} placeholder={tab.emailPlaceholder} />
               </div>
               <div>
                 <div className="flex items-baseline justify-between">
                   <label htmlFor="password" className="label">Password</label>
                   <button type="button" className="caption text-accent hover:underline">Forgot?</button>
                 </div>
-                <input id="password" type="password" className="field" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+                <div className="relative">
+                <input id="password" type="password" className="field pr-10!" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+                <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink" onClick={(e) => { const inp = (e.currentTarget.previousElementSibling as HTMLInputElement); inp.type = inp.type === "password" ? "text" : "password"; }} aria-label="Show or hide password">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                </div>
               </div>
               {role === "corporate" && (
                 <div>

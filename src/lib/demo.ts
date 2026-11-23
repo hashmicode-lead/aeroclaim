@@ -11,7 +11,7 @@ export const demoUser = {
   email: "ananya.sharma@example.com",
   phone: "+91 98XXX 41207",
   upi: "ananya@okhdfc",
-  cardTier: "Wise Platinum",
+  cardTier: "Visa Platinum",
   initials: "AS",
 };
 
@@ -30,7 +30,7 @@ export const demoClaim = {
   delayMinutes: 380,
   excuse: "Dense fog at Delhi (weather)",
   pirNumber: "LHRAI48213",
-  card: "Wise Platinum ···· 4821",
+  card: "Visa Platinum ···· 4821",
   passengers: 2,
   status: "Evidence verified",
 };
@@ -62,7 +62,7 @@ export const demoBreakdown = [
   { track: "Airline", label: "Damaged suitcase and contents", basis: "Airline pays up to about ₹1.8 lakh per passenger · Montreal Convention Art. 17(2)", inr: 118400 },
   { track: "Airline", label: "Essentials bought while the second bag was delayed", basis: "Montreal Convention Art. 19", inr: 30000 },
   { track: "Airline", label: "6h 20m delay: meals and lounge not provided", basis: "DGCA CAR Sec 3 Series M Part IV para 3.4, plus CPA 2019 deficiency in service", inr: 10000 },
-  { track: "Card", label: "Wise Platinum baggage-delay & trip-delay cover", basis: "Card insurance top-up (cover begins after 6 hours)", inr: 24000 },
+  { track: "Card", label: "Visa Platinum baggage-delay & trip-delay cover", basis: "Card insurance top-up (cover begins after 6 hours)", inr: 24000 },
 ];
 
 export const demoTotal = demoBreakdown.reduce((s, b) => s + b.inr, 0); // 1,82,400
@@ -76,7 +76,7 @@ export const packets = [
   { type: "nodal", title: "Airline nodal notice", desc: "Formal demand to Air India's nodal officer, citing the CAR and Montreal Convention clauses.", pages: 3 },
   { type: "airsewa", title: "AirSewa grievance summary", desc: "Pre-filled summary with the Open-Meteo weather certificate attached.", pages: 2 },
   { type: "ejagriti", title: "e-Jagriti consumer brief", desc: "Deficiency-in-service complaint, chronology and an indexed annexure bundle.", pages: 6 },
-  { type: "chargeback", title: "Card insurance & chargeback", desc: "Wise Platinum card claim pack: PIR, delay certificate and itemised receipts.", pages: 4 },
+  { type: "chargeback", title: "Card insurance & chargeback", desc: "Visa Platinum card claim pack: PIR, delay certificate and itemised receipts.", pages: 4 },
 ] as const;
 
 export type PacketType = (typeof packets)[number]["type"];

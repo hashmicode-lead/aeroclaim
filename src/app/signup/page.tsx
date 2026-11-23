@@ -87,10 +87,17 @@ export default function SignupPage() {
                 );
               })}
             </div>
+            <p className="footnote mt-3 px-1 text-muted">
+              {role === "flyer"
+                ? "Claim compensation, refunds, baggage payouts, and check card travel protection."
+                : role === "corporate"
+                ? "Centralized corporate PNR audits, unspent flight credit recovery, and finance reconciliation."
+                : "Access pre-audited consumer dispute briefs (>₹50,000) with verified evidence bundles and video consults."}
+            </p>
           </fieldset>
 
           <div className="card space-y-4 p-6">
-            <button type="button" className="btn w-full border border-line bg-surface py-2.5! text-ink hover:bg-surface-2" onClick={() => { signIn({ name: "New member", email: "you@gmail.com", role, isNew: true }); setPricing("choose"); }}>
+            <button type="button" className="btn w-full border border-line bg-surface py-2.5! text-ink hover:bg-surface-2" onClick={() => { signIn({ name: "Ananya Sharma", email: "ananya@gmail.com", role, isNew: true }); setPricing("choose"); }}>
               <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden>
                 <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
                 <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
@@ -141,8 +148,16 @@ export default function SignupPage() {
                     <span key={n} className={`h-1 flex-1 rounded-full transition-colors ${strength >= n ? (strength === 1 ? "bg-bad" : strength === 2 ? "bg-warn" : "bg-ok") : "bg-fill"}`} />
                   ))}
                 </div>
-                <p className={`footnote mt-1 ${errors.password ? "text-bad" : "text-muted"}`}>
-                  {errors.password ?? (strength === 3 ? "Strong password" : strength === 2 ? "Add a number and a capital letter to make it stronger" : "Use at least 8 characters")}
+                <p className={`footnote mt-1 ${errors.password ? "text-bad" : strength === 3 ? "text-ok" : strength === 2 ? "text-warn" : "text-muted"}`}>
+                  {errors.password ?? (
+                    form.password.length === 0
+                      ? "Use at least 8 characters with a mix of letters and numbers"
+                      : form.password.length < 8
+                      ? `Weak: ${8 - form.password.length} more character${8 - form.password.length === 1 ? "" : "s"} required`
+                      : strength === 2
+                      ? "Good: add a capital letter or number for a strong password"
+                      : "Strong password ✓"
+                  )}
                 </p>
               </div>
             </div>

@@ -3,8 +3,8 @@
  * logos are trademarks and need a licence. Change them here and every screen follows.
  */
 export const NETWORKS = {
-  wise: { name: "Wise", tiers: ["Classic", "Gold", "Platinum"] },
-  naster: { name: "Naster", tiers: ["Standard", "Titanium", "Platinum", "Elite"] },
+  wise: { name: "Visa", tiers: ["Classic", "Gold", "Platinum"] },
+  naster: { name: "Mastercard", tiers: ["Standard", "Titanium", "Platinum", "Elite"] },
 } as const;
 
 export type NetworkId = keyof typeof NETWORKS;

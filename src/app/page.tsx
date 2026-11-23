@@ -7,10 +7,11 @@ import { InsuranceAd } from "@/components/InsuranceAd";
 import { NETWORK_PAIR, NETWORKS } from "@/lib/networks";
 
 const TRACKS = [
-  { t: "Cancelled flight", stat: "Up to ₹10,000", sub: "cash compensation, plus a full refund", d: "If the airline cancels with less than two weeks' notice and no flight within 2 hours. You also get meals and a hotel while you wait." },
+  { t: "Cancelled flight", stat: "Up to ₹10,000", sub: "cash compensation, plus a full refund", d: "Under DGCA CAR Section 3, Series M, Part IV: cash compensation applies when informed less than 24 hours before departure (or at the airport) without a suitable alternate flight. Full refund or alternate options kick in at more than 6 hours delay." },
   { t: "Bumped from your flight", stat: "Up to ₹20,000", sub: "if the airline overbooked and refused you", d: "The later your replacement flight, the more you get: up to 4 times your base fare." },
   { t: "Lost or damaged bag", stat: "Up to ₹1.8 lakh", sub: "per passenger on international flights", d: "You must complain in writing within 7 days for damage, 21 days for a late bag. We remind you before time runs out." },
   { t: "Refund not received", stat: "Within 7 days", sub: "is how fast airlines must refund card payments", d: "Booked through an agent? 30 working days. If the airline is late, we help you get the money back through your bank." },
+  { t: "Card cover & insurance", stat: "Up to ₹10 lakh", sub: "complimentary travel & delay protection", d: "Paid by Visa or Mastercard? Check if your card already covers delays, separate-PNR missed connections, or baggage damage.", href: "/cards" },
 ];
 
 const AUDIENCES = [
@@ -61,40 +62,27 @@ export default function Home() {
         ))}
       </section>
 
-      <section className="card scroll-rise mt-16 grid items-center gap-8 overflow-hidden p-7 sm:p-10 md:grid-cols-[1fr_auto]">
-        <div>
-          <p className="eyebrow">Card cover</p>
-          <h2 className="title-1 mt-2">Paid by {NETWORK_PAIR} card? Your card may pay too.</h2>
-          <p className="mt-3 max-w-lg text-muted">
-            Premium cards include trip-delay and baggage insurance when the ticket was bought on the card. We check whether your booking qualifies and file the card claim alongside the airline claim.
-          </p>
-          <Link href="/cards" className="btn-primary mt-6"><CreditCard size={16} aria-hidden /> Check my card</Link>
-        </div>
-        <div className="tilt-in relative mx-auto h-44 w-72" aria-hidden>
-          <div className="absolute top-6 left-8 h-40 w-64 rotate-6 rounded-2xl bg-gradient-to-br from-[#24303f] to-[#0e151d] shadow-[var(--shadow-raised)]">
-            <div className="absolute right-4 bottom-4 flex items-center gap-1.5 text-white">
-              <span className="size-4 rotate-45 rounded-[4px] border-2 border-white/80" />
-              <span className="text-[13px] font-semibold tracking-wide">{NETWORKS.naster.name}</span>
-            </div>
-          </div>
-          <div className="absolute top-0 left-0 h-40 w-64 -rotate-3 rounded-2xl bg-gradient-to-br from-[#0c6b5a] to-[#063b32] p-4 shadow-[var(--shadow-raised)]">
-            <div className="h-6 w-9 rounded-md bg-gradient-to-br from-[#f5d98b] to-[#c9a44c]" />
-            <div className="caption mt-8 font-mono tracking-[0.2em] text-white/80">•••• 4821</div>
-            <div className="absolute right-4 bottom-3 text-base font-semibold tracking-[0.08em] text-white">{NETWORKS.wise.name.toUpperCase()}</div>
-          </div>
-        </div>
-      </section>
-
       <section aria-label="What we cover" className="mt-16">
-        <h2 className="title-1 scroll-rise text-center">Everything the airline owes you</h2>
-        <div className="mt-8 grid gap-3 sm:grid-cols-2">
+        <div className="flex flex-wrap items-end justify-between gap-4 px-1">
+          <div>
+            <h2 className="title-1 scroll-rise">Everything you are owed</h2>
+            <p className="footnote mt-1 text-muted">AeroClaim audits all airline statutory entitlements and your individual card coverage.</p>
+          </div>
+          <Link href="/cards" className="btn-ghost hidden sm:inline-flex"><CreditCard size={15} aria-hidden /> Check card cover</Link>
+        </div>
+        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {TRACKS.map((x) => (
-            <div key={x.t} className="card scroll-rise p-7">
+            <div key={x.t} className={`card scroll-rise flex flex-col p-7 ${x.href ? "shadow-[inset_0_0_0_2px_var(--accent-soft)]" : ""}`}>
               <div className="headline">{x.t}</div>
               <div className="title-1 mt-4 text-accent">{x.stat}</div>
               <div className="footnote text-muted">{x.sub}</div>
               <div className="grow-x mt-4 h-0.5 w-12 rounded-full bg-accent" aria-hidden />
-              <p className="footnote mt-4 text-ink/80">{x.d}</p>
+              <p className="footnote mt-4 flex-1 text-ink/80">{x.d}</p>
+              {x.href && (
+                <Link href={x.href} className="btn-primary mt-5 text-[14px]!">
+                  <CreditCard size={15} aria-hidden /> Check card cover
+                </Link>
+              )}
             </div>
           ))}
         </div>
@@ -109,7 +97,7 @@ export default function Home() {
       <section className="mt-20">
         <h2 className="title-1 scroll-rise text-center">Three steps to your claim</h2>
         <ol className="relative mt-10 grid gap-8 sm:grid-cols-3">
-          <li aria-hidden className="grow-x absolute top-5 right-[16.7%] left-[16.7%] hidden h-0.5 rounded-full bg-accent-soft sm:block" />
+          <li aria-hidden className="grow-x absolute top-5 right-[8.3%] left-[8.3%] hidden h-0.5 rounded-full bg-accent-soft sm:block" />
           {STEPS.map((s, i) => (
             <li key={s.t} className="scroll-rise relative text-center">
               <div className="relative mx-auto flex size-10 items-center justify-center rounded-full bg-accent-soft font-semibold text-accent">{i + 1}</div>

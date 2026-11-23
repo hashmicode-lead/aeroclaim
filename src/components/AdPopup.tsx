@@ -44,13 +44,13 @@ export function AdPopup({ delay = 3500 }: { delay?: number }) {
   return (
     <aside
       role="dialog"
-      aria-label="Sponsored offer from Ztar Health Insurance"
+      aria-label="Sponsored offer from Star Health Insurance"
       className={`fixed right-4 bottom-4 left-4 z-50 overflow-hidden rounded-3xl bg-surface shadow-[var(--shadow-raised)] ring-1 ring-line sm:left-auto sm:w-[360px] ${leaving ? "sheet-out" : "sheet"}`}
     >
       <div className="relative bg-[#ea580c] px-6 pt-6 pb-5 text-white">
         <div className="absolute -right-8 -bottom-12 size-36 rounded-full bg-white/10" aria-hidden />
         <div className="absolute right-10 -top-10 size-20 rounded-full bg-white/10" aria-hidden />
-        <span className="relative flex items-center gap-2"><span className="rounded-[9px] ring-2 ring-white/70"><BrandMark id="ztar" size={28} title="Ztar Health Insurance" /></span><span className="caption rounded-full bg-white/20 px-2 py-0.5 font-medium">Sponsored · Ztar Health Insurance</span></span>
+        <span className="relative flex items-center gap-2"><span className="rounded-[9px] ring-2 ring-white/70"><BrandMark id="ztar" size={28} title="Star Health Insurance" /></span><span className="caption rounded-full bg-white/20 px-2 py-0.5 font-medium">Sponsored · Star Health Insurance</span></span>
         <p className="title-2 relative mt-3">Flying this month? Get paid if you&apos;re delayed.</p>
       </div>
       <button aria-label="Close ad" onClick={close} className="absolute top-3 right-3 flex size-5 items-center justify-center rounded-full bg-black/25 text-white hover:bg-black/40">

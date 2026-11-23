@@ -8,6 +8,7 @@ const COLUMNS: { title: string; links: { label: string; href: string; external?:
       { label: "Start a claim", href: "/claims/new" },
       { label: "Card cover check", href: "/cards" },
       { label: "Recommended cards", href: "/cards/recommended" },
+      { label: "Aerospace insurance", href: "/aerospace-insurance" },
       { label: "For travellers", href: "/for/travellers" },
       { label: "For business", href: "/for/businesses" },
       { label: "For advocates", href: "/for/advocates" },
