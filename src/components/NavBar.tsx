@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Logo } from "./Logo";
-import { PricingModal } from "./PricingModal";
+import { PricingModal, type PricingAudience } from "./PricingModal";
 import { ProtectionModal } from "./ProtectionModal";
 import { ROLE_HOME, ROLE_LABEL, setRole, signOut, useSession, type Role } from "./session";
 
@@ -49,7 +49,15 @@ export function NavBar() {
   const session = useSession();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [pricing, setPricing] = useState(false);
+  const [pricing, setPricing] = useState<PricingAudience | null>(null);
+  // Open pricing on the tab that matches where the visitor is (or who they are, once signed in).
+  const openPricing = () => {
+    const p = window.location.pathname;
+    const fromPage: PricingAudience | null =
+      p.startsWith("/for/businesses") || p.startsWith("/corporate") ? "business" : p.startsWith("/for/advocates") || p.startsWith("/advocate") ? "advocates" : null;
+    const fromRole: PricingAudience = session?.role === "corporate" ? "business" : session?.role === "advocate" ? "advocates" : "travellers";
+    setPricing(fromPage ?? fromRole);
+  };
   const [protection, setProtection] = useState(false);
   const menu = useRef<HTMLDivElement>(null);
   const role: Role = session?.role ?? "flyer";
@@ -155,7 +163,7 @@ export function NavBar() {
           ) : (
             <>
               <button onClick={() => setProtection(true)} className="hidden rounded-full px-3 py-1.5 text-[13px] text-ink/70 hover:text-ink sm:inline">Protection</button>
-              <button onClick={() => setPricing(true)} className="hidden rounded-full px-3 py-1.5 text-[13px] text-ink/70 hover:text-ink sm:inline">Pricing</button>
+              <button onClick={openPricing} className="hidden rounded-full px-3 py-1.5 text-[13px] text-ink/70 hover:text-ink sm:inline">Pricing</button>
               <Link href="/login" className="rounded-full px-3 py-1.5 text-[13px] text-ink/70 hover:text-ink">Sign in</Link>
               <Link href="/signup" className="btn-primary px-3.5! py-1! text-[13px]!">Sign up</Link>
             </>
@@ -164,7 +172,7 @@ export function NavBar() {
       </div>
     </header>
     <ProtectionModal open={protection} onClose={() => setProtection(false)} />
-    <PricingModal open={pricing} onClose={() => setPricing(false)} onChoose={() => router.push("/signup")} />
+    <PricingModal open={pricing !== null} initial={pricing ?? "travellers"} onClose={() => setPricing(null)} onChoose={() => router.push(`/signup?as=${pricing === "business" ? "businesses" : pricing ?? "travellers"}`)} />
     </>
   );
 }

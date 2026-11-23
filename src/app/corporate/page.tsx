@@ -42,7 +42,7 @@ function InviteModal({ onClose }: { onClose: () => void }) {
           </div>
         ) : (
           <>
-            <p className="footnote mb-4 text-muted">Add finance and travel-desk colleagues. They'll get access to the PNR audit and recovery dashboard.</p>
+            <p className="footnote mb-4 text-muted">Add finance and travel-desk colleagues. They&apos;ll get access to the PNR audit and recovery dashboard.</p>
             <label className="label" htmlFor="invite-emails">Email addresses (comma-separated)</label>
             <textarea
               id="invite-emails"

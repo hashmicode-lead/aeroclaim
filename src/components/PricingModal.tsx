@@ -84,20 +84,26 @@ export const PLANS: Record<Audience, Plan[]> = {
 
 const LABEL: Record<Audience, string> = { travellers: "Travellers", business: "Business", advocates: "Advocates" };
 
-/** Modal sheet. Dims the page, scales in from 96%, closes on Esc, scrim click or the close button. */
-export function PricingModal({
-  open,
-  onClose,
-  onChoose,
-  initial = "travellers",
-  title = "Plans & pricing",
-}: {
+export type PricingAudience = Audience;
+
+interface PricingModalProps {
   open: boolean;
   onClose: () => void;
   onChoose?: (plan: Plan) => void;
+  /** Tab to show when the sheet opens: travellers, business or advocates. */
   initial?: Audience;
   title?: string;
-}) {
+}
+
+/** Modal sheet. Dims the page, scales in from 96%, closes on Esc, scrim click or the close button. */
+export function PricingModal(props: PricingModalProps) {
+  // Mount the sheet only while open, so it always starts on the tab the caller asked for.
+  if (!props.open) return null;
+  return <PricingSheet {...props} />;
+}
+
+function PricingSheet({ onClose, onChoose, initial = "travellers", title = "Plans & pricing" }: PricingModalProps) {
+  const open = true;
   const [audience, setAudience] = useState<Audience>(initial);
   const [closing, setClosing] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
@@ -142,8 +148,6 @@ export function PricingModal({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
-
-  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6" role="presentation">
