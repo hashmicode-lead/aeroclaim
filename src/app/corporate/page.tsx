@@ -1,6 +1,7 @@
 "use client";
 
 import { Download, FileSpreadsheet, Search, Upload, Users } from "lucide-react";
+import { ClientWall } from "@/components/ClientWall";
 import { EmptyHome } from "@/components/EmptyHome";
 import { useSession } from "@/components/session";
 import { useMemo, useState } from "react";
@@ -31,6 +32,7 @@ export default function CorporatePage() {
 
   if (session?.isNew)
     return (
+      <>
       <EmptyHome
         greeting={session.org || "Your company"}
         title="Set up your PNR audit"
@@ -41,6 +43,10 @@ export default function CorporatePage() {
         ]}
         checklist={["Create your business account", "Upload your first bookings file", "Invite a colleague", "Choose a plan (₹4,999/mo)"]}
       />
+      <div className="mx-auto max-w-5xl px-4 pb-10">
+        <ClientWall />
+      </div>
+      </>
     );
 
   return (
@@ -111,6 +117,8 @@ export default function CorporatePage() {
           </table>
         </div>
       </section>
+
+      <ClientWall />
 
       {toast && (
         <div role="status" className="reveal fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-[#1d1d1f] px-5 py-2.5 text-[14px] text-white shadow-[var(--shadow-raised)]">
