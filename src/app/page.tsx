@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, CreditCard, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { ComparePlans } from "@/components/ComparePlans";
 import { ClientStories } from "@/components/ClientStories";
@@ -8,8 +8,9 @@ const TRACKS = [
   { t: "Cancelled flight", stat: "Up to ₹10,000", sub: "plus a full refund or a new flight", d: "Told less than two weeks before, with no flight within 2 hours? The airline owes you cash." },
   { t: "Bumped from your flight", stat: "Up to ₹20,000", sub: "if the airline overbooked", d: "The later your replacement flight, the more you get: up to 4 times your base fare." },
   { t: "Lost or damaged bag", stat: "Up to ₹1.8 lakh", sub: "per passenger, international flights", d: "Complain within 7 days for damage, 21 for a late bag. We remind you in time." },
+  { t: "Aerospace Insurance", stat: "Up to ₹25 lakh+", sub: "disruption, transit & IRDAI audit", d: "Force majeure delays when airline liability ends, high-value air cargo risk, and IRDAI Bima Bharosa claim escalation.", href: "/aerospace-insurance", cta: "Explore Aerospace Insurance" },
+  { t: "Recommended Cards", stat: "Up to ₹10 lakh", sub: "built-in travel protection", d: `Paid by ${NETWORK_PAIR} card? Discover curated credit & debit cards with automatic flight delay, baggage loss, and missed connection cover.`, href: "/cards/recommended", cta: "See Recommended Cards" },
   { t: "Refund not received", stat: "7 days", sub: "for airlines to refund card payments", d: "Booked through an agent? 30 working days. Late? We get it back through your bank." },
-  { t: "Card cover", stat: "Up to ₹10 lakh", sub: "travel cover on eligible cards", d: `Paid by ${NETWORK_PAIR} card? Your card may cover delays and bags too.`, href: "/cards", cta: "Check card cover" },
 ];
 
 const AUDIENCES = [
@@ -42,6 +43,25 @@ export default function Home() {
             </Link>
           </div>
           <p className="footnote mt-5 text-muted">No card required. Pay only if you recover.*</p>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href="/aerospace-insurance"
+              className="pressable inline-flex items-center gap-2 rounded-full border border-line bg-surface/90 px-4 py-2 footnote text-ink shadow-[var(--shadow-card)] transition-all hover:border-accent hover:bg-surface-2"
+            >
+              <ShieldCheck size={16} className="text-accent" aria-hidden />
+              <span className="font-semibold">Aerospace Insurance</span>
+              <span className="caption text-muted">Force majeure &amp; transit risk ›</span>
+            </Link>
+            <Link
+              href="/cards/recommended"
+              className="pressable inline-flex items-center gap-2 rounded-full border border-line bg-surface/90 px-4 py-2 footnote text-ink shadow-[var(--shadow-card)] transition-all hover:border-accent hover:bg-surface-2"
+            >
+              <CreditCard size={16} className="text-ok" aria-hidden />
+              <span className="font-semibold">Recommended Cards</span>
+              <span className="caption text-muted">Up to ₹10L travel protection ›</span>
+            </Link>
+          </div>
         </div>
       </section>
 

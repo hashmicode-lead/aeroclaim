@@ -12,14 +12,20 @@ const LINKS: Record<Role, { href: string; label: string }[]> = {
   flyer: [
     { href: "/dashboard", label: "My claims" },
     { href: "/claims/new", label: "New claim" },
-    { href: "/cards", label: "Card cover" },
+    { href: "/cards/recommended", label: "Recommended Cards" },
+    { href: "/aerospace-insurance", label: "Aerospace Insurance" },
     { href: "/protection", label: "Protection" },
   ],
   corporate: [
     { href: "/corporate", label: "PNR audit" },
+    { href: "/aerospace-insurance", label: "Aerospace Insurance" },
+    { href: "/cards/recommended", label: "Recommended Cards" },
     { href: "/protection", label: "Protection" },
   ],
-  advocate: [{ href: "/advocate", label: "Leads" }],
+  advocate: [
+    { href: "/advocate", label: "Leads" },
+    { href: "/aerospace-insurance", label: "Aerospace Insurance" },
+  ],
 };
 
 function ActiveLinks({ role }: { role: Role }) {
@@ -68,11 +74,20 @@ export function NavBar() {
           <Logo size={24} />
         </Link>
 
-        {session && (
+        {session ? (
           <nav className="hidden items-center gap-1 text-[13px] sm:flex">
             <Suspense fallback={<NavLinksInner role={role} path="" />}>
               <ActiveLinks role={role} />
             </Suspense>
+          </nav>
+        ) : (
+          <nav className="hidden items-center gap-1 text-[13px] sm:flex">
+            <Link href="/aerospace-insurance" className="rounded-full px-3 py-1.5 transition-colors text-ink/70 hover:text-ink">
+              Aerospace Insurance
+            </Link>
+            <Link href="/cards/recommended" className="rounded-full px-3 py-1.5 transition-colors text-ink/70 hover:text-ink">
+              Recommended Cards
+            </Link>
           </nav>
         )}
 
