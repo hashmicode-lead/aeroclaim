@@ -1,8 +1,7 @@
 "use client";
 
 import { BadgeCheck, CalendarDays, Clock, Lock, MapPin, ShieldCheck, Unlock } from "lucide-react";
-import { EmptyHome } from "@/components/EmptyHome";
-import { useSession } from "@/components/session";
+import { useSession, signIn } from "@/components/session";
 import Link from "next/link";
 import { useState } from "react";
 import { inr, leads } from "@/lib/demo";
@@ -20,16 +19,60 @@ export default function AdvocatePortal() {
 
   if (session?.isNew)
     return (
-      <EmptyHome
-        greeting="Consumer Advocate Portal"
-        title="Verification in progress"
-        sub="We're confirming your enrolment with the Bar Council. Leads appear here once you're verified, usually within one working day."
-        actions={[
-          { href: "#", label: "Complete your profile", desc: "Practice areas, city and consultation fee.", Icon: BadgeCheck, primary: true },
-          { href: "#", label: "Set your availability", desc: "Slots travellers can book for video consults.", Icon: Clock },
-        ]}
-        checklist={["Create your advocate account", "Bar Council verification", "Complete your profile", "Unlock your first lead"]}
-      />
+      <div className="reveal mx-auto max-w-5xl px-4 py-10">
+        <div className="px-1">
+          <p className="footnote text-muted">Consumer Advocate Portal</p>
+          <h1 className="title-1 mt-0.5">Verification in progress</h1>
+          <p className="mt-1.5 max-w-xl text-muted">We&apos;re confirming your enrolment with the Bar Council. Leads appear here once you&apos;re verified, usually within one working day.</p>
+        </div>
+
+        <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_320px]">
+          <div className="space-y-3">
+            <a href="#" className="pressable card group flex items-center gap-4 p-5 hover:bg-surface-2 shadow-[inset_0_0_0_2px_var(--accent),var(--shadow-card)]">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent text-white"><BadgeCheck size={20} /></span>
+              <span className="min-w-0 flex-1">
+                <span className="headline block">Complete your profile</span>
+                <span className="footnote block text-muted">Practice areas, city and consultation fee.</span>
+              </span>
+              <span className="text-muted">→</span>
+            </a>
+            <a href="#" className="pressable card group flex items-center gap-4 p-5 hover:bg-surface-2">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent"><Clock size={20} /></span>
+              <span className="min-w-0 flex-1">
+                <span className="headline block">Set your availability</span>
+                <span className="footnote block text-muted">Slots travellers can book for video consults.</span>
+              </span>
+              <span className="text-muted">→</span>
+            </a>
+            <div className="card mt-6 px-6 py-10 text-center">
+              <p className="headline">Leads appear after verification</p>
+              <p className="footnote mx-auto mt-1 max-w-sm text-muted">Pre-audited consumer dispute briefs (&gt;₹50,000) with verified evidence appear here once Bar Council confirmation is complete.</p>
+              <button
+                type="button"
+                className="btn-ghost mt-4"
+                onClick={() => { signIn({ name: session?.name ?? "Adv. Rahul Khanna", email: session?.email ?? "rahul@example.com", role: "advocate", isNew: false }); }}
+              >
+                Preview demo leads
+              </button>
+            </div>
+          </div>
+          <aside className="space-y-4">
+            <div className="card p-5">
+              <p className="headline">Verification checklist</p>
+              <ul className="mt-3 space-y-3">
+                {["Create your advocate account", "Bar Council verification", "Complete your profile", "Unlock your first lead"].map((c, i) => (
+                  <li key={c} className="footnote flex items-start gap-3">
+                    <span className={`caption mt-px flex size-5 shrink-0 items-center justify-center rounded-full font-semibold ${i === 0 ? "bg-ok text-white" : "bg-fill text-muted"}`}>
+                      {i === 0 ? "✓" : i + 1}
+                    </span>
+                    <span className={i === 0 ? "text-muted line-through" : ""}>{c}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </div>
     );
 
   return (
