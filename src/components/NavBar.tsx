@@ -59,7 +59,7 @@ export function NavBar() {
     <header className="no-print sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
       <div className="mx-auto flex h-12 max-w-5xl items-center gap-4 px-4">
         <Link href="/" aria-label="AeroClaim home" className="flex items-center">
-          <Logo size={26} />
+          <Logo size={24} />
         </Link>
 
         {session && (

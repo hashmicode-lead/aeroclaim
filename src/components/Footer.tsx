@@ -50,7 +50,7 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-[1.3fr_repeat(4,1fr)]">
           <div>
             <Link href="/" aria-label="AeroClaim home" className="flex items-center">
-              <Logo size={24} />
+              <Logo size={22} />
             </Link>
             <p className="footnote mt-3 max-w-xs text-muted">Flight delay, cancellation, baggage and refund claims for Indian travellers, prepared in minutes.</p>
           </div>

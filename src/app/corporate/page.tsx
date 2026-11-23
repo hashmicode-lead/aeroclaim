@@ -3,6 +3,7 @@
 import { Download, FileSpreadsheet, Search, Upload, Users } from "lucide-react";
 import { ClientStories } from "@/components/ClientStories";
 import { ClientWall } from "@/components/ClientWall";
+import { PartnerStrip } from "@/components/PartnerStrip";
 import { EmptyHome } from "@/components/EmptyHome";
 import { useSession } from "@/components/session";
 import { useMemo, useState } from "react";
@@ -46,6 +47,7 @@ export default function CorporatePage() {
       />
       <div className="mx-auto max-w-5xl px-4 pb-10">
         <ClientWall />
+        <PartnerStrip />
       </div>
       </>
     );
@@ -120,6 +122,7 @@ export default function CorporatePage() {
       </section>
 
       <ClientWall />
+      <PartnerStrip />
       <ClientStories />
 
       {toast && (

@@ -459,7 +459,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
                     <YesNo name="singlePnr" label="Were both flights on the same PNR?" value={v.singlePnr ?? ""} onChange={set("singlePnr")} />
                     {v.singlePnr === "false" && (
                       <p className="footnote rounded-xl bg-warn-soft px-4 py-2 text-warn sm:col-span-2">
-                        Separate-PNR connections are not protected by the airline. Travel insurance or card cover may help — we'll check this in the assessment.
+                        Separate-PNR connections are not protected by the airline. Travel insurance or card cover may help — we&apos;ll check this in the assessment.
                       </p>
                     )}
                   </>

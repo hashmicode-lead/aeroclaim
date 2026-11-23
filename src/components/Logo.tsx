@@ -1,17 +1,21 @@
 import { useId } from "react";
 
 /**
- * AeroClaim mark: a plane climbing inside an open orbit ring, on a white continuous-corner tile.
+ * AeroClaim mark: a plane climbing inside an open orbit ring.
+ * Shown without a background in the UI; pass `tile` for an app-icon style white tile
+ * (the favicon in src/app/icon.svg keeps the tile so it reads on dark browser tabs).
  * Reference artwork: public/brand/aeroclaim-logo.jpg
  */
-export function LogoMark({ size = 24, className = "" }: { size?: number; className?: string }) {
+export function LogoMark({ size = 24, className = "", tile = false }: { size?: number; className?: string; tile?: boolean }) {
   const uid = useId().replace(/:/g, "");
-  const tile = `${uid}t`;
+  const tileId = `${uid}t`;
   const blue = `${uid}b`;
+  // Without the tile, crop the viewBox to the ring so the mark fills its box and aligns with text.
+  const viewBox = tile ? "0 0 32 32" : "4.6 4.6 22.8 22.8";
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" className={className} aria-hidden>
+    <svg width={size} height={size} viewBox={viewBox} className={className} aria-hidden>
       <defs>
-        <linearGradient id={tile} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={tileId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#ffffff" />
           <stop offset="1" stopColor="#eef1f6" />
         </linearGradient>
@@ -20,12 +24,14 @@ export function LogoMark({ size = 24, className = "" }: { size?: number; classNa
           <stop offset="1" stopColor="#0a6cff" />
         </linearGradient>
       </defs>
-      <path
-        fill={`url(#${tile})`}
-        stroke="rgba(0,0,0,0.09)"
-        strokeWidth="0.6"
-        d="M16 .3c9.5 0 12.6 0 14.2 1.5s1.5 4.7 1.5 14.2 0 12.6-1.5 14.2-4.7 1.5-14.2 1.5S3.4 31.7 1.8 30.2.3 25.5.3 16 .3 3.4 1.8 1.8 6.5.3 16 .3Z"
-      />
+      {tile && (
+        <path
+          fill={`url(#${tileId})`}
+          stroke="rgba(0,0,0,0.09)"
+          strokeWidth="0.6"
+          d="M16 .3c9.5 0 12.6 0 14.2 1.5s1.5 4.7 1.5 14.2 0 12.6-1.5 14.2-4.7 1.5-14.2 1.5S3.4 31.7 1.8 30.2.3 25.5.3 16 .3 3.4 1.8 1.8 6.5.3 16 .3Z"
+        />
+      )}
       {/* Open ring: ~84% of the circle, gap at the upper right */}
       <circle cx="16" cy="16" r="10.2" fill="none" stroke={`url(#${blue})`} strokeWidth="2.1" strokeLinecap="round" strokeDasharray="54 64.1" transform="rotate(-12 16 16)" />
       {/* Plane (Material "flight" glyph, Apache-2.0), heading up-right */}
@@ -38,9 +44,9 @@ export function LogoMark({ size = 24, className = "" }: { size?: number; classNa
 
 export function Logo({ size = 24, className = "" }: { size?: number; className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
+    <span className={`inline-flex items-center gap-1.5 ${className}`}>
       <LogoMark size={size} />
-      <span className="text-[17px] font-bold tracking-[-0.035em]">
+      <span className="text-[18px] leading-none font-bold tracking-[-0.035em]">
         <span className="text-ink">Aero</span>
         <span className="bg-gradient-to-b from-[#1f97ff] to-[#0a6cff] bg-clip-text text-transparent">Claim</span>
       </span>

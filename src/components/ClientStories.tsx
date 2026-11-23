@@ -23,6 +23,17 @@ interface Story {
 
 const STORIES: Story[] = [
   {
+    // Shown with his consent (confirmed by the team); quote is a draft for him to approve.
+    name: "Dr. Thomas George K",
+    role: "Director and Chairman, LEAD College (Autonomous)",
+    badge: "Chairman · Mentor",
+    initials: "TG",
+    hue: "#6d28d9",
+    photo: "/team/thomas-george-k.jpg",
+    quote:
+      "Opportunity is everywhere if you have an entrepreneurial eye. Millions of Indian travellers accept a cancelled flight as bad luck. This team saw the rights hidden in the rulebook and built a way for anyone to claim them.",
+  },
+  {
     name: "Riju Monachan",
     role: "AeroClaim team",
     badge: "Beta tester",
@@ -141,7 +152,7 @@ export function ClientStories() {
           </li>
         ))}
       </ul>
-      <p className="caption mt-2 px-1 text-muted italic">Team quotes describe testing AeroClaim. Customer stories are samples for this demo.</p>
+      <p className="caption mt-2 px-1 text-muted italic">Team and mentor quotes are shared with permission. Customer stories are samples for this demo.</p>
     </section>
   );
 }

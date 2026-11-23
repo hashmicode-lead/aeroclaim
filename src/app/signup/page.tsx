@@ -65,7 +65,7 @@ export default function SignupPage() {
   return (
     <div className="mx-auto grid max-w-5xl gap-10 px-4 py-12 lg:grid-cols-[1fr_340px]">
       <div className="reveal mx-auto w-full max-w-lg">
-        <LogoMark size={48} className="mb-5 drop-shadow-[0_8px_18px_rgba(0,0,0,0.12)]" />
+        <LogoMark size={44} className="mb-5" />
         <h1 className="title-1">Create your account</h1>
         <p className="mt-1.5 text-muted">
           Already have one? <Link href="/login" className="text-accent hover:underline">Sign in</Link>

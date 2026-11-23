@@ -220,7 +220,7 @@ export default function AerospaceInsurancePage() {
         </h2>
         <p className="footnote scroll-rise mx-auto mt-2 max-w-xl text-center text-muted">
           No amount of planning protects against airline failures, weather delays, or baggage
-          mishandling. Here's what AeroClaim adds for disciplined travellers.
+          mishandling. Here&apos;s what AeroClaim adds for disciplined travellers.
         </p>
         <div className="mt-8 grid gap-3 sm:grid-cols-2">
           <div className="card scroll-rise p-6">
@@ -264,7 +264,7 @@ export default function AerospaceInsurancePage() {
         <h2 className="title-1 text-balance">Check your protection gaps</h2>
         <p className="footnote max-w-md text-muted">
           Run a free cover check to see where airline rules, your card insurance, and travel policies
-          overlap — and where they don't.
+          overlap — and where they don&apos;t.
         </p>
         <Link href="/signup" className="btn-primary px-6! py-3! text-[17px]! bg-[#0066CC]">
           Start a free cover check
