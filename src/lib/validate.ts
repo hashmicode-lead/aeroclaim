@@ -10,6 +10,7 @@ const ENUMS = {
   bookingChannel: ["airline", "agent"],
   paymentMethod: ["credit_card", "debit_card", "upi", "netbanking", "cash", "wallet"],
   baggageIssue: ["delayed", "damaged", "lost", "pilfered"],
+  protectionTier: ["trip_shield", "annual_pass"],
 } as const;
 
 export type ValidationResult = { ok: true; input: ClaimInput } | { ok: false; errors: Record<string, string> };
@@ -85,6 +86,7 @@ export function validateClaimInput(raw: unknown): ValidationResult {
     pirNumber: str("pirNumber", 20)?.toUpperCase(),
     baggageClaimAmount: num("baggageClaimAmount"),
     notes: str("notes", 4000),
+    protectionTier: oneOf("protectionTier"),
   };
 
   if (!input.passengerName) errors.passengerName = "Required";

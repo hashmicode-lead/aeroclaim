@@ -57,6 +57,11 @@ async function ClaimReport({ params }: { params: Promise<{ id: string }> }) {
       {/* Title */}
       <header className="px-1">
         <p className="eyebrow">{TYPE[i.disruptionType]} · PNR {i.pnr}</p>
+        {i.protectionTier && (
+          <p className="caption mt-2 inline-flex items-center gap-1 rounded-full bg-ok-soft px-2.5 py-0.5 font-semibold text-ok">
+            Protected · {i.protectionTier === "annual_pass" ? "Annual Pass" : "Trip Shield"}
+          </p>
+        )}
         <h1 className="title-1 mt-2">
           {o?.city ?? i.origin} <span className="text-muted">→</span> {d?.city ?? i.destination}
         </h1>

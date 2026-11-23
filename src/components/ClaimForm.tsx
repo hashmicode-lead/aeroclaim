@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, FileText, UploadCloud, X } from "lucide-reac
 import { useState } from "react";
 import { AIRLINES, AIRPORTS } from "@/lib/airports";
 import { DateTimeField } from "./DateTimeField";
+import { currentProtection } from "./session";
 import { DOC_KIND_LABELS, type DisruptionType, type DocKind } from "@/lib/types";
 
 type Values = Record<string, string>;
@@ -201,7 +202,7 @@ export function ClaimForm({ directUpload = false }: { directUpload?: boolean }) 
     setSubmitting(true);
     setErrors({});
     const fd = new FormData();
-    fd.set("data", JSON.stringify(v));
+    fd.set("data", JSON.stringify({ ...v, protectionTier: currentProtection() ?? undefined }));
     appendFiles(fd, true);
     const res = await fetch("/api/claims", { method: "POST", body: fd });
     const data = await res.json();

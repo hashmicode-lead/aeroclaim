@@ -5,7 +5,7 @@ import { EmptyHome } from "@/components/EmptyHome";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Countdown } from "@/components/client";
-import { InsuranceAd } from "@/components/InsuranceAd";
+import { ComparePlans } from "@/components/ComparePlans";
 import { useSession } from "@/components/session";
 import { signIn } from "@/components/session";
 import { demoDeadlines, demoTotal, inr, myClaims, timeline } from "@/lib/demo";
@@ -106,7 +106,7 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="mt-4">
-            <InsuranceAd index={2} />
+            <ComparePlans variant="compact" />
           </div>
         </section>
       </div>

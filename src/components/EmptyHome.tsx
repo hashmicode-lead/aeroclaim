@@ -1,6 +1,6 @@
 import { ArrowRight, type LucideIcon } from "lucide-react";
 import Link from "next/link";
-import { InsuranceAd } from "./InsuranceAd";
+import { ComparePlans } from "./ComparePlans";
 
 /** First-run home for a freshly signed-up account: no history, clear next steps. */
 export function EmptyHome({
@@ -64,7 +64,7 @@ export function EmptyHome({
               ))}
             </ul>
           </div>
-          <InsuranceAd index={2} />
+          <ComparePlans variant="compact" />
         </aside>
       </div>
     </div>

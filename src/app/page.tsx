@@ -1,6 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { AdPopup } from "@/components/AdPopup";
+import { ComparePlans } from "@/components/ComparePlans";
 import { ClientStories } from "@/components/ClientStories";
 import { NETWORK_PAIR } from "@/lib/networks";
 
@@ -84,6 +84,10 @@ export default function Home() {
       </section>
 
       <div className="mt-28 sm:mt-36">
+        <ComparePlans />
+      </div>
+
+      <div className="mt-28 sm:mt-36">
         <ClientStories />
       </div>
 
@@ -108,7 +112,6 @@ export default function Home() {
         </div>
       </section>
 
-      <AdPopup delay={9000} />
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { Briefcase, Plane, Scale } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
-import { InsuranceAd } from "@/components/InsuranceAd";
+import { ComparePlans } from "@/components/ComparePlans";
 import { LogoMark } from "@/components/Logo";
 import { PricingModal } from "@/components/PricingModal";
 import { ROLE_HOME, signIn, type Role } from "@/components/session";
@@ -178,9 +178,8 @@ export default function SignupPage() {
         </form>
       </div>
 
-      <aside className="space-y-4 lg:pt-16" aria-label="Sponsored">
-        <InsuranceAd index={0} />
-        <InsuranceAd index={1} />
+      <aside className="space-y-4 lg:pt-16" aria-label="Protection plans">
+        <ComparePlans variant="compact" />
       </aside>
 
       <PricingModal

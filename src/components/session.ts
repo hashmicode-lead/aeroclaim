@@ -68,3 +68,48 @@ export const setRole = (role: Role) => {
 
 export const ROLE_HOME: Record<Role, string> = { flyer: "/dashboard", corporate: "/corporate", advocate: "/advocate" };
 export const ROLE_LABEL: Record<Role, string> = { flyer: "Flyer", corporate: "Corporate", advocate: "Advocate" };
+
+/* ---------- Protection tier (kept separately so it can be chosen before signing up) ---------- */
+export type ProtectionTier = "trip_shield" | "annual_pass";
+export const PROTECTION_LABEL: Record<ProtectionTier, string> = { trip_shield: "Trip Shield", annual_pass: "Annual Pass" };
+
+const PKEY = "aeroclaim.protection";
+const pListeners = new Set<() => void>();
+
+function readProtection(): ProtectionTier | null {
+  try {
+    const v = localStorage.getItem(PKEY);
+    return v === "trip_shield" || v === "annual_pass" ? v : null;
+  } catch {
+    return null;
+  }
+}
+
+export function useProtection(): ProtectionTier | null | undefined {
+  return useSyncExternalStore(
+    (cb) => {
+      pListeners.add(cb);
+      window.addEventListener("storage", cb);
+      return () => {
+        pListeners.delete(cb);
+        window.removeEventListener("storage", cb);
+      };
+    },
+    readProtection,
+    () => undefined,
+  );
+}
+
+export function setProtection(tier: ProtectionTier | null) {
+  try {
+    if (tier) localStorage.setItem(PKEY, tier);
+    else localStorage.removeItem(PKEY);
+  } catch {
+    /* storage blocked: selection lasts for this page view only */
+  }
+  pListeners.forEach((l) => l());
+}
+
+export function currentProtection(): ProtectionTier | null {
+  return typeof window === "undefined" ? null : readProtection();
+}

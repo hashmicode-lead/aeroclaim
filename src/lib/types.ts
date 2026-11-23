@@ -68,6 +68,9 @@ export interface ClaimInput {
   baggageClaimAmount?: number;
 
   notes?: string;
+
+  /** Protection plan the traveller chose (Trip Shield / Annual Pass), if any. */
+  protectionTier?: "trip_shield" | "annual_pass";
 }
 
 export type FindingStatus = "eligible" | "likely" | "needs_info" | "not_eligible" | "info";
