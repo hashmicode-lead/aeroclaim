@@ -177,7 +177,7 @@ export default async function AudiencePage({ params }: PageProps<"/for/[audience
   return (
     <>
     {audience === "travellers" && <CardOfferBanner />}
-    <div className="mx-auto max-w-5xl px-4">
+    <div className="mx-auto max-w-5xl px-5 pb-8 sm:px-6">
       {/* Hero */}
       <section className="reveal pt-16 pb-12 text-center sm:pt-24">
         <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-accent-soft text-accent">
@@ -203,7 +203,7 @@ export default async function AudiencePage({ params }: PageProps<"/for/[audience
       </section>
 
       {/* Features */}
-      <section className="mt-20" aria-labelledby="features-title">
+      <section className="mt-24 sm:mt-32" aria-labelledby="features-title">
         <h2 id="features-title" className="title-1 scroll-rise text-center">What you get</h2>
         <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {p.features.map((f) => (
@@ -217,7 +217,7 @@ export default async function AudiencePage({ params }: PageProps<"/for/[audience
       </section>
 
       {/* Steps */}
-      <section className="mt-20" aria-labelledby="steps-title">
+      <section className="mt-24 sm:mt-32" aria-labelledby="steps-title">
         <h2 id="steps-title" className="title-1 scroll-rise text-center">How it works</h2>
         <ol className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {p.steps.map((s, i) => (
@@ -231,7 +231,7 @@ export default async function AudiencePage({ params }: PageProps<"/for/[audience
       </section>
 
       {/* Pricing */}
-      <section className="mt-20" aria-labelledby="pricing-title">
+      <section className="mt-24 sm:mt-32" aria-labelledby="pricing-title">
         <h2 id="pricing-title" className="title-1 scroll-rise text-center">Pricing</h2>
         <div className="mx-auto mt-8 grid max-w-3xl gap-3 sm:grid-cols-2">
           {p.plans.map((pl) => (
@@ -262,7 +262,7 @@ export default async function AudiencePage({ params }: PageProps<"/for/[audience
       {audience === "travellers" && <ClientStories />}
 
       {/* FAQ */}
-      <section className="mx-auto mt-20 max-w-3xl" aria-labelledby="faq-title">
+      <section className="mx-auto mt-24 max-w-3xl sm:mt-32" aria-labelledby="faq-title">
         <h2 id="faq-title" className="title-1 scroll-rise text-center">Questions</h2>
         <div className="card mt-8 divide-y divide-line">
           {p.faq.map((f) => (
@@ -278,7 +278,7 @@ export default async function AudiencePage({ params }: PageProps<"/for/[audience
       </section>
 
       {/* Closing CTA */}
-      <section className="card scroll-rise mt-20 flex flex-col items-center gap-4 p-10 text-center">
+      <section className="card scroll-rise mt-24 sm:mt-32 flex flex-col items-center gap-4 p-10 text-center">
         <Luggage size={28} className="text-accent" aria-hidden />
         <h2 className="title-1 text-balance">Ready when you are.</h2>
         <Link href={signupHref} className="btn-primary px-6! py-3! text-[17px]! bg-[#0066CC] hover:bg-[#005bb5]">{p.cta}</Link>

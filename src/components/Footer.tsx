@@ -6,6 +6,7 @@ const COLUMNS: { title: string; links: { label: string; href: string; external?:
     title: "Product",
     links: [
       { label: "Start a claim", href: "/claims/new" },
+      { label: "Travel protection", href: "/protection" },
       { label: "Card cover check", href: "/cards" },
       { label: "Recommended cards", href: "/cards/recommended" },
       { label: "Aerospace insurance", href: "/aerospace-insurance" },

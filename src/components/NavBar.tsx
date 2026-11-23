@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Logo } from "./Logo";
 import { PricingModal } from "./PricingModal";
+import { ProtectionModal } from "./ProtectionModal";
 import { ROLE_HOME, ROLE_LABEL, setRole, signOut, useSession, type Role } from "./session";
 
 const LINKS: Record<Role, { href: string; label: string }[]> = {
@@ -12,8 +13,12 @@ const LINKS: Record<Role, { href: string; label: string }[]> = {
     { href: "/dashboard", label: "My claims" },
     { href: "/claims/new", label: "New claim" },
     { href: "/cards", label: "Card cover" },
+    { href: "/protection", label: "Protection" },
   ],
-  corporate: [{ href: "/corporate", label: "PNR audit" }],
+  corporate: [
+    { href: "/corporate", label: "PNR audit" },
+    { href: "/protection", label: "Protection" },
+  ],
   advocate: [{ href: "/advocate", label: "Leads" }],
 };
 
@@ -39,6 +44,7 @@ export function NavBar() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pricing, setPricing] = useState(false);
+  const [protection, setProtection] = useState(false);
   const menu = useRef<HTMLDivElement>(null);
   const role: Role = session?.role ?? "flyer";
 
@@ -133,6 +139,7 @@ export function NavBar() {
             </div>
           ) : (
             <>
+              <button onClick={() => setProtection(true)} className="hidden rounded-full px-3 py-1.5 text-[13px] text-ink/70 hover:text-ink sm:inline">Protection</button>
               <button onClick={() => setPricing(true)} className="hidden rounded-full px-3 py-1.5 text-[13px] text-ink/70 hover:text-ink sm:inline">Pricing</button>
               <Link href="/login" className="rounded-full px-3 py-1.5 text-[13px] text-ink/70 hover:text-ink">Sign in</Link>
               <Link href="/signup" className="btn-primary px-3.5! py-1! text-[13px]!">Sign up</Link>
@@ -141,6 +148,7 @@ export function NavBar() {
         </div>
       </div>
     </header>
+    <ProtectionModal open={protection} onClose={() => setProtection(false)} />
     <PricingModal open={pricing} onClose={() => setPricing(false)} onChoose={() => router.push("/signup")} />
     </>
   );

@@ -51,12 +51,18 @@
 }
 
 html {
+  overflow-x: clip; /* never let a stray element push the page sideways on phones */
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  background: var(--bg);
+  /* A quiet wash of brand blue and violet at the top of every page, fading into the neutral ground. */
+  background:
+    radial-gradient(1100px 520px at 15% -8%, rgba(0, 102, 204, 0.07), transparent 65%),
+    radial-gradient(900px 480px at 92% -6%, rgba(94, 92, 230, 0.06), transparent 62%),
+    var(--bg);
+  background-repeat: no-repeat;
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: 1.0625rem; /* 17px, Apple body size */
@@ -309,6 +315,18 @@ body {
     animation-timeline: view();
     animation-range: entry 20% cover 45%;
   }
+}
+
+/* Soft glow behind the hero headline. Decorative only, no layout effect. */
+.hero-glow::before {
+  content: "";
+  position: absolute;
+  inset: 4% 8% auto;
+  height: 70%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(0, 102, 204, 0.1), rgba(94, 92, 230, 0.05) 55%, transparent);
+  filter: blur(20px);
 }
 
 /* Scroll-edge fade instead of a hard divider under floating chrome */
