@@ -2,6 +2,7 @@ import "server-only";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { createClient, type Client, type InStatement } from "@libsql/client";
+import { createClaimBlob, getClaimBlob, listClaimsBlob, readDocumentBlob, updateAssessmentBlob, blobDbActive } from "./blobdb";
 import { DATA_DIR, loadFile } from "./storage";
 import type { Assessment, ClaimInput, ClaimRecord, DocKind, StoredDocument, WeatherReport } from "./types";
 
@@ -9,6 +10,7 @@ import type { Assessment, ClaimInput, ClaimRecord, DocKind, StoredDocument, Weat
  * Database: libSQL / Turso.
  * - Production (Vercel): TURSO_DATABASE_URL + TURSO_AUTH_TOKEN (set by the Turso integration).
  * - Development: a local SQLite file at ./data/aeroclaim.db.
+ * - Vercel without Turso: a private Vercel Blob store (see blobdb.ts).
  */
 const g = globalThis as unknown as { __aeroclaimDb?: { client: Client; ready: Promise<unknown> } };
 
@@ -92,6 +94,7 @@ export async function createClaim(args: {
   weather: WeatherReport | null;
   documents: NewDocument[];
 }): Promise<string> {
+  if (blobDbActive()) return createClaimBlob(args);
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
   const stmts: InStatement[] = [
@@ -109,6 +112,7 @@ export async function createClaim(args: {
 }
 
 export async function getClaim(id: string): Promise<ClaimRecord | null> {
+  if (blobDbActive()) return getClaimBlob(id);
   const c = await db();
   const [claims, docs] = await c.batch(
     [
@@ -122,11 +126,13 @@ export async function getClaim(id: string): Promise<ClaimRecord | null> {
 }
 
 export async function listClaims(): Promise<ClaimRecord[]> {
+  if (blobDbActive()) return listClaimsBlob();
   const res = await (await db()).execute("SELECT id, created_at, input, assessment, NULL AS weather FROM claims ORDER BY created_at DESC LIMIT 200");
   return res.rows.map((r) => toClaim(r, []));
 }
 
 export async function updateAssessment(id: string, assessment: Assessment, weather: WeatherReport | null) {
+  if (blobDbActive()) return updateAssessmentBlob(id, assessment, weather);
   await (await db()).execute({
     sql: "UPDATE claims SET assessment = ?, weather = ? WHERE id = ?",
     args: [JSON.stringify(assessment), weather ? JSON.stringify(weather) : null, id],
@@ -134,6 +140,7 @@ export async function updateAssessment(id: string, assessment: Assessment, weath
 }
 
 export async function readDocument(id: string): Promise<{ doc: StoredDocument; body: Uint8Array | ReadableStream<Uint8Array> } | null> {
+  if (blobDbActive()) return readDocumentBlob(id);
   const res = await (await db()).execute({ sql: "SELECT * FROM documents WHERE id = ?", args: [id] });
   const row = res.rows[0];
   if (!row) return null;
