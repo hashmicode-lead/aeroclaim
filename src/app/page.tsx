@@ -1,7 +1,6 @@
 import { ArrowRight, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { AdPopup } from "@/components/AdPopup";
-import { CardOfferBanner } from "@/components/CardOfferBanner";
 import { ClientStories } from "@/components/ClientStories";
 import { InsuranceAd } from "@/components/InsuranceAd";
 import { NETWORK_PAIR, NETWORKS } from "@/lib/networks";
@@ -28,8 +27,6 @@ const STEPS = [
 
 export default function Home() {
   return (
-    <>
-    <CardOfferBanner />
     <div className="mx-auto max-w-5xl px-4">
       <section className="reveal pt-20 pb-16 text-center sm:pt-28 sm:pb-20">
         <div className="hero-recede">
@@ -113,6 +110,5 @@ export default function Home() {
 
       <AdPopup />
     </div>
-    </>
   );
 }

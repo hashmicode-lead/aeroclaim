@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CardOfferBanner } from "@/components/CardOfferBanner";
 import { ClientStories } from "@/components/ClientStories";
 import { notFound } from "next/navigation";
 
@@ -174,6 +175,8 @@ export default async function AudiencePage({ params }: PageProps<"/for/[audience
   const signupHref = `/signup?as=${audience}`;
 
   return (
+    <>
+    {audience === "travellers" && <CardOfferBanner />}
     <div className="mx-auto max-w-5xl px-4">
       {/* Hero */}
       <section className="reveal pt-16 pb-12 text-center sm:pt-24">
@@ -281,5 +284,6 @@ export default async function AudiencePage({ params }: PageProps<"/for/[audience
         <Link href={signupHref} className="btn-primary px-6! py-3! text-[17px]! bg-[#0066CC] hover:bg-[#005bb5]">{p.cta}</Link>
       </section>
     </div>
+    </>
   );
 }
