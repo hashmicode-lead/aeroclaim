@@ -27,7 +27,7 @@ const ADS = [
     mark: "fbi" as BrandId,
     brand: "FBI Health Insurance",
     headline: "Annual multi-trip cover for ₹2,999",
-    body: "Unlimited international trips, medical cover up to $250,000 and missed connections.",
+    body: "Unlimited international trips, medical cover up to ₹2 crore and missed connections.",
     cta: "Compare covers",
   },
 ];
@@ -41,7 +41,7 @@ export function InsuranceAd({ variant = "card", index = 0 }: { variant?: "card" 
   const Badge = <span className="caption rounded-full bg-fill px-2 py-0.5 font-medium text-muted">Sponsored</span>;
   const Mark = <BrandMark id={ad.mark} size={40} title={ad.brand} />;
   const Cta = (
-    <button className="btn-ghost shrink-0" onClick={() => setClicked(true)}>
+    <button className="btn-ghost shrink-0 border border-accent/25 bg-accent-soft text-accent transition-colors hover:bg-accent/15" onClick={() => setClicked(true)}>
       {clicked ? "Quote sent to your email" : ad.cta}
     </button>
   );

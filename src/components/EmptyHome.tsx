@@ -9,12 +9,14 @@ export function EmptyHome({
   sub,
   actions,
   checklist,
+  onLoadSample,
 }: {
   greeting: string;
   title: string;
   sub: string;
   actions: { href: string; label: string; desc: string; Icon: LucideIcon; primary?: boolean }[];
   checklist: string[];
+  onLoadSample?: () => void;
 }) {
   return (
     <div className="reveal mx-auto max-w-5xl px-4 py-10">
@@ -42,6 +44,11 @@ export function EmptyHome({
           <div className="card mt-6 px-6 py-10 text-center">
             <p className="headline">Nothing here yet</p>
             <p className="footnote mx-auto mt-1 max-w-sm text-muted">Your claims, deadlines and payouts will appear here once you add your first one.</p>
+            {onLoadSample && (
+              <button type="button" onClick={onLoadSample} className="btn-ghost mt-4">
+                Load sample claim (₹1,82,400 demo)
+              </button>
+            )}
           </div>
         </div>
 

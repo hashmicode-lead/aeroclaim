@@ -115,8 +115,13 @@ export function PricingModal({
   useEffect(() => {
     if (!open) return;
     opener.current = document.activeElement;
-    const prev = document.body.style.overflow;
+    const prevOverflow = document.body.style.overflow;
+    const prevPadding = document.body.style.paddingRight;
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
     panel.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
@@ -130,7 +135,8 @@ export function PricingModal({
     };
     document.addEventListener("keydown", onKey);
     return () => {
-      document.body.style.overflow = prev;
+      document.body.style.overflow = prevOverflow;
+      document.body.style.paddingRight = prevPadding;
       document.removeEventListener("keydown", onKey);
       (opener.current as HTMLElement | null)?.focus?.();
     };
@@ -141,7 +147,7 @@ export function PricingModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6" role="presentation">
-      <div className={`scrim absolute inset-0 bg-black/35 ${closing ? "scrim-out" : ""}`} onClick={close} aria-hidden />
+      <div className={`scrim absolute inset-0 bg-black/45 backdrop-blur-[2px] ${closing ? "scrim-out" : ""}`} onClick={close} aria-hidden />
       <div
         ref={panel}
         role="dialog"
@@ -190,7 +196,7 @@ export function PricingModal({
                 ))}
               </ul>
               <button
-                className={`${p.featured ? "btn-primary" : "btn-ghost"} mt-6 w-full py-2.5!`}
+                className={`${p.featured ? "btn-primary bg-[#0066CC] hover:bg-[#005bb5]" : "btn border border-[#0066CC]/35 bg-blue-50/60 font-semibold text-[#0066CC] hover:bg-blue-100/60"} mt-6 w-full py-2.5!`}
                 onClick={() => {
                   onChoose?.(p);
                   close();
@@ -201,8 +207,23 @@ export function PricingModal({
             </div>
           ))}
         </div>
-        <p className="caption mt-5 rounded-xl bg-fill px-4 py-3 text-left text-muted"><span className="font-semibold text-ink">*</span> No win, no fee is offered only after we check your claim&apos;s risk. Depending on that check, the fee can change (25% if a consumer-commission filing is needed), or we may offer the ₹299 self-file kit instead.</p>
-        <p className="caption mt-3 text-center text-muted">Prices include GST. Withdrawing after we file, or taking payment directly from the airline, costs our fee or ₹499, whichever is higher. Demo build: no payment is taken.</p>
+        <p className="caption mt-5 rounded-xl bg-fill px-4 py-3 text-left text-muted">
+          {audience === "travellers" ? (
+            <><span className="font-semibold text-ink">*</span> No win, no fee is offered only after we check your claim&apos;s risk. Depending on that check, the fee can change (25% if a consumer-commission filing is needed), or we may offer the ₹299 self-file kit instead.</>
+          ) : audience === "business" ? (
+            <><span className="font-semibold text-ink">◇</span> Corporate plan starts with a 14-day free trial. No credit card required. Enterprise contracts include custom success-fee terms. All prices exclude GST where applicable.</>
+          ) : (
+            <><span className="font-semibold text-ink">◇</span> Lead fees are per verified case unlocked. Bar Council enrolment is verified before any leads are shown. AeroClaim never takes a share of your professional fees.</>
+          )}
+        </p>
+        <p className="caption mt-3 text-center text-muted">
+          {audience === "travellers"
+            ? "Prices include GST. Withdrawing after we file, or taking payment directly from the airline, costs our fee or ₹499, whichever is higher. Demo build: no payment is taken."
+            : audience === "business"
+            ? "All plans are month-to-month unless stated otherwise. Demo build: no payment is taken."
+            : "All lead fees are one-time per case. Demo build: no payment is taken."
+          }
+        </p>
       </div>
     </div>
   );

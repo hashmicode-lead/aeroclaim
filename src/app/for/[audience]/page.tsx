@@ -184,7 +184,7 @@ export default async function AudiencePage({ params }: PageProps<"/for/[audience
         <h1 className="display mx-auto mt-2 max-w-3xl text-balance">{p.headline}</h1>
         <p className="title-2 mx-auto mt-5 max-w-2xl font-normal! text-balance text-muted">{p.sub}</p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-          <Link href={signupHref} className="btn-primary px-6! py-3! text-[17px]!">{p.cta}</Link>
+          <Link href={signupHref} className="btn-primary px-6! py-3! text-[17px]! bg-[#0066CC] hover:bg-[#005bb5]">{p.cta}</Link>
           <Link href="/login" className="text-[17px] text-accent hover:underline">Log in <span aria-hidden>›</span></Link>
         </div>
       </section>
@@ -243,7 +243,13 @@ export default async function AudiencePage({ params }: PageProps<"/for/[audience
                   <li key={x} className="footnote flex gap-2"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-ok" aria-hidden />{x}</li>
                 ))}
               </ul>
-              <Link href={signupHref} className={`${pl.featured ? "btn-primary" : "btn-ghost"} mt-6 w-full py-2.5!`}>{p.cta}</Link>
+              <Link href={signupHref} className={`${pl.featured ? "btn-primary" : "btn-ghost"} mt-6 w-full py-2.5!`}>
+                {pl.featured ? p.cta : (
+                  audience === "travellers" ? "Get the kit" :
+                  audience === "businesses" ? "Talk to sales" :
+                  "Go Pro"
+                )}
+              </Link>
             </div>
           ))}
         </div>
@@ -272,7 +278,7 @@ export default async function AudiencePage({ params }: PageProps<"/for/[audience
       <section className="card scroll-rise mt-20 flex flex-col items-center gap-4 p-10 text-center">
         <Luggage size={28} className="text-accent" aria-hidden />
         <h2 className="title-1 text-balance">Ready when you are.</h2>
-        <Link href={signupHref} className="btn-primary px-6! py-3! text-[17px]!">{p.cta}</Link>
+        <Link href={signupHref} className="btn-primary px-6! py-3! text-[17px]! bg-[#0066CC] hover:bg-[#005bb5]">{p.cta}</Link>
       </section>
     </div>
   );

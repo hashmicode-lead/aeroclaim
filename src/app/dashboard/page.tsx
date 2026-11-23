@@ -3,16 +3,19 @@
 import { ArrowRight, CalendarClock, CreditCard, FilePlus2, Plus } from "lucide-react";
 import { EmptyHome } from "@/components/EmptyHome";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Countdown } from "@/components/client";
 import { InsuranceAd } from "@/components/InsuranceAd";
 import { useSession } from "@/components/session";
+import { signIn } from "@/components/session";
 import { demoDeadlines, demoTotal, inr, myClaims, timeline } from "@/lib/demo";
 
 const TONE = { info: "bg-info-soft text-info", ok: "bg-ok-soft text-ok", warn: "bg-warn-soft text-warn" };
 
 export default function Dashboard() {
   const session = useSession();
-  const first = session?.name?.split(" ")[0] ?? "there";
+  const router = useRouter();
+  const first = session?.name?.split(" ")[0] || "Ananya";
   const total = myClaims.reduce((s, c) => s + c.amount, 0);
 
   if (session?.isNew)
@@ -23,9 +26,13 @@ export default function Dashboard() {
         sub="Add a flight that went wrong and we'll work out what you're owed."
         actions={[
           { href: "/claims/new", label: "Start your first claim", desc: "Delay, cancellation, denied boarding, baggage or a stuck refund.", Icon: FilePlus2, primary: true },
-          { href: "/cards", label: "Check your card cover", desc: "See if your Wise or Naster card insures your trip.", Icon: CreditCard },
+          { href: "/cards", label: "Check your card cover", desc: "See if your Visa or Mastercard insures your trip.", Icon: CreditCard },
         ]}
         checklist={["Create your account", "Add your first flight", "Add a card for cover checks", "Add your UPI ID for payouts"]}
+        onLoadSample={() => {
+          signIn({ name: session?.name ?? "Ananya Sharma", email: session?.email ?? "ananya.sharma@example.com", role: "flyer", isNew: false });
+          router.push("/audit/demo");
+        }}
       />
     );
 
